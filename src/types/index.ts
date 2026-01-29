@@ -35,14 +35,18 @@ export interface Company {
     salary: string;
     eligibilityCriteria: {
         minCGPA: number;
-        backlogsAllowed: number;
+        backlogsAllowed: number; // Keeping for backward compatibility (Standing Arrears)
+        standingArrears: number;
+        historyOfArrears: number;
         sslc: number; // 10th Marks
         hsc: number; // 12th Marks
         branches: string[];
     };
+    firstRoundCount?: number; // Number of students required for first round
     deadline: number;
     driveDate: number;
-    rounds: string; // Description of rounds
+    rounds: string[]; // List of round descriptions
+    requirements?: string[]; // List of requirements
     applicants: string[];
 }
 

@@ -1,14 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { UserService } from '../../services/userService';
+import { CompanyService } from '../../services/companyService';
 
 const DeptCoordinatorDashboard: React.FC = () => {
     const { userProfile } = useAuth();
-    // In a real app, these stats would come from an API
-    const stats = {
-        totalStudents: 120, // Placeholder
-        placedStudents: 85, // Placeholder
-        pendingVerifications: 5 // Placeholder
-    };
+    const [stats, setStats] = useState({
+        totalStudents: 0,
+        placedStudents: 0, // Not fully tracked yet
+        totalDrives: 0
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (!userProfile?.department) return;
+            try {
+                // Fetch all students (filtered in memory or by query, here getting all due to service limitation but filtering in memory)
+                // Optimized: create a query based method later. For now, get all.
+                const allStudents = await UserService.getUsersByRole('STUDENT');
+                const deptStudents = allStudents.filter(u => u.department === userProfile.department);
+                const companies = await CompanyService.getAllCompanies();
+
+                setStats({
+                    totalStudents: deptStudents.length,
+                    placedStudents: 0, // Placeholder as we don't have placement status yet
+                    totalDrives: companies.length
+                });
+
+            } catch (error) {
+                console.error("Error fetching dept stats:", error);
+            }
+        };
+        fetchStats();
+    }, [userProfile]);
 
     return (
         <div className="">
@@ -27,12 +51,12 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="text-gray-500 text-sm font-medium uppercase">Placed Students</h3>
                     <p className="text-3xl font-bold text-green-600 mt-2">{stats.placedStudents}</p>
-                    <p className="text-sm text-gray-400 mt-2">Offers received</p>
+                    <p className="text-sm text-gray-400 mt-2">Offers received (Pending)</p>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Pending Verifications</h3>
-                    <p className="text-3xl font-bold text-orange-500 mt-2">{stats.pendingVerifications}</p>
-                    <p className="text-sm text-gray-400 mt-2">Action required</p>
+                    <h3 className="text-gray-500 text-sm font-medium uppercase">Total Drives</h3>
+                    <p className="text-3xl font-bold text-orange-500 mt-2">{stats.totalDrives}</p>
+                    <p className="text-sm text-gray-400 mt-2">Opportunities</p>
                 </div>
             </div>
         </div>

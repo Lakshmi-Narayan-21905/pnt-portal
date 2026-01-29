@@ -2,21 +2,37 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Users, GraduationCap, Calendar } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
+import { UserService } from '../../services/userService';
 
 const TrainingHeadDashboard: React.FC = () => {
     const { userProfile } = useAuth();
     const [stats, setStats] = useState({
         activeTrainings: 0,
-        upcomingTrainings: 0
+        upcomingTrainings: 0,
+        coordinators: 0
     });
 
     useEffect(() => {
         const fetchStats = async () => {
-            const trainings = await TrainingService.getAllTrainings();
-            const now = Date.now();
-            const active = trainings.filter(t => t.startDate <= now && t.endDate >= now).length;
-            const upcoming = trainings.filter(t => t.startDate > now).length;
-            setStats({ activeTrainings: active, upcomingTrainings: upcoming });
+            try {
+                const [trainings, deptCoords, classCoords] = await Promise.all([
+                    TrainingService.getAllTrainings(),
+                    UserService.getUsersByRole('DEPT_COORDINATOR'),
+                    UserService.getUsersByRole('CLASS_COORDINATOR')
+                ]);
+
+                const now = Date.now();
+                const active = trainings.filter(t => t.startDate <= now && t.endDate >= now).length;
+                const upcoming = trainings.filter(t => t.startDate > now).length;
+
+                setStats({
+                    activeTrainings: active,
+                    upcomingTrainings: upcoming,
+                    coordinators: deptCoords.length + classCoords.length
+                });
+            } catch (error) {
+                console.error("Error fetching training stats:", error);
+            }
         };
         fetchStats();
     }, []);
@@ -46,9 +62,10 @@ const TrainingHeadDashboard: React.FC = () => {
                     </div>
                     <div>
                         <h3 className="text-gray-500 text-sm font-medium">Coordinators</h3>
-                        <p className="text-2xl font-bold text-gray-900">--</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.coordinators}</p>
                     </div>
                 </div>
+
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
                     <div className="p-4 bg-blue-50 rounded-lg mr-4">
