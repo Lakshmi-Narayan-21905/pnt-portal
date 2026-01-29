@@ -52,20 +52,23 @@ const ManageUsers: React.FC = () => {
         setCreating(true);
         try {
             // 1. Create Auth User
-            const uid = await AdminAuthService.createUser(formData.email, formData.password);
+            const user = await AdminAuthService.createUser(
+                formData.email,
+                formData.password
+            );
 
             // 2. Create Firestore Profile
             await UserService.createUserProfile({
-                uid,
+                uid: user.uid,
                 email: formData.email,
-                role: activeTab,
                 displayName: formData.displayName,
-                department: formData.department || undefined,
+                role: activeTab, // Use activeTab for role
+                department: formData.department || '',
                 profileCompleted: true // Heads are pre-verified
             });
 
             setIsAddModalOpen(false);
-            setFormData({ email: '', password: '', displayName: '', department: '' });
+            setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
             fetchUsers();
             alert('User created successfully');
         } catch (error: any) {

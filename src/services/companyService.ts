@@ -7,7 +7,8 @@ import {
     getDocs,
     query,
     where,
-    getDoc
+    getDoc,
+    arrayUnion
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Company } from '../types';
@@ -75,6 +76,19 @@ export const CompanyService = {
             await deleteDoc(doc(db, COLLECTION_NAME, id));
         } catch (error) {
             console.error("Error deleting company:", error);
+            throw error;
+        }
+    },
+
+    // Apply to a specific drive
+    applyToDrive: async (companyId: string, studentId: string) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, companyId);
+            await updateDoc(docRef, {
+                applicants: arrayUnion(studentId)
+            });
+        } catch (error) {
+            console.error("Error applying to drive:", error);
             throw error;
         }
     }

@@ -40,12 +40,16 @@ const ManageCoordinators: React.FC = () => {
         e.preventDefault();
         setCreating(true);
         try {
-            const uid = await AdminAuthService.createUser(formData.email, formData.password);
+            const user = await AdminAuthService.createUser(
+                formData.email,
+                formData.password
+            );
+
             await UserService.createUserProfile({
-                uid,
+                uid: user.uid,
                 email: formData.email,
-                role: 'DEPT_COORDINATOR',
                 displayName: formData.displayName,
+                role: 'DEPT_COORDINATOR',
                 department: formData.department,
                 profileCompleted: true
             });

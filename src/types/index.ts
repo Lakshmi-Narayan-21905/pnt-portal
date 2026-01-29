@@ -13,6 +13,14 @@ export interface UserProfile {
     displayName: string;
     department?: string;
     classId?: string;
+    section?: string;
+    phone?: string;
+    address?: string;
+    cgpa?: number;
+    tenthMark?: number;
+    twelfthMark?: number;
+    standingArreas?: number;
+    historyOfArreas?: number;
     profileCompleted: boolean;
     createdAt: number;
 }

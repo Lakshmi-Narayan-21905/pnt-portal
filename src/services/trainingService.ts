@@ -5,7 +5,8 @@ import {
     deleteDoc,
     doc,
     getDocs,
-    getDoc
+    getDoc,
+    arrayUnion
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Training } from '../types';
@@ -47,6 +48,19 @@ export const TrainingService = {
             await deleteDoc(doc(db, COLLECTION_NAME, id));
         } catch (error) {
             console.error("Error deleting training:", error);
+            throw error;
+        }
+    },
+
+    // Register for a training program
+    registerForTraining: async (trainingId: string, studentId: string) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, trainingId);
+            await updateDoc(docRef, {
+                participants: arrayUnion(studentId)
+            });
+        } catch (error) {
+            console.error("Error registering for training:", error);
             throw error;
         }
     }

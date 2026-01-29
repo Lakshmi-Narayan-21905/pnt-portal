@@ -20,6 +20,24 @@ import TrainingPrograms from './pages/training/TrainingPrograms';
 import TrainingCoordinators from './pages/training/TrainingCoordinators';
 import TrainingStudents from './pages/training/TrainingStudents';
 
+import DeptCoordinatorLayout from './pages/coordinator/DeptCoordinatorLayout';
+import DeptCoordinatorDashboard from './pages/coordinator/DeptCoordinatorDashboard';
+import DeptStudents from './pages/coordinator/DeptStudents';
+import DeptCoordinators from './pages/coordinator/DeptCoordinators';
+import DeptPlacements from './pages/coordinator/DeptPlacements';
+import DeptTrainings from './pages/coordinator/DeptTrainings';
+
+import ClassCoordinatorLayout from './pages/class-coordinator/ClassCoordinatorLayout';
+import ClassCoordinatorDashboard from './pages/class-coordinator/ClassCoordinatorDashboard';
+import ClassStudents from './pages/class-coordinator/ClassStudents';
+
+import StudentLayout from './pages/student/StudentLayout';
+import StudentDashboard from './pages/student/StudentDashboard';
+import CompleteProfile from './pages/student/CompleteProfile';
+import StudentProfile from './pages/student/StudentProfile';
+import StudentDrives from './pages/student/StudentDrives';
+import StudentTrainings from './pages/student/StudentTrainings';
+
 const App: React.FC = () => {
   return (
     <Router>
@@ -54,6 +72,39 @@ const App: React.FC = () => {
             <Route path="trainings" element={<TrainingPrograms />} />
             <Route path="coordinators" element={<TrainingCoordinators />} />
             <Route path="students" element={<TrainingStudents />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
+        </Route>
+
+        {/* Dept Coordinator Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['DEPT_COORDINATOR']} />}>
+          <Route path="/dept-coordinator" element={<DeptCoordinatorLayout />}>
+            <Route path="dashboard" element={<DeptCoordinatorDashboard />} />
+            <Route path="students" element={<DeptStudents />} />
+            <Route path="coordinators" element={<DeptCoordinators />} />
+            <Route path="companies" element={<DeptPlacements />} />
+            <Route path="trainings" element={<DeptTrainings />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
+        </Route>
+
+        {/* Class Coordinator Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['CLASS_COORDINATOR']} />}>
+          <Route path="/class-coordinator" element={<ClassCoordinatorLayout />}>
+            <Route path="dashboard" element={<ClassCoordinatorDashboard />} />
+            <Route path="students" element={<ClassStudents />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
+        </Route>
+
+        {/* Student Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
+          <Route path="/student/complete-profile" element={<CompleteProfile />} />
+          <Route path="/student" element={<StudentLayout />}>
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="profile" element={<StudentProfile />} />
+            <Route path="drives" element={<StudentDrives />} />
+            <Route path="trainings" element={<StudentTrainings />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>
