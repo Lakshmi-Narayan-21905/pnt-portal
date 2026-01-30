@@ -2,13 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Company } from '../../types';
-import { Briefcase, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Briefcase, Calendar, CheckCircle, XCircle, AlertCircle, Info, Filter } from 'lucide-react';
+import { checkEligibility } from '../../utils/eligibility';
+import Modal from '../../components/Modal';
+import { JOB_ROLES } from '../../utils/constants';
 
 const StudentDrives: React.FC = () => {
     const { userProfile } = useAuth();
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [applying, setApplying] = useState<string | null>(null);
+    const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+
+    // Filters
+    const [roleFilter, setRoleFilter] = useState<string>('');
+    const [minSalaryFilter, setMinSalaryFilter] = useState<string>('');
+    const [eligibilityFilter, setEligibilityFilter] = useState<'all' | 'eligible' | 'not_eligible'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'opted_in' | 'opted_out' | 'not_registered'>('all');
 
     useEffect(() => {
         fetchCompanies();
@@ -71,25 +81,8 @@ const StudentDrives: React.FC = () => {
         }
     };
 
-    const isEligible = (company: Company) => {
-        if (!userProfile) return { eligible: false, reason: "Profile not loaded" };
-
-        // Basic eligibility checks
-        const { cgpa, tenthMark, twelfthMark, department, standingArreas } = userProfile;
-        const { minCGPA, sslc, hsc, backlogsAllowed, branches } = company.eligibilityCriteria;
-
-        if ((cgpa || 0) < minCGPA) return { eligible: false, reason: `CGPA < ${minCGPA}` };
-        if ((tenthMark || 0) < sslc) return { eligible: false, reason: `10th Mark < ${sslc}%` };
-        if ((twelfthMark || 0) < hsc) return { eligible: false, reason: `12th Mark < ${hsc}%` };
-        if ((standingArreas || 0) > backlogsAllowed) return { eligible: false, reason: `Arrears > ${backlogsAllowed}` };
-
-        // Branch check (if branches are specified)
-        if (branches && branches.length > 0 && department && !branches.includes(department)) {
-            return { eligible: false, reason: "Dept mismatch" };
-        }
-
-        return { eligible: true };
-    };
+    // Use utility instead of local function
+    // const isEligible = ... (removed)
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading drives...</div>;
 
@@ -100,16 +93,143 @@ const StudentDrives: React.FC = () => {
                 Drives & Opportunities
             </h1>
 
-            {companies.length === 0 ? (
+            {/* Filter Section */}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="flex items-center mb-3">
+                    <Filter className="w-4 h-4 text-indigo-600 mr-2" />
+                    <h2 className="text-sm font-semibold text-gray-700">Filter Opportunities</h2>
+                    <button
+                        onClick={() => {
+                            setRoleFilter('');
+                            setMinSalaryFilter('');
+                            setEligibilityFilter('all');
+                            setStatusFilter('all');
+                        }}
+                        className="ml-auto text-xs text-indigo-600 hover:text-indigo-800"
+                    >
+                        Reset Filters
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Role Filter */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Job Role</label>
+                        <select
+                            value={roleFilter}
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="">All Roles</option>
+                            {JOB_ROLES.map(role => (
+                                <option key={role} value={role}>{role}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Salary Filter */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Min Salary (LPA)</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. 5"
+                            value={minSalaryFilter}
+                            onChange={(e) => setMinSalaryFilter(e.target.value)}
+                            className="w-full pl-2 text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                    </div>
+
+                    {/* Eligibility Filter */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Eligibility</label>
+                        <select
+                            value={eligibilityFilter}
+                            onChange={(e) => setEligibilityFilter(e.target.value as any)}
+                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="all">Check All</option>
+                            <option value="eligible">Eligible Only</option>
+                            <option value="not_eligible">Not Eligible</option>
+                        </select>
+                    </div>
+
+                    {/* Status Filter */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">My Status</label>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value as any)}
+                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="opted_in">Opted In</option>
+                            <option value="opted_out">Opted Out</option>
+                            <option value="not_registered">Not Registered</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {companies.filter(company => {
+                // Role Filter
+                if (roleFilter && !company.roles.includes(roleFilter)) return false;
+
+                // Salary Filter (Heuristic: extract first number)
+                if (minSalaryFilter) {
+                    const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
+                    const minSalary = parseFloat(minSalaryFilter) || 0;
+                    if (companySalary < minSalary) return false;
+                }
+
+                // Eligibility Filter
+                const { eligible } = checkEligibility(userProfile, company);
+                if (eligibilityFilter === 'eligible' && !eligible) return false;
+                if (eligibilityFilter === 'not_eligible' && eligible) return false;
+
+                // Status Filter
+                const hasApplied = company.applicants?.includes(userProfile?.uid || '');
+                const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
+
+                if (statusFilter === 'opted_in' && !hasApplied) return false;
+                if (statusFilter === 'opted_out' && !hasOptedOut) return false;
+                if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
+
+                return true;
+            }).length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-lg shadow">
-                    <p className="text-gray-500 text-lg">No active drives at the moment.</p>
+                    <p className="text-gray-500 text-lg">No drives match your filters.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6">
-                    {companies.map(company => {
+                    {companies.filter(company => {
+                        // Role Filter
+                        if (roleFilter && !company.roles.includes(roleFilter)) return false;
+
+                        // Salary Filter
+                        if (minSalaryFilter) {
+                            const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
+                            const minSalary = parseFloat(minSalaryFilter) || 0;
+                            if (companySalary < minSalary) return false;
+                        }
+
+                        // Eligibility Filter
+                        const { eligible } = checkEligibility(userProfile, company);
+                        if (eligibilityFilter === 'eligible' && !eligible) return false;
+                        if (eligibilityFilter === 'not_eligible' && eligible) return false;
+
+                        // Status Filter
                         const hasApplied = company.applicants?.includes(userProfile?.uid || '');
                         const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-                        const { eligible, reason } = isEligible(company);
+
+                        if (statusFilter === 'opted_in' && !hasApplied) return false;
+                        if (statusFilter === 'opted_out' && !hasOptedOut) return false;
+                        if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
+
+                        return true;
+                    }).map(company => {
+                        const hasApplied = company.applicants?.includes(userProfile?.uid || '');
+                        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
+                        const { eligible, reason } = checkEligibility(userProfile, company);
                         const isExpired = company.deadline < Date.now();
 
                         return (
@@ -142,6 +262,14 @@ const StudentDrives: React.FC = () => {
                                         </div>
 
                                         <div className="flex items-center space-x-3">
+                                            <button
+                                                onClick={() => setSelectedCompany(company)}
+                                                className="flex items-center text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-4"
+                                            >
+                                                <Info className="w-4 h-4 mr-1" />
+                                                View Details
+                                            </button>
+
                                             {isExpired ? (
                                                 <button disabled className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
                                                     <XCircle className="w-4 h-4 mr-2" />
@@ -190,6 +318,85 @@ const StudentDrives: React.FC = () => {
                     })}
                 </div>
             )}
+
+            {/* Details Modal */}
+            <Modal
+                isOpen={!!selectedCompany}
+                onClose={() => setSelectedCompany(null)}
+                title={selectedCompany?.name || 'Company Details'}
+            >
+                {selectedCompany && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Type</span>
+                                <span className="font-medium text-gray-900">{selectedCompany.type}</span>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Salary / Package</span>
+                                <span className="font-medium text-green-700">{selectedCompany.salary}</span>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Drive Date</span>
+                                <span className="font-medium text-gray-900">{new Date(selectedCompany.driveDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Deadline</span>
+                                <span className="font-medium text-red-700">{new Date(selectedCompany.deadline).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Job Description</h4>
+                            <p className="text-gray-600 text-sm whitespace-pre-wrap">{selectedCompany.description}</p>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Roles</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedCompany.roles.map((role, i) => (
+                                    <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {role}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {selectedCompany.requirements && selectedCompany.requirements.length > 0 && (
+                            <div>
+                                <h4 className="font-semibold text-gray-900 mb-2">Key Requirements</h4>
+                                <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                                    {selectedCompany.requirements.map((req, i) => (
+                                        <li key={i}>{req}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {selectedCompany.rounds && selectedCompany.rounds.length > 0 && (
+                            <div>
+                                <h4 className="font-semibold text-gray-900 mb-2">Selection Process (Rounds)</h4>
+                                <ol className="list-decimal pl-5 text-sm text-gray-600 space-y-1">
+                                    {selectedCompany.rounds.map((round, i) => (
+                                        <li key={i}>{round}</li>
+                                    ))}
+                                </ol>
+                            </div>
+                        )}
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Eligibility Criteria</h4>
+                            <div className="bg-orange-50 rounded-lg p-4 text-sm text-orange-900 grid grid-cols-2 gap-y-2">
+                                <div>Min CGPA: <span className="font-bold">{selectedCompany.eligibilityCriteria.minCGPA}</span></div>
+                                <div>History of Arrears: <span className="font-bold">{selectedCompany.eligibilityCriteria.historyOfArrears}</span></div>
+                                <div>Standing Arrears: <span className="font-bold">{selectedCompany.eligibilityCriteria.standingArrears}</span></div>
+                                <div>10th Mark: <span className="font-bold">{selectedCompany.eligibilityCriteria.sslc}%</span></div>
+                                <div>12th Mark: <span className="font-bold">{selectedCompany.eligibilityCriteria.hsc}%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };

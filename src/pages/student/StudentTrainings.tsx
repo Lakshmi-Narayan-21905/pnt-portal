@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Training } from '../../types';
-import { GraduationCap, Calendar, CheckCircle } from 'lucide-react';
+import { GraduationCap, Calendar, CheckCircle, Info } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 const StudentTrainings: React.FC = () => {
     const { userProfile } = useAuth();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState<string | null>(null);
+    const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
 
     useEffect(() => {
         fetchTrainings();
@@ -80,22 +82,32 @@ const StudentTrainings: React.FC = () => {
                                     Year: {training.eligibility.year}
                                 </span>
 
-                                {isRegistered ? (
-                                    <span className="flex items-center text-green-600 text-sm font-medium">
-                                        <CheckCircle className="w-4 h-4 mr-1" />
-                                        Registered
-                                    </span>
-                                ) : isCompleted ? (
-                                    <span className="text-gray-400 text-sm font-medium">Completed</span>
-                                ) : (
+                                <div className="flex items-center">
                                     <button
-                                        onClick={() => handleRegister(training.id)}
-                                        disabled={registering === training.id}
-                                        className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-lg hover:bg-indigo-100 transition-colors"
+                                        onClick={() => setSelectedTraining(training)}
+                                        className="flex items-center text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-4"
                                     >
-                                        {registering === training.id ? 'Joining...' : 'Register'}
+                                        <Info className="w-4 h-4 mr-1" />
+                                        View Details
                                     </button>
-                                )}
+
+                                    {isRegistered ? (
+                                        <span className="flex items-center text-green-600 text-sm font-medium">
+                                            <CheckCircle className="w-4 h-4 mr-1" />
+                                            Registered
+                                        </span>
+                                    ) : isCompleted ? (
+                                        <span className="text-gray-400 text-sm font-medium">Completed</span>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleRegister(training.id)}
+                                            disabled={registering === training.id}
+                                            className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-lg hover:bg-indigo-100 transition-colors"
+                                        >
+                                            {registering === training.id ? 'Joining...' : 'Register'}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     );
@@ -107,6 +119,51 @@ const StudentTrainings: React.FC = () => {
                     <p className="text-gray-500 text-lg">No upcoming training programs.</p>
                 </div>
             )}
+
+            {/* Training Details Modal */}
+            <Modal
+                isOpen={!!selectedTraining}
+                onClose={() => setSelectedTraining(null)}
+                title={selectedTraining?.title || 'Training Details'}
+            >
+                {selectedTraining && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Trainer</span>
+                                <span className="font-medium text-gray-900">{selectedTraining.trainer}</span>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Duration</span>
+                                <span className="font-medium text-indigo-700">
+                                    {Math.ceil((selectedTraining.endDate - selectedTraining.startDate) / (1000 * 60 * 60 * 24))} Days
+                                </span>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">Start Date</span>
+                                <span className="font-medium text-gray-900">{new Date(selectedTraining.startDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <span className="block text-gray-500 text-xs uppercase mb-1">End Date</span>
+                                <span className="font-medium text-gray-900">{new Date(selectedTraining.endDate).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                            <p className="text-gray-600 text-sm whitespace-pre-wrap">{selectedTraining.description}</p>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Target Audience</h4>
+                            <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-900">
+                                <p className="mb-2"><span className="font-bold">Year:</span> {selectedTraining.eligibility.year}th Year Students</p>
+                                <p><span className="font-bold">Eligible Branches:</span> {selectedTraining.eligibility.branches.join(', ') || 'All Branches'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };
