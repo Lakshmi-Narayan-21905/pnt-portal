@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import { UserService } from '../services/userService';
 import type { UserProfile } from '../types';
 
 interface AuthContextType {
@@ -26,9 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchUserProfile = async (uid: string) => {
         setError(null);
         try {
-            const userDoc = await getDoc(doc(db, 'users', uid));
-            if (userDoc.exists()) {
-                setUserProfile(userDoc.data() as UserProfile);
+            // Use UserService to find user across collections
+            const profile = await UserService.getUserProfile(uid);
+
+            if (profile) {
+                setUserProfile(profile);
             } else {
                 console.warn("User document not found for UID:", uid);
                 setUserProfile(null);
