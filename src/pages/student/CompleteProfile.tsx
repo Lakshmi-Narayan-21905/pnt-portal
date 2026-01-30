@@ -36,7 +36,6 @@ const CompleteProfile: React.FC = () => {
                 twelfthMark: parseFloat(formData.twelfthMark),
                 standingArreas: parseInt(formData.standingArreas),
                 historyOfArreas: parseInt(formData.historyOfArreas),
-                historyOfArreas: parseInt(formData.historyOfArreas),
                 profileCompleted: true,
                 profileStatus: 'APPROVAL_PENDING'
             });

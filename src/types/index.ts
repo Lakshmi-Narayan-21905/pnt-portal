@@ -49,6 +49,7 @@ export interface Company {
     rounds: string[]; // List of round descriptions
     requirements?: string[]; // List of requirements
     applicants: string[];
+    optedOut?: string[];
 }
 
 export interface Training {
