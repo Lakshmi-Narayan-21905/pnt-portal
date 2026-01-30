@@ -83,18 +83,18 @@ const LoginPage: React.FC = () => {
                     <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
                     <div className="w-full max-w-sm relative z-10">
                         {/* Logo */}
-                        <div className="flex justify-center mb-4">
-                            <img 
-                                src={logo} 
-                                alt="Kongu Engineering College" 
-                                className="h-16 object-contain"
+                        <div className="flex justify-center mb-6 -mt-12">
+                            <img
+                                src={logo}
+                                alt="Kongu Engineering College"
+                                className="h-28 object-contain"
                             />
                         </div>
 
                         {/* Header */}
                         <div className="text-center mb-5">
                             <h1 className="text-xl font-bold text-slate-900 mb-1">
-                                Get Started with Kongu Placements
+                                Get Started with your Placements
                             </h1>
                             <p className="text-slate-500 text-xs">
                                 Sign in to your account to continue
@@ -154,8 +154,8 @@ const LoginPage: React.FC = () => {
 
                             {/* Forgot Password Link */}
                             <div className="text-left pt-1">
-                                <a 
-                                    href="#" 
+                                <a
+                                    href="#"
                                     className="text-xs text-primary-600 hover:text-primary-700 font-medium underline underline-offset-4 decoration-primary-300 hover:decoration-primary-500 transition-all duration-200"
                                 >
                                     Forgot your password?
@@ -167,13 +167,13 @@ const LoginPage: React.FC = () => {
 
                 {/* Right Side - Image */}
                 <div className="hidden lg:block lg:w-1/2 relative rounded-r-2xl overflow-hidden">
-                    <img 
-                        src={loginBg} 
-                        alt="College Library" 
+                    <img
+                        src={loginBg}
+                        alt="College Library"
                         className="absolute inset-0 w-full h-full object-cover"
                     />
                     {/* Green overlay for branding */}
-                    
+
                 </div>
             </div>
         </div>
