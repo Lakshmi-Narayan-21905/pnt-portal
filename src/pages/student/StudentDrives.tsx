@@ -29,21 +29,43 @@ const StudentDrives: React.FC = () => {
 
     const handleApply = async (companyId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to apply for this drive?")) return;
+        if (!window.confirm("Are you sure you want to 'Opt In' for this drive? This counts as an application.")) return;
 
         setApplying(companyId);
         try {
             await CompanyService.applyToDrive(companyId, userProfile.uid);
-            // Refresh local state to show 'Applied' status immediately
+            // Refresh local state
             setCompanies(prev => prev.map(c =>
                 c.id === companyId
                     ? { ...c, applicants: [...(c.applicants || []), userProfile.uid] }
                     : c
             ));
-            alert("Applied successfully!");
+            alert("Opted In successfully!");
         } catch (error) {
-            console.error("Error applying:", error);
-            alert("Failed to apply. Please try again.");
+            console.error("Error opting in:", error);
+            alert("Failed to opt in. Please try again.");
+        } finally {
+            setApplying(null);
+        }
+    };
+
+    const handleOptOut = async (companyId: string) => {
+        if (!userProfile?.uid) return;
+        if (!window.confirm("Are you sure you want to 'Opt Out'? You will NOT be able to apply for this drive later.")) return;
+
+        setApplying(companyId);
+        try {
+            await CompanyService.optOutDrive(companyId, userProfile.uid);
+            // Refresh local state
+            setCompanies(prev => prev.map(c =>
+                c.id === companyId
+                    ? { ...c, optedOut: [...(c.optedOut || []), userProfile.uid] }
+                    : c
+            ));
+            alert("Opted Out successfully.");
+        } catch (error) {
+            console.error("Error opting out:", error);
+            alert("Failed to opt out.");
         } finally {
             setApplying(null);
         }
@@ -86,6 +108,7 @@ const StudentDrives: React.FC = () => {
                 <div className="grid grid-cols-1 gap-6">
                     {companies.map(company => {
                         const hasApplied = company.applicants?.includes(userProfile?.uid || '');
+                        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
                         const { eligible, reason } = isEligible(company);
                         const isExpired = company.deadline < Date.now();
 
@@ -118,16 +141,21 @@ const StudentDrives: React.FC = () => {
                                             <span>Deadline: {new Date(company.deadline).toLocaleDateString()}</span>
                                         </div>
 
-                                        <div>
-                                            {hasApplied ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 cursor-default opacity-80">
-                                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                                    Applied
-                                                </button>
-                                            ) : isExpired ? (
+                                        <div className="flex items-center space-x-3">
+                                            {isExpired ? (
                                                 <button disabled className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
                                                     <XCircle className="w-4 h-4 mr-2" />
                                                     Expired
+                                                </button>
+                                            ) : hasApplied ? (
+                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 cursor-default opacity-80">
+                                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                                    Opted In
+                                                </button>
+                                            ) : hasOptedOut ? (
+                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-400 cursor-default opacity-80">
+                                                    <XCircle className="w-4 h-4 mr-2" />
+                                                    Opted Out
                                                 </button>
                                             ) : !eligible ? (
                                                 <div className="flex items-center text-red-500 text-sm font-medium cursor-not-allowed" title={reason}>
@@ -135,13 +163,24 @@ const StudentDrives: React.FC = () => {
                                                     Not Eligible ({reason})
                                                 </div>
                                             ) : (
-                                                <button
-                                                    onClick={() => handleApply(company.id)}
-                                                    disabled={applying === company.id}
-                                                    className="flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                                                >
-                                                    {applying === company.id ? 'Applying...' : 'Apply Now'}
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={() => handleApply(company.id)}
+                                                        disabled={applying === company.id}
+                                                        className="flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                                                    >
+                                                        {applying === company.id ? 'Processing...' : 'Opt In'}
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleOptOut(company.id)}
+                                                        disabled={applying === company.id}
+                                                        className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+                                                    >
+                                                        {applying === company.id ? 'Processing...' : 'Opt Out'}
+                                                    </button>
+
+                                                </>
                                             )}
                                         </div>
                                     </div>

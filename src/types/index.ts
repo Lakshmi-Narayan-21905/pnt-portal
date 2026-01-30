@@ -22,6 +22,7 @@ export interface UserProfile {
     standingArreas?: number;
     historyOfArreas?: number;
     profileCompleted: boolean;
+    profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
     createdAt: number;
 }
 
@@ -48,6 +49,7 @@ export interface Company {
     rounds: string[]; // List of round descriptions
     requirements?: string[]; // List of requirements
     applicants: string[];
+    optedOut?: string[];
 }
 
 export interface Training {

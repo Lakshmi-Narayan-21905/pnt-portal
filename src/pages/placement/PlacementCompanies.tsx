@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, Calendar } from 'lucide-react';
 import { CompanyService } from '../../services/companyService';
 import type { Company } from '../../types';
@@ -9,6 +9,7 @@ import { DEPARTMENTS, COMPANY_TYPES, JOB_ROLES } from '../../utils/constants';
 const PlacementCompanies: React.FC = () => {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Dynamic Form State
@@ -119,6 +120,10 @@ const PlacementCompanies: React.FC = () => {
         }
     };
 
+    const handleCardClick = (company: Company) => {
+        navigate(`${company.id}`);
+    };
+
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
@@ -138,7 +143,14 @@ const PlacementCompanies: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {companies.length === 0 && <p className="text-gray-500">No active drives.</p>}
                     {companies.map((company) => (
-                        <div key={company.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div
+                            key={company.id}
+                            onClick={() => handleCardClick(company)}
+                            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer relative group"
+                        >
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-gray-100 px-2 py-1 rounded">
+                                Click for details
+                            </div>
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-blue-50 rounded-lg">
                                     <Building2 className="w-6 h-6 text-blue-600" />
@@ -152,9 +164,14 @@ const PlacementCompanies: React.FC = () => {
                             <p className="text-gray-500 text-sm mb-4">{company.roles.join(', ')}</p>
                             <p className="text-sm font-semibold text-gray-700 mb-2">Package: {company.salary}</p>
 
-                            <div className="flex items-center text-sm text-gray-500 border-t pt-4">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                {new Date(company.driveDate).toLocaleDateString()}
+                            <div className="flex justify-between items-center border-t pt-4">
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <Calendar className="w-4 h-4 mr-2" />
+                                    {new Date(company.driveDate).toLocaleDateString()}
+                                </div>
+                                <div className="text-sm font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                                    {company.applicants?.length || 0} Reg.
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -344,6 +361,8 @@ const PlacementCompanies: React.FC = () => {
                     <button type="submit" className="w-full btn-primary mt-6 py-2.5 text-lg shadow-sm">Create Drive</button>
                 </form>
             </Modal>
+
+
         </div>
     );
 };

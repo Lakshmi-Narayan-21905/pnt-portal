@@ -12,11 +12,13 @@ import PlacementHeadLayout from './pages/placement/PlacementHeadLayout';
 import PlacementHeadDashboard from './pages/placement/PlacementHeadDashboard';
 import ManageCoordinators from './pages/placement/ManageCoordinators';
 import PlacementCompanies from './pages/placement/PlacementCompanies';
+import CompanyDetails from './pages/placement/CompanyDetails';
 import PlacementStudents from './pages/placement/PlacementStudents';
 
 import TrainingHeadLayout from './pages/training/TrainingHeadLayout';
 import TrainingHeadDashboard from './pages/training/TrainingHeadDashboard';
 import TrainingPrograms from './pages/training/TrainingPrograms';
+import TrainingDetails from './pages/training/TrainingDetails';
 import TrainingCoordinators from './pages/training/TrainingCoordinators';
 import TrainingStudents from './pages/training/TrainingStudents';
 
@@ -61,6 +63,7 @@ const App: React.FC = () => {
             <Route path="dashboard" element={<PlacementHeadDashboard />} />
             <Route path="coordinators" element={<ManageCoordinators />} />
             <Route path="companies" element={<PlacementCompanies />} />
+            <Route path="companies/:companyId" element={<CompanyDetails />} />
             <Route path="students" element={<PlacementStudents />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
@@ -70,6 +73,7 @@ const App: React.FC = () => {
           <Route path="/training-head" element={<TrainingHeadLayout />}>
             <Route path="dashboard" element={<TrainingHeadDashboard />} />
             <Route path="trainings" element={<TrainingPrograms />} />
+            <Route path="trainings/:trainingId" element={<TrainingDetails />} />
             <Route path="coordinators" element={<TrainingCoordinators />} />
             <Route path="students" element={<TrainingStudents />} />
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -82,8 +86,11 @@ const App: React.FC = () => {
             <Route path="dashboard" element={<DeptCoordinatorDashboard />} />
             <Route path="students" element={<DeptStudents />} />
             <Route path="coordinators" element={<DeptCoordinators />} />
+            <Route path="coordinators" element={<DeptCoordinators />} />
             <Route path="companies" element={<DeptPlacements />} />
+            <Route path="companies/:companyId" element={<CompanyDetails />} />
             <Route path="trainings" element={<DeptTrainings />} />
+            <Route path="trainings/:trainingId" element={<TrainingDetails />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>

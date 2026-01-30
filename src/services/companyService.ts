@@ -5,8 +5,6 @@ import {
     deleteDoc,
     doc,
     getDocs,
-    query,
-    where,
     getDoc,
     arrayUnion
 } from 'firebase/firestore';
@@ -89,6 +87,19 @@ export const CompanyService = {
             });
         } catch (error) {
             console.error("Error applying to drive:", error);
+            throw error;
+        }
+    },
+
+    // Opt out of a drive
+    optOutDrive: async (companyId: string, studentId: string) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, companyId);
+            await updateDoc(docRef, {
+                optedOut: arrayUnion(studentId)
+            });
+        } catch (error) {
+            console.error("Error opting out of drive:", error);
             throw error;
         }
     }
