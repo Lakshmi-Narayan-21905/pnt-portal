@@ -22,6 +22,7 @@ export interface UserProfile {
     standingArreas?: number;
     historyOfArreas?: number;
     profileCompleted: boolean;
+    profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
     createdAt: number;
 }
 
