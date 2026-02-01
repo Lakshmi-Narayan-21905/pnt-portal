@@ -11,24 +11,39 @@ const CompleteProfile: React.FC = () => {
     const [formData, setFormData] = useState({
         displayName: userProfile?.displayName || '',
         email: userProfile?.email || '',
-        phone: '',
-        address: '',
-        cgpa: '',
-        tenthMark: '',
-        twelfthMark: '',
-        standingArreas: '',
-        historyOfArreas: ''
+        rollNo: userProfile?.rollNo || '',
+        phone: userProfile?.phone || '',
+        address: userProfile?.address || '',
+        cgpa: userProfile?.cgpa?.toString() || '',
+        tenthMark: userProfile?.tenthMark?.toString() || '',
+        twelfthMark: userProfile?.twelfthMark?.toString() || '',
+        standingArreas: userProfile?.standingArreas?.toString() || '0',
+        historyOfArreas: userProfile?.historyOfArreas?.toString() || '0'
     });
+
+    const validateRollNo = (roll: string) => {
+        // Format: 2 digits + 3 letters + 3 digits (e.g. 23csr118) -> Total 8 chars
+        // OR user said "accept only 7 characters", but examples were 8. 
+        // I will trust the examples pattern: ^[0-9]{2}[a-zA-Z]{3}[0-9]{3}$
+        const regex = /^[0-9]{2}[a-zA-Z]{3}[0-9]{3}$/;
+        return regex.test(roll);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!userProfile?.uid) return;
+
+        if (!validateRollNo(formData.rollNo)) {
+            alert("Invalid Roll Number format. Expected format: 23csr118 (2 digits, 3 letters, 3 digits)");
+            return;
+        }
 
         setSubmitting(true);
         try {
             await UserService.updateUserProfile(userProfile.uid, {
                 ...userProfile,
                 displayName: formData.displayName, // Allow Name edit? Sure.
+                rollNo: formData.rollNo.toLowerCase(),
                 phone: formData.phone,
                 address: formData.address,
                 cgpa: parseFloat(formData.cgpa),
@@ -54,10 +69,10 @@ const CompleteProfile: React.FC = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Complete Your Profile
+                    {userProfile?.profileCompleted ? 'Edit Your Profile' : 'Complete Your Profile'}
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
-                    Please provide your academic and personal details.
+                    {userProfile?.profileCompleted ? 'Update your academic and personal details.' : 'Please provide your academic and personal details.'}
                 </p>
             </div>
 
@@ -75,6 +90,19 @@ const CompleteProfile: React.FC = () => {
                             <div className="sm:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700">Email (Read Only)</label>
                                 <input type="email" disabled className="mt-1 block w-full input-field bg-gray-100" value={formData.email} />
+                            </div>
+
+                            <div className="sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700">Roll Number</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="mt-1 block w-full input-field uppercase"
+                                    placeholder="e.g. 23CSR118"
+                                    value={formData.rollNo}
+                                    onChange={e => setFormData({ ...formData, rollNo: e.target.value })}
+                                />
+                                <p className="mt-1 text-xs text-gray-500">Format: 23CSR118</p>
                             </div>
 
                             <div className="sm:col-span-3">
@@ -119,7 +147,7 @@ const CompleteProfile: React.FC = () => {
                             disabled={submitting}
                             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
-                            {submitting ? 'Saving...' : 'Complete Profile'}
+                            {submitting ? 'Saving...' : (userProfile?.profileCompleted ? 'Update Profile' : 'Complete Profile')}
                         </button>
                     </form>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Upload, Search, Download } from 'lucide-react';
+import { Users, Plus, Upload, Search, Download, Eye, EyeOff } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import type { UserProfile, UserRole } from '../../types';
@@ -22,6 +22,7 @@ const ManageUsers: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -136,6 +137,23 @@ const ManageUsers: React.FC = () => {
                 {canAdd && (
                     <div className="flex space-x-2">
                         <button
+                            onClick={() => {
+                                const exportData = users.map(u => ({
+                                    Name: u.displayName,
+                                    Email: u.email,
+                                    Department: u.department,
+                                    Role: activeTab
+                                }));
+                                import('../../utils/excelParser').then(mod => {
+                                    mod.ExcelParser.exportToExcel(exportData, `${activeTab}_List`);
+                                });
+                            }}
+                            className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                        </button>
+                        <button
                             onClick={() => setIsUploadModalOpen(true)}
                             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                         >
@@ -223,7 +241,23 @@ const ManageUsers: React.FC = () => {
                 <form onSubmit={handleCreateUser} className="space-y-4">
                     <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
                     <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                    <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    <div className="relative">
+                        <input
+                            required
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            className="input-field pr-10"
+                            value={formData.password}
+                            onChange={e => setFormData({ ...formData, password: e.target.value })}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Department (Optional)</label>

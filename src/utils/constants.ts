@@ -1,6 +1,7 @@
 export const DEPARTMENTS = [
     'CSE',
     'AIDS',
+    'IT',
     'AIML',
     'ECE',
     'EEE',
@@ -12,6 +13,7 @@ export const DEPARTMENTS = [
     'MECH',
     'FT',
     'CHEM'
+
 ] as const;
 
 export const COMPANY_TYPES = [

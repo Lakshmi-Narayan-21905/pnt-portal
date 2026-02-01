@@ -19,9 +19,16 @@ const StudentTrainings: React.FC = () => {
     const fetchTrainings = async () => {
         try {
             const data = await TrainingService.getAllTrainings();
+
+            // Filter by Department
+            const dept = userProfile?.department;
+            const filteredData = data.filter(t =>
+                !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept)
+            );
+
             // Sort by start date (upcoming first)
-            data.sort((a, b) => a.startDate - b.startDate);
-            setTrainings(data);
+            filteredData.sort((a, b) => a.startDate - b.startDate);
+            setTrainings(filteredData);
         } catch (error) {
             console.error("Error fetching trainings:", error);
         } finally {

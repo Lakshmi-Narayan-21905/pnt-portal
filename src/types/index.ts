@@ -11,6 +11,7 @@ export interface UserProfile {
     email: string;
     role: UserRole;
     displayName: string;
+    rollNo?: string;
     department?: string;
     classId?: string;
     section?: string;
@@ -23,6 +24,7 @@ export interface UserProfile {
     historyOfArreas?: number;
     profileCompleted: boolean;
     profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
+    placementStatus?: 'PLACED' | 'UNPLACED' | 'OFFERED';
     createdAt: number;
 }
 
@@ -64,4 +66,15 @@ export interface Training {
         year: number;
     };
     participants: string[]; // List of student UIDs
+}
+
+export interface PlacementRecord {
+    id: string;
+    name: string;
+    rollNo: string;
+    department: string;
+    companyName: string;
+    package?: string; // Optional (LPA)
+    academicYear: string; // e.g. "2023-2027" or just "2026"
+    createdAt?: number;
 }

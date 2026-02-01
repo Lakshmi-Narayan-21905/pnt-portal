@@ -1,12 +1,25 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
+import { useNavigate } from 'react-router-dom';
+import { Pencil } from 'lucide-react';
+
 const StudentProfile: React.FC = () => {
     const { userProfile } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">My Profile</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+                <button
+                    onClick={() => navigate('/student/complete-profile')}
+                    className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit Profile
+                </button>
+            </div>
 
             <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
                 <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
@@ -21,6 +34,10 @@ const StudentProfile: React.FC = () => {
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Email Address</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{userProfile?.email}</dd>
+                        </div>
+                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt className="text-sm font-medium text-gray-500">Roll Number</dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 uppercase">{userProfile?.rollNo || '-'}</dd>
                         </div>
                         <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt className="text-sm font-medium text-gray-500">Phone</dt>

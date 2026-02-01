@@ -6,6 +6,7 @@ import { TrainingService } from '../../services/trainingService';
 
 import { checkEligibility } from '../../utils/eligibility';
 import DashboardCalendar, { type CalendarEvent } from '../../components/DashboardCalendar';
+import { Trophy } from 'lucide-react';
 
 const StudentDashboard: React.FC = () => {
     const { userProfile } = useAuth();
@@ -35,10 +36,19 @@ const StudentDashboard: React.FC = () => {
                     TrainingService.getAllTrainings()
                 ]);
 
+                // Filter by Department
+                const dept = userProfile.department;
+                const relevantCompanies = companies.filter(c =>
+                    !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept)
+                );
+                const relevantTrainings = trainings.filter(t =>
+                    !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept)
+                );
+
                 const now = Date.now();
-                const activeDrives = companies.filter(c => c.deadline && c.deadline > now).length;
-                const myApplications = companies.filter(c => c.applicants && c.applicants.includes(userProfile.uid)).length;
-                const myTrainings = trainings.filter(t => t.participants && t.participants.includes(userProfile.uid) && t.startDate > now).length;
+                const activeDrives = relevantCompanies.filter(c => c.deadline && c.deadline > now).length;
+                const myApplications = relevantCompanies.filter(c => c.applicants && c.applicants.includes(userProfile.uid)).length;
+                const myTrainings = relevantTrainings.filter(t => t.participants && t.participants.includes(userProfile.uid) && t.startDate > now).length;
 
                 setStats({
                     activeDrives,
@@ -47,7 +57,7 @@ const StudentDashboard: React.FC = () => {
                 });
 
                 // Transform for Calendar with Filters
-                let filteredCompanies = companies;
+                let filteredCompanies = relevantCompanies;
 
                 if (placementFilter !== 'all') {
                     filteredCompanies = companies.filter(c => {
@@ -73,9 +83,9 @@ const StudentDashboard: React.FC = () => {
                     }));
                 setCompanyEvents(cEvents);
 
-                let filteredTrainings = trainings;
+                let filteredTrainings = relevantTrainings;
                 if (trainingFilter !== 'all') {
-                    filteredTrainings = trainings.filter(t => {
+                    filteredTrainings = relevantTrainings.filter(t => {
                         const isRegistered = t.participants?.includes(userProfile.uid);
                         return trainingFilter === 'registered' ? isRegistered : !isRegistered;
                     });
@@ -106,6 +116,18 @@ const StudentDashboard: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-800">Welcome Back, {userProfile?.displayName?.split(' ')[0]}!</h1>
                 <p className="text-gray-600 mt-2">Here's an overview of your placement journey.</p>
             </div>
+
+            {userProfile?.placementStatus === 'PLACED' && (
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-8 rounded-r shadow-sm flex items-center">
+                    <div className="bg-green-200 rounded-full p-2 mr-4">
+                        <Trophy className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg">Congratulations! You are Placed!</h3>
+                        <p className="text-sm">Great job on securing a placement. We are proud of your achievement!</p>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
