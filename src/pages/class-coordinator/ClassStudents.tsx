@@ -191,7 +191,7 @@ const ClassStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white/90 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
                 <table className="min-w-full divide-y divide-brand-orange-light/30">
                     <thead className="bg-brand-orange-ice/50">
                         <tr>

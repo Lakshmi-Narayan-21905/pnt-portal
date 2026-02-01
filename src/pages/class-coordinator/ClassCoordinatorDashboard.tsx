@@ -47,7 +47,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
                     <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
                         <Users className="w-8 h-8 text-brand-orange-primary" />
                     </div>
@@ -57,7 +57,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
                     <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
                         <CheckCircle className="w-8 h-8 text-brand-orange-primary" />
                     </div>
@@ -68,7 +68,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
                     <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
                         <Building2 className="w-8 h-8 text-brand-orange-primary" />
                     </div>

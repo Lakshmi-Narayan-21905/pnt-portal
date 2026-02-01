@@ -10,11 +10,12 @@ const AnimatedBackground: React.FC = () => {
     const isGreenTheme = location.pathname.startsWith('/training-head') || location.pathname.startsWith('/placement-head');
     const isLavenderTheme = location.pathname.startsWith('/dept-coordinator');
     const isOrangeTheme = location.pathname.startsWith('/class-coordinator');
+    const isIndigoTheme = location.pathname.startsWith('/admin');
 
     return (
         <div className="fixed inset-0 z-[-50] overflow-hidden pointer-events-none isolate">
             {/* Rich Animated Background - Switch based on route */}
-            <div className={`${isGreenTheme ? 'green-bg-wrapper' : isLavenderTheme ? 'lavender-bg-wrapper' : isOrangeTheme ? 'orange-bg-wrapper' : 'student-bg-wrapper'} absolute inset-0 w-full h-full transition-colors duration-1000`}>
+            <div className={`${isGreenTheme ? 'green-bg-wrapper' : isLavenderTheme ? 'lavender-bg-wrapper' : isOrangeTheme ? 'orange-bg-wrapper' : isIndigoTheme ? 'indigo-bg-wrapper' : 'student-bg-wrapper'} absolute inset-0 w-full h-full transition-colors duration-1000`}>
                 {/* Floating Squares - Removed as per previous tasks */}
 
                 {/* Flowy Waves */}

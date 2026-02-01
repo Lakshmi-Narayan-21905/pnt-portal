@@ -62,6 +62,14 @@ export default {
                     primary: '#FB8C00',  // Strong Orange for buttons
                     deep: '#E65100',     // User provided dark (Text/Active)
                     rust: '#BF360C',     // Darkest Rust
+                },
+                'brand-indigo': {
+                    ice: '#E6E8F0',      // User provided lightest
+                    light: '#C7D2FE',    // Light Accent
+                    soft: '#A5B4FC',     // Soft Indigo
+                    primary: '#4F46E5',  // Indigo 600
+                    deep: '#3730A3',     // Indigo 800
+                    dark: '#1E1B4B',     // Indigo 950
                 }
             },
         },

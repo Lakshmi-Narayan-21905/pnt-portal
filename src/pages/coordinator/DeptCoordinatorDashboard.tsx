@@ -24,9 +24,10 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 const companies = await CompanyService.getAllCompanies();
 
                 setStats({
-                    totalStudents: deptStudents.length,
-                    placedStudents: 0, // Placeholder as we don't have placement status yet
-                    totalDrives: companies.length
+                    totalStudents: students.length,
+                    placedStudents: placed,
+                    totalDrives: companies.length,
+                    inTraining: 0 // Placeholder as per previous fix pattern
                 });
 
             } catch (error) {
@@ -45,7 +46,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
                     <div className="p-4 bg-brand-lavender-ice rounded-lg mr-4">
                         <Users className="w-8 h-8 text-brand-lavender-primary" />
                     </div>
@@ -55,7 +56,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
                     <div className="p-4 bg-brand-lavender-ice rounded-lg mr-4">
                         <Building2 className="w-8 h-8 text-brand-lavender-deep" />
                     </div>
@@ -65,7 +66,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
                     <div className="p-4 bg-brand-lavender-ice rounded-lg mr-4">
                         <GraduationCap className="w-8 h-8 text-brand-lavender-purple" />
                     </div>

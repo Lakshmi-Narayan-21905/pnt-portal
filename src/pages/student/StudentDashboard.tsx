@@ -108,7 +108,7 @@ const StudentDashboard: React.FC = () => {
         <div
             className="relative overflow-hidden rounded-2xl p-6 group transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
             style={{
-                background: 'rgba(255, 255, 255, 0.85)',
+                background: 'rgba(255, 255, 255, 0.7)',
                 backdropFilter: 'blur(20px)',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.5)',
@@ -175,7 +175,7 @@ const StudentDashboard: React.FC = () => {
             {/* Calendars Section with Blue Glassmorphism */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Drives Calendar */}
-                <div className="h-[600px] flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-blue-900/5 overflow-hidden">
+                <div className="h-[600px] flex flex-col bg-white/70 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-blue-900/5 overflow-hidden">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <div className="flex items-center gap-3">
                             <div className="w-1.5 h-6 bg-blue-600 rounded-full shadow-sm shadow-blue-200"></div>
@@ -208,7 +208,7 @@ const StudentDashboard: React.FC = () => {
                 </div>
 
                 {/* Trainings Calendar */}
-                <div className="h-[600px] flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-indigo-900/5 overflow-hidden">
+                <div className="h-[600px] flex flex-col bg-white/70 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-indigo-900/5 overflow-hidden">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <div className="flex items-center gap-3">
                             <div className="w-1.5 h-6 bg-indigo-500 rounded-full shadow-sm shadow-indigo-200"></div>

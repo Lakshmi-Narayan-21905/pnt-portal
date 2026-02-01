@@ -145,7 +145,7 @@ const DeptCoordinators: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white/90 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
                 <table className="min-w-full divide-y divide-brand-lavender-light/30">
                     <thead className="bg-brand-lavender-ice/50">
                         <tr>

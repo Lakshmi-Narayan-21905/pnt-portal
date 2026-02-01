@@ -46,7 +46,7 @@ const DeptPlacements: React.FC = () => {
                             <div
                                 key={company.id}
                                 onClick={() => handleCardClick(company)}
-                                className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-lavender-primary/5 transition cursor-pointer relative group"
+                                className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-lavender-primary/5 transition cursor-pointer relative group"
                             >
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-brand-lavender-light text-brand-lavender-deep px-2 py-1 rounded">
                                     Click for details

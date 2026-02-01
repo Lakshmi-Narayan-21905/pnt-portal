@@ -38,16 +38,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
     const isActive = (path: string) => location.pathname === path;
 
     const themeConfig = {
-        indigo: {
-            sidebarGradient: 'from-indigo-900 via-indigo-800 to-indigo-900',
-            activeItemBg: 'bg-white/20 shadow-inner backdrop-blur-sm border border-white/10',
-            activeItemText: 'text-white font-semibold',
-            accentText: 'text-indigo-200',
-            logoBg: 'bg-indigo-600',
-            hoverBg: 'hover:bg-white/10 hover:backdrop-blur-sm',
-            lightAccent: 'bg-white/10 backdrop-blur-sm shadow-sm border border-white/20 text-white',
-            border: 'border-indigo-700/50',
-        },
+
         purple: {
             sidebarGradient: 'from-purple-900 via-purple-800 to-purple-900',
             activeItemBg: 'bg-white/20 shadow-inner backdrop-blur-sm border border-white/10',
@@ -94,6 +85,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             activeItemText: 'text-brand-orange-deep font-bold',
             accentText: 'text-gray-500',
             logoBg: 'bg-brand-orange-primary',
+            hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
+            lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+            border: 'border-gray-200',
+        },
+        indigo: {
+            sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
+            activeItemBg: 'bg-brand-indigo-ice text-brand-indigo-deep border-r-[3px] border-brand-indigo-primary rounded-none',
+            activeItemText: 'text-brand-indigo-deep font-bold',
+            accentText: 'text-gray-500',
+            logoBg: 'bg-brand-indigo-primary',
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             border: 'border-gray-200',
