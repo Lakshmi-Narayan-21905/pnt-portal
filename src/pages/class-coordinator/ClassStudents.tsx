@@ -173,17 +173,17 @@ const ClassStudents: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-800">My Students</h1>
                     <p className="text-sm text-gray-500">Department: {userProfile?.department}</p>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-3">
                     <button
                         onClick={() => setIsUploadModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        className="flex items-center px-4 py-2 bg-brand-orange-ice text-brand-orange-deep font-medium rounded-lg hover:bg-brand-orange-light transition border border-brand-orange-light"
                     >
                         <Upload className="w-4 h-4 mr-2" />
                         Upload Excel
                     </button>
                     <button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                        className="flex items-center px-4 py-2 bg-brand-orange-primary text-white font-bold rounded-lg hover:bg-brand-orange-deep transition shadow-lg shadow-brand-orange-primary/30"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Student
@@ -191,41 +191,41 @@ const ClassStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-white/90 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+                <table className="min-w-full divide-y divide-brand-orange-light/30">
+                    <thead className="bg-brand-orange-ice/50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-brand-orange-light/30">
                         {loading ? (
-                            <tr><td colSpan={3} className="p-4 text-center">Loading...</td></tr>
+                            <tr><td colSpan={3} className="p-8 text-center text-gray-500">Loading...</td></tr>
                         ) : students.length === 0 ? (
-                            <tr><td colSpan={3} className="p-4 text-center">No students found.</td></tr>
+                            <tr><td colSpan={3} className="p-8 text-center text-gray-500">No students found.</td></tr>
                         ) : (
                             students.map((student) => (
                                 <tr
                                     key={student.uid}
                                     onClick={() => setSelectedStudent(student)}
-                                    className="cursor-pointer hover:bg-gray-50 transition"
+                                    className="cursor-pointer hover:bg-brand-orange-ice/30 transition-colors"
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                                            <div className="h-10 w-10 rounded-full bg-brand-orange-ice flex items-center justify-center text-brand-orange-primary font-bold shadow-sm border border-brand-orange-light/30">
                                                 {student.displayName?.charAt(0)}
                                             </div>
                                             <div className="ml-4 text-sm font-medium text-gray-900">{student.displayName}</div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.email}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${student.profileStatus === 'VERIFIED' ? 'bg-green-100 text-green-800' :
-                                                student.profileStatus === 'APPROVAL_PENDING' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-yellow-100 text-yellow-800'}`}>
+                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileStatus === 'VERIFIED' ? 'bg-brand-green-ice text-brand-green-deep border-brand-green-light' :
+                                            student.profileStatus === 'APPROVAL_PENDING' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                'bg-brand-orange-ice text-brand-orange-deep border-brand-orange-light'
+                                            }`}>
                                             {student.profileStatus === 'VERIFIED' ? 'Verified' :
                                                 student.profileStatus === 'APPROVAL_PENDING' ? 'Approval Pending' :
                                                     'Pending'}
@@ -244,7 +244,7 @@ const ClassStudents: React.FC = () => {
                     <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                     <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
 
-                    <button disabled={creating} type="submit" className="w-full btn-primary mt-4">
+                    <button disabled={creating} type="submit" className="w-full py-2.5 bg-brand-orange-primary text-white font-bold rounded-lg hover:bg-brand-orange-deep transition shadow-lg shadow-brand-orange-primary/30 mt-4 disabled:opacity-70">
                         {creating ? 'Creating...' : 'Create Student'}
                     </button>
                 </form>
@@ -252,12 +252,12 @@ const ClassStudents: React.FC = () => {
 
             <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} title="Bulk Upload Students">
                 <div className="space-y-4 text-center">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-1 text-sm text-gray-500">Upload Excel file with columns: email, password, displayName</p>
-                        <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
+                    <div className="border-2 border-dashed border-brand-orange-light rounded-xl p-8 bg-brand-orange-ice/30">
+                        <Upload className="mx-auto h-12 w-12 text-brand-orange-medium" />
+                        <p className="mt-2 text-sm text-gray-600">Upload Excel file with columns: email, password, displayName</p>
+                        <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-orange-ice file:text-brand-orange-deep hover:file:bg-brand-orange-light transition cursor-pointer" />
                     </div>
-                    {creating && <p className="text-blue-600">Processing file... Please wait...</p>}
+                    {creating && <p className="text-brand-orange-primary font-medium">Processing file... Please wait...</p>}
                 </div>
             </Modal>
 

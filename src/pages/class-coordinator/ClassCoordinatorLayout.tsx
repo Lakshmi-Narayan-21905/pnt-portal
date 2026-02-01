@@ -15,9 +15,9 @@ const ClassCoordinatorLayout: React.FC = () => {
         <DashboardLayout
             title="Class Portal"
             navItems={navItems}
-            userRoleLabel={user?.department || "Coordinator"}
-        />
-    );
+            userRoleLabel={user?.section ? `Section ${user.section}` : "Coordinator"}
+            theme="orange"
+        />);
 };
 
 export default ClassCoordinatorLayout;

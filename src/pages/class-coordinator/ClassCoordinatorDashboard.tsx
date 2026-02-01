@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Users, CheckCircle, Building2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserService } from '../../services/userService';
 import { CompanyService } from '../../services/companyService';
@@ -46,18 +47,35 @@ const ClassCoordinatorDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">My Students</h3>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{stats.totalStudents}</p>
+                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
+                    <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
+                        <Users className="w-8 h-8 text-brand-orange-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-gray-500 text-sm font-medium uppercase">My Students</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalStudents}</p>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Placed Students</h3>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{stats.placedStudents}</p>
-                    <p className="text-sm text-gray-400 mt-2">Offers (Pending)</p>
+
+                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
+                    <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
+                        <CheckCircle className="w-8 h-8 text-brand-orange-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-gray-500 text-sm font-medium uppercase">Placed Students</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.placedStudents}</p>
+                        <p className="text-xs text-brand-orange-deep mt-1">Offers (Pending)</p>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Total Drives</h3>
-                    <p className="text-3xl font-bold text-orange-500 mt-2">{stats.totalDrives}</p>
+
+                <div className="bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
+                    <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
+                        <Building2 className="w-8 h-8 text-brand-orange-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-gray-500 text-sm font-medium uppercase">Total Drives</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalDrives}</p>
+                    </div>
                 </div>
             </div>
         </div>

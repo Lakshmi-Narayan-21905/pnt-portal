@@ -53,6 +53,15 @@ export default {
                     purple: '#7C3AED',   // Purple
                     deep: '#6D28D9',     // Deep Violet Text
                     dark: '#5B21B6',     // Darkest Violet
+                },
+                'brand-orange': {
+                    ice: '#FFF8F1',      // Very Light Cream
+                    cream: '#FFF3E0',    // User provided light
+                    light: '#FFE0B2',    // User provided accent
+                    medium: '#FFB74D',   // User provided medium
+                    primary: '#FB8C00',  // Strong Orange for buttons
+                    deep: '#E65100',     // User provided dark (Text/Active)
+                    rust: '#BF360C',     // Darkest Rust
                 }
             },
         },
