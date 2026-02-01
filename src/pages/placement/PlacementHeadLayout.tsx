@@ -7,7 +7,8 @@ import {
     LogOut,
     Building2,
     Briefcase,
-    ClipboardList
+    ClipboardList,
+    Menu
 } from 'lucide-react';
 
 const PlacementHeadLayout: React.FC = () => {
@@ -24,10 +25,21 @@ const PlacementHeadLayout: React.FC = () => {
         { path: '/placement-head/records', label: 'Placement Records', icon: ClipboardList },
     ];
 
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-transparent overflow-hidden">
+            {/* Mobile Overlay */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-30 md:hidden transition-opacity"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <div className="w-64 bg-white shadow-lg z-10 hidden md:flex flex-col">
+            <div className={`fixed md:static inset-y-0 left-0 w-72 bg-white/80 backdrop-blur-xl border-r border-white/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 transform transition-transform duration-300 md:transform-none flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 border-b border-gray-200 flex items-center">
                     <div className="h-8 w-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
                         <span className="text-white font-bold">PH</span>
@@ -73,7 +85,10 @@ const PlacementHeadLayout: React.FC = () => {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="bg-white shadow-sm md:hidden p-4 flex justify-between items-center">
+                <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 md:hidden p-4 flex justify-between items-center z-10">
+                    <button onClick={toggleSidebar} className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <Menu className="w-6 h-6" />
+                    </button>
                     <span className="font-bold text-gray-800">Placement Portal</span>
                     <button onClick={() => logout()} className="text-red-600 text-sm">Logout</button>
                 </header>
