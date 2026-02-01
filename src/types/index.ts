@@ -23,6 +23,7 @@ export interface UserProfile {
     historyOfArreas?: number;
     profileCompleted: boolean;
     profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
+    photoURL?: string;
     createdAt: number;
 }
 

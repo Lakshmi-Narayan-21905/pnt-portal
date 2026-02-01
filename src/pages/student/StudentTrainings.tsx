@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import type { Training } from '../../types';
 import { GraduationCap, Calendar, CheckCircle, Info } from 'lucide-react';
 import Modal from '../../components/Modal';
+import StudentPageContainer from '../../components/student/StudentPageContainer';
 
 const StudentTrainings: React.FC = () => {
     const { userProfile } = useAuth();
@@ -53,56 +54,51 @@ const StudentTrainings: React.FC = () => {
     if (loading) return <div className="p-8 text-center text-gray-500">Loading trainings...</div>;
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <GraduationCap className="mr-3 text-indigo-600" />
-                Training Programs
-            </h1>
-
+        <StudentPageContainer title="Training Programs" subtitle="Skill development sessions and workshops">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {trainings.map(training => {
                     const isRegistered = training.participants?.includes(userProfile?.uid || '');
                     const isCompleted = training.endDate < Date.now();
 
                     return (
-                        <div key={training.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col h-full hover:shadow-md transition-shadow">
+                        <div key={training.id} className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/60 p-6 flex flex-col h-full hover:shadow-lg hover:shadow-blue-900/5 transition-all duration-300">
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{training.title}</h3>
-                                <p className="text-sm text-gray-600 mb-4">Trainer: {training.trainer}</p>
+                                <p className="text-sm text-gray-600 mb-4 bg-blue-50/50 inline-block px-2 py-1 rounded">Trainer: {training.trainer}</p>
                                 <p className="text-gray-600 mb-6 text-sm line-clamp-3">{training.description}</p>
 
                                 <div className="flex items-center text-sm text-gray-500 mb-2">
-                                    <Calendar className="w-4 h-4 mr-2" />
+                                    <Calendar className="w-4 h-4 mr-2 text-blue-500" />
                                     <span>{new Date(training.startDate).toLocaleDateString()} - {new Date(training.endDate).toLocaleDateString()}</span>
                                 </div>
                             </div>
 
-                            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
-                                <span className="text-xs bg-gray-100 rounded-full px-3 py-1 font-medium text-gray-600">
+                            <div className="mt-6 pt-4 border-t border-gray-200/50 flex justify-between items-center">
+                                <span className="text-xs bg-gray-100 rounded-full px-3 py-1 font-medium text-gray-600 border border-gray-200">
                                     Year: {training.eligibility.year}
                                 </span>
 
                                 <div className="flex items-center">
                                     <button
                                         onClick={() => setSelectedTraining(training)}
-                                        className="flex items-center text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-4"
+                                        className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium mr-4"
                                     >
                                         <Info className="w-4 h-4 mr-1" />
                                         View Details
                                     </button>
 
                                     {isRegistered ? (
-                                        <span className="flex items-center text-green-600 text-sm font-medium">
+                                        <span className="flex items-center text-green-600 text-sm font-bold bg-green-50 px-3 py-1 rounded-full border border-green-100">
                                             <CheckCircle className="w-4 h-4 mr-1" />
                                             Registered
                                         </span>
                                     ) : isCompleted ? (
-                                        <span className="text-gray-400 text-sm font-medium">Completed</span>
+                                        <span className="text-gray-400 text-sm font-medium bg-gray-50 px-3 py-1 rounded-full">Completed</span>
                                     ) : (
                                         <button
                                             onClick={() => handleRegister(training.id)}
                                             disabled={registering === training.id}
-                                            className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-lg hover:bg-indigo-100 transition-colors"
+                                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
                                         >
                                             {registering === training.id ? 'Joining...' : 'Register'}
                                         </button>
@@ -115,7 +111,7 @@ const StudentTrainings: React.FC = () => {
             </div>
 
             {trainings.length === 0 && (
-                <div className="text-center py-12 bg-white rounded-lg shadowcol-span-1 md:col-span-2">
+                <div className="text-center py-12 bg-white/70 backdrop-blur-xl rounded-xl shadow border border-white/60 col-span-1 md:col-span-2">
                     <p className="text-gray-500 text-lg">No upcoming training programs.</p>
                 </div>
             )}
@@ -164,7 +160,7 @@ const StudentTrainings: React.FC = () => {
                     </div>
                 )}
             </Modal>
-        </div>
+        </StudentPageContainer>
     );
 };
 

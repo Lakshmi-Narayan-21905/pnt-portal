@@ -6,6 +6,7 @@ import { Briefcase, Calendar, CheckCircle, XCircle, AlertCircle, Info, Filter } 
 import { checkEligibility } from '../../utils/eligibility';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
+import StudentPageContainer from '../../components/student/StudentPageContainer';
 
 const StudentDrives: React.FC = () => {
     const { userProfile } = useAuth();
@@ -87,16 +88,11 @@ const StudentDrives: React.FC = () => {
     if (loading) return <div className="p-8 text-center text-gray-500">Loading drives...</div>;
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <Briefcase className="mr-3 text-indigo-600" />
-                Drives & Opportunities
-            </h1>
-
+        <StudentPageContainer title="Drives & Opportunities" subtitle="Explore and apply for campus placement drives">
             {/* Filter Section */}
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="bg-white/70 backdrop-blur-xl p-4 rounded-xl shadow-sm border border-white/60 mb-6">
                 <div className="flex items-center mb-3">
-                    <Filter className="w-4 h-4 text-indigo-600 mr-2" />
+                    <Filter className="w-4 h-4 text-blue-600 mr-2" />
                     <h2 className="text-sm font-semibold text-gray-700">Filter Opportunities</h2>
                     <button
                         onClick={() => {
@@ -105,7 +101,7 @@ const StudentDrives: React.FC = () => {
                             setEligibilityFilter('all');
                             setStatusFilter('all');
                         }}
-                        className="ml-auto text-xs text-indigo-600 hover:text-indigo-800"
+                        className="ml-auto text-xs text-blue-600 hover:text-blue-800"
                     >
                         Reset Filters
                     </button>
@@ -118,7 +114,7 @@ const StudentDrives: React.FC = () => {
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         >
                             <option value="">All Roles</option>
                             {JOB_ROLES.map(role => (
@@ -135,7 +131,7 @@ const StudentDrives: React.FC = () => {
                             placeholder="e.g. 5"
                             value={minSalaryFilter}
                             onChange={(e) => setMinSalaryFilter(e.target.value)}
-                            className="w-full pl-2 text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full pl-2 text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         />
                     </div>
 
@@ -145,7 +141,7 @@ const StudentDrives: React.FC = () => {
                         <select
                             value={eligibilityFilter}
                             onChange={(e) => setEligibilityFilter(e.target.value as any)}
-                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         >
                             <option value="all">Check All</option>
                             <option value="eligible">Eligible Only</option>
@@ -159,7 +155,7 @@ const StudentDrives: React.FC = () => {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         >
                             <option value="all">All Status</option>
                             <option value="opted_in">Opted In</option>
@@ -171,6 +167,7 @@ const StudentDrives: React.FC = () => {
             </div>
 
             {companies.filter(company => {
+                // ... (filtering logic remains same, implicit via React rendering but we're inside the return, so we just wrap the result)
                 // Role Filter
                 if (roleFilter && !company.roles.includes(roleFilter)) return false;
 
@@ -196,7 +193,7 @@ const StudentDrives: React.FC = () => {
 
                 return true;
             }).length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg shadow">
+                <div className="text-center py-12 bg-white/60 backdrop-blur-xl rounded-xl shadow border border-white/60">
                     <p className="text-gray-500 text-lg">No drives match your filters.</p>
                 </div>
             ) : (
@@ -233,15 +230,15 @@ const StudentDrives: React.FC = () => {
                         const isExpired = company.deadline < Date.now();
 
                         return (
-                            <div key={company.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                            <div key={company.id} className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/60 overflow-hidden hover:shadow-lg hover:shadow-blue-900/5 transition-all duration-300">
                                 <div className="p-6">
-                                    <div className="flex justify-between items-start">
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                                         <div>
                                             <h2 className="text-xl font-bold text-gray-900">{company.name}</h2>
                                             <p className="text-sm text-gray-500 mt-1">{company.type} • {company.roles.join(', ')}</p>
                                         </div>
-                                        <div className="flex flex-col items-end">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                        <div className="flex flex-col items-end w-full md:w-auto">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100/80 text-green-800 backdrop-blur-sm">
                                                 {company.salary}
                                             </span>
                                             <span className="text-xs text-gray-500 mt-2 flex items-center">
@@ -255,47 +252,47 @@ const StudentDrives: React.FC = () => {
                                         {company.description}
                                     </div>
 
-                                    <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+                                    <div className="mt-6 flex flex-wrap items-center justify-between border-t border-gray-200/50 pt-4 gap-4">
                                         <div className="flex space-x-4 text-sm text-gray-500">
-                                            <span>Min CGPA: {company.eligibilityCriteria.minCGPA}</span>
-                                            <span>Deadline: {new Date(company.deadline).toLocaleDateString()}</span>
+                                            <span className="font-medium bg-gray-50 px-2 py-1 rounded-md">Min CGPA: {company.eligibilityCriteria.minCGPA}</span>
+                                            <span className="font-medium bg-red-50 text-red-600 px-2 py-1 rounded-md">Deadline: {new Date(company.deadline).toLocaleDateString()}</span>
                                         </div>
 
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
                                             <button
                                                 onClick={() => setSelectedCompany(company)}
-                                                className="flex items-center text-indigo-600 hover:text-indigo-800 text-sm font-medium mr-4"
+                                                className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium mr-4"
                                             >
                                                 <Info className="w-4 h-4 mr-1" />
                                                 View Details
                                             </button>
 
                                             {isExpired ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
+                                                <button disabled className="flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
                                                     <XCircle className="w-4 h-4 mr-2" />
                                                     Expired
                                                 </button>
                                             ) : hasApplied ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 cursor-default opacity-80">
+                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600/90 cursor-default">
                                                     <CheckCircle className="w-4 h-4 mr-2" />
                                                     Opted In
                                                 </button>
                                             ) : hasOptedOut ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-400 cursor-default opacity-80">
+                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-400/90 cursor-default">
                                                     <XCircle className="w-4 h-4 mr-2" />
                                                     Opted Out
                                                 </button>
                                             ) : !eligible ? (
                                                 <div className="flex items-center text-red-500 text-sm font-medium cursor-not-allowed" title={reason}>
                                                     <AlertCircle className="w-5 h-5 mr-2" />
-                                                    Not Eligible ({reason})
+                                                    Not Eligible
                                                 </div>
                                             ) : (
                                                 <>
                                                     <button
                                                         onClick={() => handleApply(company.id)}
                                                         disabled={applying === company.id}
-                                                        className="flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                                                        className="flex items-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-all"
                                                     >
                                                         {applying === company.id ? 'Processing...' : 'Opt In'}
                                                     </button>
@@ -303,7 +300,7 @@ const StudentDrives: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOptOut(company.id)}
                                                         disabled={applying === company.id}
-                                                        className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+                                                        className="flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-all"
                                                     >
                                                         {applying === company.id ? 'Processing...' : 'Opt Out'}
                                                     </button>
@@ -319,12 +316,13 @@ const StudentDrives: React.FC = () => {
                 </div>
             )}
 
-            {/* Details Modal */}
+            {/* Details Modal - Kept same logic, just wrapper changed */}
             <Modal
                 isOpen={!!selectedCompany}
                 onClose={() => setSelectedCompany(null)}
                 title={selectedCompany?.name || 'Company Details'}
             >
+                {/* ... existing modal content ... */}
                 {selectedCompany && (
                     <div className="space-y-6">
                         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -397,7 +395,7 @@ const StudentDrives: React.FC = () => {
                     </div>
                 )}
             </Modal>
-        </div>
+        </StudentPageContainer>
     );
 };
 

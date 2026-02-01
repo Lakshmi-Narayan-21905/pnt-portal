@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { CompanyService } from '../../services/companyService';
 import { TrainingService } from '../../services/trainingService';
+import { Briefcase, Building2, GraduationCap, ChevronRight, Filter } from 'lucide-react';
 
 import { checkEligibility } from '../../utils/eligibility';
 import DashboardCalendar, { type CalendarEvent } from '../../components/DashboardCalendar';
+import AnimatedCounter from '../../components/AnimatedCounter';
+import StudentPageContainer from '../../components/student/StudentPageContainer';
 
 const StudentDashboard: React.FC = () => {
     const { userProfile } = useAuth();
@@ -100,81 +103,149 @@ const StudentDashboard: React.FC = () => {
         fetchStats();
     }, [userProfile, placementFilter, trainingFilter]);
 
-    return (
-        <div className="">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">Welcome Back, {userProfile?.displayName?.split(' ')[0]}!</h1>
-                <p className="text-gray-600 mt-2">Here's an overview of your placement journey.</p>
-            </div>
+    // Card Component
+    const StatCard = ({ title, count, subtitle, icon: Icon, delay = 0 }: any) => (
+        <div
+            className="relative overflow-hidden rounded-2xl p-6 group transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+            style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                animation: `fadeInUp 0.6s ease-out forwards ${delay}s`,
+                opacity: 0
+            }}
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-blue-500/10"></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Active Drives</h3>
-                    <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.activeDrives}</p>
-                    <p className="text-xs text-gray-400 mt-1">Companies hiring now</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">My Applications</h3>
-                    <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.myApplications}</p>
-                    <p className="text-xs text-gray-400 mt-1">Applied so far</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Upcoming Trainings</h3>
-                    <p className="text-3xl font-bold text-orange-500 mt-2">{stats.upcomingTrainings}</p>
-                    <p className="text-xs text-gray-400 mt-1">Scheduled sessions</p>
-                </div>
-            </div>
-
-            {/* Calendars Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-                <div className="h-[540px] flex flex-col">
-                    <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-medium text-gray-600">Filter Drives:</label>
-                        <select
-                            value={placementFilter}
-                            onChange={(e) => setPlacementFilter(e.target.value as any)}
-                            className="text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option value="all">All Drives</option>
-                            <option value="eligible">Eligible</option>
-                            <option value="not_eligible">Not Eligible</option>
-                            <option value="opted_in">Opted In</option>
-                            <option value="opted_out">Opted Out</option>
-                        </select>
+            <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-gray-500 text-xs font-bold uppercase tracking-widest">{title}</h3>
+                    <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                        <Icon className="w-5 h-5" />
                     </div>
-                    <DashboardCalendar
-                        title="Company Drives"
-                        events={companyEvents}
-                        type="point"
-                        onEventClick={() => navigate('/student/drives')}
-                    />
                 </div>
 
-                <div className="h-[540px] flex flex-col">
-                    <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-medium text-gray-600">Filter Trainings:</label>
-                        <select
-                            value={trainingFilter}
-                            onChange={(e) => setTrainingFilter(e.target.value as any)}
-                            className="text-xs border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                        >
-                            <option value="all">All Trainings</option>
-                            <option value="registered">Registered</option>
-                            <option value="not_registered">Not Registered</option>
-                        </select>
-                    </div>
-                    <DashboardCalendar
-                        title="Training Schedule"
-                        events={trainingEvents}
-                        type="range"
-                        onEventClick={() => navigate('/student/trainings')}
-                    />
+                <div className="flex items-center gap-3 my-4">
+                    <span className="text-4xl font-extrabold text-gray-800 tracking-tight">
+                        <AnimatedCounter value={count} />
+                    </span>
                 </div>
+
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent my-2"></div>
+
+                <p className="text-xs text-gray-500 font-medium flex items-center justify-between group-hover:text-blue-700 transition-colors">
+                    {subtitle}
+                    <ChevronRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-blue-500" />
+                </p>
             </div>
-
-
         </div>
+    );
+
+    return (
+        <StudentPageContainer
+            title={`Hello, ${userProfile?.displayName?.split(' ')[0]} 👋`}
+            subtitle="Here's what's happening in your placement journey today."
+        >
+            {/* Stats Grid - Responsive Correction */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <StatCard
+                    title="Active Drives"
+                    count={stats.activeDrives}
+                    subtitle="Companies hiring now"
+                    icon={Building2}
+                    delay={0.1}
+                />
+                <StatCard
+                    title="My Applications"
+                    count={stats.myApplications}
+                    subtitle="Applications submitted"
+                    icon={Briefcase}
+                    delay={0.2}
+                />
+                <StatCard
+                    title="Upcoming Trainings"
+                    count={stats.upcomingTrainings}
+                    subtitle="Scheduled sessions"
+                    icon={GraduationCap}
+                    delay={0.3}
+                />
+            </div>
+
+            {/* Calendars Section with Blue Glassmorphism */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Drives Calendar */}
+                <div className="h-[600px] flex flex-col bg-white/60 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-blue-900/5 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-6 bg-blue-600 rounded-full shadow-sm shadow-blue-200"></div>
+                            <h3 className="font-bold text-gray-800 tracking-tight text-lg">Placement Schedule</h3>
+                        </div>
+
+                        <div className="relative group w-full sm:w-auto">
+                            <Filter className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-blue-500 transition-colors" />
+                            <select
+                                value={placementFilter}
+                                onChange={(e) => setPlacementFilter(e.target.value as any)}
+                                className="w-full sm:w-auto pl-9 pr-4 py-2 text-xs font-semibold bg-white border border-gray-200 rounded-full shadow-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none appearance-none cursor-pointer hover:border-gray-300 transition-all text-gray-600"
+                            >
+                                <option value="all">All Drives</option>
+                                <option value="eligible">Eligible</option>
+                                <option value="not_eligible">Ineligible</option>
+                                <option value="opted_in">Opted In</option>
+                                <option value="opted_out">Opted Out</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white/40">
+                        <DashboardCalendar
+                            title=""
+                            events={companyEvents}
+                            type="point"
+                            onEventClick={() => navigate('/student/drives')}
+                        />
+                    </div>
+                </div>
+
+                {/* Trainings Calendar */}
+                <div className="h-[600px] flex flex-col bg-white/60 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-indigo-900/5 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-6 bg-indigo-500 rounded-full shadow-sm shadow-indigo-200"></div>
+                            <h3 className="font-bold text-gray-800 tracking-tight text-lg">Training Schedule</h3>
+                        </div>
+
+                        <div className="relative group w-full sm:w-auto">
+                            <Filter className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-indigo-500 transition-colors" />
+                            <select
+                                value={trainingFilter}
+                                onChange={(e) => setTrainingFilter(e.target.value as any)}
+                                className="w-full sm:w-auto pl-9 pr-4 py-2 text-xs font-semibold bg-white border border-gray-200 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none appearance-none cursor-pointer hover:border-gray-300 transition-all text-gray-600"
+                            >
+                                <option value="all">All Trainings</option>
+                                <option value="registered">Registered</option>
+                                <option value="not_registered">Not Registered</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white/40">
+                        <DashboardCalendar
+                            title=""
+                            events={trainingEvents}
+                            type="range"
+                            onEventClick={() => navigate('/student/trainings')}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <style>{`
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
+        </StudentPageContainer>
     );
 };
 
