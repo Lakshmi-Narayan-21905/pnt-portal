@@ -20,6 +20,7 @@ const PlacementHeadLayout: React.FC = () => {
             title="Placement Portal"
             navItems={navItems}
             userRoleLabel="Placement Head"
+            theme="green"
         />
     );
 };

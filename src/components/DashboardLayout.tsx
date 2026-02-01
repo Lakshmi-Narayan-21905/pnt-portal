@@ -69,14 +69,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             border: 'border-gray-200',
         },
         green: {
-            sidebarGradient: 'from-green-900 via-green-800 to-green-900',
-            activeItemBg: 'bg-white/20 shadow-inner backdrop-blur-sm border border-white/10',
-            activeItemText: 'text-white font-semibold',
-            accentText: 'text-green-200',
-            logoBg: 'bg-green-600',
-            hoverBg: 'hover:bg-white/10 hover:backdrop-blur-sm',
-            lightAccent: 'bg-white/10 backdrop-blur-sm shadow-sm border border-white/20 text-white',
-            border: 'border-green-700/50',
+            sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
+            activeItemBg: 'bg-brand-green-ice text-brand-green-deep border-r-[3px] border-brand-green-primary rounded-none', // Professional Active Indicator
+            activeItemText: 'text-brand-green-deep font-bold',
+            accentText: 'text-gray-500',
+            logoBg: 'bg-brand-green-primary', // Solid Brand Green Logo
+            hoverBg: 'hover:bg-gray-50 hover:text-gray-900', // Subtle gray hover
+            lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200', // Toggle button
+            border: 'border-gray-200',
         },
         amber: {
             sidebarGradient: 'from-stone-900 via-stone-800 to-stone-900',

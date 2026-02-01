@@ -20,6 +20,7 @@ const TrainingHeadLayout: React.FC = () => {
             title="Training Portal"
             navItems={navItems}
             userRoleLabel="Training Head"
+            theme="green"
         />
     );
 };

@@ -82,7 +82,7 @@ const TrainingPrograms: React.FC = () => {
                 <h1 className="text-2xl font-bold text-gray-800">Training Programs</h1>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+                    className="flex items-center px-4 py-2 bg-brand-green-primary text-white rounded-lg hover:bg-brand-green-dark transition shadow-lg shadow-brand-green-primary/30"
                 >
                     <Plus className="w-5 h-5 mr-2" />
                     Add Training
@@ -98,28 +98,28 @@ const TrainingPrograms: React.FC = () => {
                         <div
                             key={training.id}
                             onClick={() => handleCardClick(training)}
-                            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer relative group"
+                            className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 hover:shadow-lg hover:shadow-brand-green-emerald/10 transition cursor-pointer relative group flex flex-col h-full"
                         >
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-gray-100 px-2 py-1 rounded">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-white/50 backdrop-blur-md px-2 py-1 rounded text-gray-600">
                                 Click for details
                             </div>
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-green-50 rounded-lg">
-                                    <GraduationCap className="w-6 h-6 text-green-600" />
+                                <div className="p-3 bg-brand-green-ice rounded-lg">
+                                    <GraduationCap className="w-6 h-6 text-brand-green-primary" />
                                 </div>
-                                <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700">
+                                <span className="px-2 py-1 text-xs rounded-full font-medium bg-brand-green-light text-brand-green-dark border border-brand-green-mint/20">
                                     Year {training.eligibility.year}
                                 </span>
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 mb-1">{training.title}</h3>
                             <p className="text-gray-500 text-sm mb-4">by {training.trainer}</p>
 
-                            <div className="flex justify-between items-center border-t pt-4">
+                            <div className="mt-auto flex justify-between items-center border-t border-brand-green-mint/20 pt-4">
                                 <div className="flex items-center text-sm text-gray-500">
-                                    <Calendar className="w-4 h-4 mr-2" />
+                                    <Calendar className="w-4 h-4 mr-2 text-brand-green-emerald" />
                                     {new Date(training.startDate).toLocaleDateString()}
                                 </div>
-                                <div className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                                <div className="text-sm font-medium text-brand-green-dark bg-brand-green-ice px-3 py-1 rounded-full border border-brand-green-mint/30">
                                     {training.participants?.length || 0} Reg.
                                 </div>
                             </div>

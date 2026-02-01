@@ -35,6 +35,15 @@ export default {
                     blue: '#0077B6',     // Secondary Brand
                     navy: '#03045E',     // Text/Dark Elements
                     dark: '#023E8A',     // Darker Blue
+                },
+                'brand-green': {
+                    ice: '#F2FCF5',      // Very Light Mint Background (Mildest Green)
+                    light: '#D1F0DB',    // Light Green Accent
+                    mint: '#6FCF97',     // Minty Green
+                    primary: '#27AE60',  // Primary Green Button (Stripe Green-ish)
+                    emerald: '#10B981',  // Emerald Green
+                    deep: '#047857',     // Deep Green Text
+                    dark: '#064E3B',     // Darkest Green
                 }
             },
         },
