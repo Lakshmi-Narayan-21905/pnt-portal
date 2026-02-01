@@ -14,6 +14,7 @@ import ManageCoordinators from './pages/placement/ManageCoordinators';
 import PlacementCompanies from './pages/placement/PlacementCompanies';
 import CompanyDetails from './pages/placement/CompanyDetails';
 import PlacementStudents from './pages/placement/PlacementStudents';
+import PlacementRecords from './pages/placement/PlacementRecords';
 
 import TrainingHeadLayout from './pages/training/TrainingHeadLayout';
 import TrainingHeadDashboard from './pages/training/TrainingHeadDashboard';
@@ -65,6 +66,7 @@ const App: React.FC = () => {
             <Route path="companies" element={<PlacementCompanies />} />
             <Route path="companies/:companyId" element={<CompanyDetails />} />
             <Route path="students" element={<PlacementStudents />} />
+            <Route path="records" element={<PlacementRecords />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>

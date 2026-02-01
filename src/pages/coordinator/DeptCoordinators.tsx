@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, Upload, Eye, EyeOff, Pencil, Trash2, Download } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,6 +14,9 @@ const DeptCoordinators: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [selectedCoord, setSelectedCoord] = useState<UserProfile | null>(null);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -40,34 +43,73 @@ const DeptCoordinators: React.FC = () => {
         fetchCoordinators();
     }, [userProfile]);
 
+    const handleEdit = (coord: UserProfile) => {
+        setFormData({
+            email: coord.email,
+            password: '', // Don't show password
+            displayName: coord.displayName,
+            section: coord.section || '',
+        });
+        setSelectedCoord(coord);
+        setEditMode(true);
+        setIsAddModalOpen(true);
+    };
+
+    const handleDelete = async (uid: string, name: string) => {
+        if (!confirm(`Are you sure you want to delete coordinator ${name}? This cannot be undone.`)) return;
+
+        try {
+            await UserService.deleteUserProfile(uid);
+            alert('Coordinator deleted successfully');
+            fetchCoordinators();
+        } catch (error: any) {
+            console.error(error);
+            alert('Failed to delete: ' + error.message);
+        }
+    };
+
     const handleCreateCoordinator = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!userProfile?.department) return;
         setCreating(true);
         try {
-            const newUser = await AdminAuthService.createUser(
-                formData.email,
-                formData.password
-            );
+            if (editMode && selectedCoord) {
+                // Update existing
+                await UserService.updateUserProfile(selectedCoord.uid, {
+                    displayName: formData.displayName,
+                    section: formData.section.toUpperCase(),
+                });
+                // Note: Not updating email/password here as it requires Admin auth specialized calls usually
+                // or re-authentication. For now assuming simple profile update.
+                alert('Coordinator updated successfully');
+            } else {
+                // Create new
+                const newUser = await AdminAuthService.createUser(
+                    formData.email,
+                    formData.password
+                );
 
-            await UserService.createUserProfile({
-                uid: newUser.uid,
-                email: formData.email,
-                displayName: formData.displayName,
-                role: 'CLASS_COORDINATOR',
-                department: userProfile.department,
-                section: formData.section.toUpperCase(),
-                profileCompleted: true, // Coordinators created by Dept Head are auto-verified
-                createdAt: Date.now()
-            });
+                await UserService.createUserProfile({
+                    uid: newUser.uid,
+                    email: formData.email,
+                    displayName: formData.displayName,
+                    role: 'CLASS_COORDINATOR',
+                    department: userProfile.department,
+                    section: formData.section.toUpperCase(),
+                    profileCompleted: true,
+                    createdAt: Date.now()
+                });
+                alert('Class Coordinator created successfully');
+            }
 
             setIsAddModalOpen(false);
             setFormData({ email: '', password: '', displayName: '', section: '' });
+            setEditMode(false);
+            setSelectedCoord(null);
             fetchCoordinators();
-            alert('Class Coordinator created successfully');
         } catch (error: any) {
             console.error(error);
-            alert('Failed to create coordinator: ' + error.message);
+            alert('Operation failed: ' + error.message);
         } finally {
             setCreating(false);
         }
@@ -129,6 +171,24 @@ const DeptCoordinators: React.FC = () => {
 
                 <div className="flex space-x-2">
                     <button
+                        onClick={() => {
+                            const exportData = coordinators.map(c => ({
+                                Name: c.displayName,
+                                Email: c.email,
+                                Department: c.department,
+                                Section: c.section
+                            }));
+                            import('../../utils/excelParser').then(mod => {
+                                mod.ExcelParser.exportToExcel(exportData, `${userProfile?.department}_Coordinators`);
+                            });
+                        }}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        title="Export Coordinators"
+                    >
+                        <Download className="w-4 h-4 mr-2" />
+                        Export
+                    </button>
+                    <button
                         onClick={() => setIsUploadModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                     >
@@ -152,13 +212,14 @@ const DeptCoordinators: React.FC = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {loading ? (
-                            <tr><td colSpan={3} className="p-4 text-center">Loading...</td></tr>
+                            <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
                         ) : coordinators.length === 0 ? (
-                            <tr><td colSpan={3} className="p-4 text-center">No coordinators found.</td></tr>
+                            <tr><td colSpan={4} className="p-4 text-center">No coordinators found.</td></tr>
                         ) : (
                             coordinators.map((coord) => (
                                 <tr key={coord.uid}>
@@ -172,6 +233,22 @@ const DeptCoordinators: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.department} {coord.section ? `(${coord.section})` : ''}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button
+                                            onClick={() => handleEdit(coord)}
+                                            className="text-indigo-600 hover:text-indigo-900 mr-4"
+                                            title="Edit"
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(coord.uid, coord.displayName)}
+                                            className="text-red-600 hover:text-red-900"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}
@@ -179,15 +256,36 @@ const DeptCoordinators: React.FC = () => {
                 </table>
             </div>
 
-            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Class Coordinator">
+            <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditMode(false); setFormData({ email: '', password: '', displayName: '', section: '' }); }} title={`${editMode ? 'Edit' : 'Add'} Class Coordinator`}>
                 <form onSubmit={handleCreateCoordinator} className="space-y-4">
                     <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
                     <input placeholder="Section (Optional)" className="input-field" value={formData.section} onChange={e => setFormData({ ...formData, section: e.target.value })} />
-                    <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                    <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+
+                    {!editMode && (
+                        <>
+                            <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                            <div className="relative">
+                                <input
+                                    required
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Password"
+                                    className="input-field pr-10"
+                                    value={formData.password}
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                                >
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                        </>
+                    )}
 
                     <button disabled={creating} type="submit" className="w-full btn-primary mt-4">
-                        {creating ? 'Creating...' : 'Create Coordinator'}
+                        {creating ? 'Processing...' : (editMode ? 'Update Coordinator' : 'Create Coordinator')}
                     </button>
                 </form>
             </Modal>

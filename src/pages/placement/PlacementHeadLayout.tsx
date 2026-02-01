@@ -6,7 +6,8 @@ import {
     Users,
     LogOut,
     Building2,
-    Briefcase
+    Briefcase,
+    ClipboardList
 } from 'lucide-react';
 
 const PlacementHeadLayout: React.FC = () => {
@@ -20,6 +21,7 @@ const PlacementHeadLayout: React.FC = () => {
         { path: '/placement-head/coordinators', label: 'Coordinators', icon: Users },
         { path: '/placement-head/companies', label: 'Company Drives', icon: Building2 },
         { path: '/placement-head/students', label: 'Students', icon: Briefcase },
+        { path: '/placement-head/records', label: 'Placement Records', icon: ClipboardList },
     ];
 
     return (
@@ -39,8 +41,8 @@ const PlacementHeadLayout: React.FC = () => {
                             key={item.path}
                             to={item.path}
                             className={`flex items-center px-4 py-3 rounded-lg transition-colors ${isActive(item.path)
-                                    ? 'bg-purple-50 text-purple-600 font-medium'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                ? 'bg-purple-50 text-purple-600 font-medium'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                         >
                             <item.icon className={`h-5 w-5 mr-3 ${isActive(item.path) ? 'text-purple-600' : 'text-gray-400'}`} />

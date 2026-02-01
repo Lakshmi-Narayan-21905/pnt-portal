@@ -6,7 +6,8 @@ import {
     collection,
     query,
     where,
-    getDocs
+    getDocs,
+    deleteDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { UserProfile, UserRole } from '../types';
@@ -77,6 +78,21 @@ export const UserService = {
         }
     },
 
+    // Delete a user profile (Only Delete Firestore Doc)
+    deleteUserProfile: async (uid: string) => {
+        try {
+            const result = await UserService.findUserDoc(uid);
+            if (result) {
+                await deleteDoc(result.ref);
+            } else {
+                throw new Error("User not found for deletion");
+            }
+        } catch (error) {
+            console.error("Error deleting user profile:", error);
+            throw error;
+        }
+    },
+
     // Get all users with a specific role (Only new collection)
     getUsersByRole: async (role: UserRole): Promise<UserProfile[]> => {
         try {
@@ -110,6 +126,27 @@ export const UserService = {
         } catch (error) {
             console.error("Error fetching all users:", error);
             throw error;
+        }
+    },
+
+    // Update student placement status by Roll Number
+    updateUserStatusByRollNo: async (rollNo: string, status: 'PLACED' | 'UNPLACED' | 'OFFERED') => {
+        try {
+            const normalizedRoll = rollNo.toLowerCase().trim();
+            // Students are in 'students' collection
+            const q = query(collection(db, 'students'), where('rollNo', '==', normalizedRoll));
+            const snapshot = await getDocs(q);
+
+            if (!snapshot.empty) {
+                const docRef = snapshot.docs[0].ref;
+                await updateDoc(docRef, { placementStatus: status });
+                return true;
+            }
+            return false; // User not found
+        } catch (error) {
+            console.error(`Error updating status for rollNo ${rollNo}:`, error);
+            // Don't throw, just log, so bulk upload continues
+            return false;
         }
     }
 };

@@ -27,9 +27,16 @@ const StudentDrives: React.FC = () => {
     const fetchCompanies = async () => {
         try {
             const data = await CompanyService.getAllCompanies();
+
+            // Filter by Department
+            const dept = userProfile?.department;
+            const filteredData = data.filter(c =>
+                !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept)
+            );
+
             // Sort by drive date descending
-            data.sort((a, b) => b.driveDate - a.driveDate);
-            setCompanies(data);
+            filteredData.sort((a, b) => b.driveDate - a.driveDate);
+            setCompanies(filteredData);
         } catch (error) {
             console.error("Error fetching companies:", error);
         } finally {
