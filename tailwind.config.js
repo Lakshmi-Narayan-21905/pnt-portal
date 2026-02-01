@@ -44,6 +44,15 @@ export default {
                     emerald: '#10B981',  // Emerald Green
                     deep: '#047857',     // Deep Green Text
                     dark: '#064E3B',     // Darkest Green
+                },
+                'brand-lavender': {
+                    ice: '#F8F7FC',      // Very Light Lavender Background
+                    light: '#EBE9F7',    // Light Lavender Accent
+                    lilac: '#C4B5FD',    // Lilac Accent
+                    primary: '#8B5CF6',  // Primary Violet Button (Tailwind Violet-500 equivalent)
+                    purple: '#7C3AED',   // Purple
+                    deep: '#6D28D9',     // Deep Violet Text
+                    dark: '#5B21B6',     // Darkest Violet
                 }
             },
         },

@@ -1,3 +1,6 @@
+@import './styles/student-background.css';
+@import './styles/green-background.css';
+@import './styles/lavender-background.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

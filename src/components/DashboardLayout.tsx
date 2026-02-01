@@ -10,7 +10,7 @@ interface NavigationItem {
     icon: React.ElementType;
 }
 
-export type ThemeColor = 'indigo' | 'purple' | 'blue' | 'green' | 'amber';
+export type ThemeColor = 'indigo' | 'purple' | 'blue' | 'green' | 'amber' | 'lavender';
 
 interface DashboardLayoutProps {
     title: string;
@@ -76,6 +76,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             logoBg: 'bg-brand-green-primary', // Solid Brand Green Logo
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900', // Subtle gray hover
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200', // Toggle button
+            border: 'border-gray-200',
+        },
+        lavender: {
+            sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
+            activeItemBg: 'bg-brand-lavender-ice text-brand-lavender-deep border-r-[3px] border-brand-lavender-primary rounded-none',
+            activeItemText: 'text-brand-lavender-deep font-bold',
+            accentText: 'text-gray-500',
+            logoBg: 'bg-brand-lavender-primary', // Solid Brand Lavender Logo
+            hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
+            lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             border: 'border-gray-200',
         },
         amber: {

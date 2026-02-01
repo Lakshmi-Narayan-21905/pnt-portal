@@ -19,6 +19,7 @@ const DeptCoordinatorLayout: React.FC = () => {
             title="Dept Portal"
             navItems={navItems}
             userRoleLabel={user?.department || "Coordinator"}
+            theme="lavender" // Added theme prop
         />
     );
 };
