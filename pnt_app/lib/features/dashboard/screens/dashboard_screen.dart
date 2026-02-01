@@ -96,25 +96,38 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Welcome back!',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Welcome back!',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          Text(
-                            authService.user?.email ?? 'User',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primary900,
+                            Text(
+                              authService.user?.email ?? 'User',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary900,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                            Text(
+                              'Role: ${authService.userRole ?? "None"}', 
+                              style: const TextStyle(fontSize: 12, color: Colors.blue),
+                            ),
+                            if (authService.error != null)
+                              Text(
+                                authService.error!,
+                                style: const TextStyle(fontSize: 10, color: Colors.red),
+                                maxLines: 2,
+                              ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

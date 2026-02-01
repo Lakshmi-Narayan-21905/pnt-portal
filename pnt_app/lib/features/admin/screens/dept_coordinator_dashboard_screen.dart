@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../auth/services/auth_service.dart';
 import '../../../core/theme/app_theme.dart';
+import 'dept_coordinator/dept_coordinator_company_drives_screen.dart';
+import 'dept_coordinator/dept_coordinator_trainings_screen.dart';
 
 class DeptCoordinatorDashboardScreen extends StatelessWidget {
   const DeptCoordinatorDashboardScreen({super.key});
@@ -78,14 +80,14 @@ class DeptCoordinatorDashboardScreen extends StatelessWidget {
                   'Company Drives',
                   LucideIcons.building,
                   Colors.purple,
-                  () => context.push('/student/drives'), // Reuse existing view or create specific
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DeptCoordinatorCompanyDrivesScreen())),
                 ),
                 _buildActionCard(
                   context,
                   'Trainings',
                   LucideIcons.graduationCap,
                   Colors.orange,
-                  () => context.push('/admin/trainings'), // Reuse view, maybe read-only?
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DeptCoordinatorTrainingsScreen())),
                 ),
                 _buildActionCard(
                   context,

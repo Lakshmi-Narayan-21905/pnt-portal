@@ -9,11 +9,13 @@ class AuthService extends ChangeNotifier {
   User? _user;
   Map<String, dynamic>? _userProfile;
   bool _isLoading = true;
+  String? _error;
 
   User? get user => _user;
   Map<String, dynamic>? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
-  String? get userRole => _userProfile?['role']?.toString().toLowerCase();
+  String? get error => _error;
+  String? get userRole => _userProfile?['role']?.toString().trim().toLowerCase();
 
   AuthService() {
     _auth.authStateChanges().listen((User? user) async {
@@ -28,15 +30,51 @@ class AuthService extends ChangeNotifier {
     });
   }
 
+  // Collections to search for user profile
+  static const List<String> _roleCollections = [
+    'students',
+    'admin',
+    'placement_heads',
+    'training_heads',
+    'dept_coordinators',
+    'class_coordinators',
+  ];
+
   Future<void> _fetchUserProfile(String uid) async {
     try {
-      final doc = await _db.collection('users').doc(uid).get();
-      if (doc.exists) {
-        _userProfile = doc.data();
+      _error = null;
+      Map<String, dynamic>? foundProfile;
+
+      // Check all collections in parallel
+      final futures = _roleCollections.map((col) => _db.collection(col).doc(uid).get());
+      final snapshots = await Future.wait(futures);
+
+      for (var doc in snapshots) {
+        if (doc.exists) {
+          foundProfile = doc.data();
+          break; // Stop at first match
+        }
+      }
+
+      if (foundProfile != null) {
+        _userProfile = foundProfile;
         notifyListeners();
+      } else {
+        // Fallback: check legacy 'users' collection just in case
+        final legacyDoc = await _db.collection('users').doc(uid).get();
+        if (legacyDoc.exists) {
+          _userProfile = legacyDoc.data();
+          notifyListeners();
+        } else {
+          _error = "User profile not found. ID: $uid";
+          _userProfile = null;
+          notifyListeners();
+        }
       }
     } catch (e) {
+      _error = e.toString();
       debugPrint('Error fetching user profile: $e');
+      notifyListeners();
     }
   }
 

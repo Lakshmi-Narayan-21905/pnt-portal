@@ -27,8 +27,21 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      // Navigation is handled by router refresh listenable or manually
-      if (mounted) context.go('/dashboard');
+
+      if (!mounted) return;
+
+      final role = authService.userRole;
+      if (role == 'placement_head') {
+        context.go('/placement/dashboard');
+      } else if (role == 'admin') {
+        context.go('/admin/dashboard'); // Assuming admin dashboard route exists or handled
+      } else if (role == 'dept_coordinator') {
+        context.go('/dept/dashboard');
+      } else if (role == 'training_head') {
+        context.go('/training/dashboard');
+      } else {
+        context.go('/dashboard'); // Default to student
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

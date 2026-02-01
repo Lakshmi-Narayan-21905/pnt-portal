@@ -117,7 +117,7 @@ class StudentDashboardScreen extends StatelessWidget {
                   'Enroll in upcoming training sessions',
                   LucideIcons.graduationCap,
                   Colors.purple,
-                  () => {}, // Todo: Implement Student Trainings View (different from admin)
+                  () => context.push('/student/trainings'),
                 ),
                 _buildActionCard(
                   context,
@@ -125,15 +125,7 @@ class StudentDashboardScreen extends StatelessWidget {
                   'Manage your academic and personal details',
                   LucideIcons.user,
                   Colors.orange,
-                  () => {}, // Placeholder
-                ),
-                _buildActionCard(
-                  context,
-                  'My Applications',
-                  'Track status of your applications',
-                  LucideIcons.clipboardList,
-                  Colors.green,
-                  () => {}, // Placeholder
+                  () => context.push('/student/profile'),
                 ),
               ],
             ),
@@ -169,27 +161,35 @@ class StudentDashboardScreen extends StatelessWidget {
               ),
               child: Icon(icon, color: color, size: 24),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            const SizedBox(height: 12),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                  const SizedBox(height: 4),
+                  Flexible(
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

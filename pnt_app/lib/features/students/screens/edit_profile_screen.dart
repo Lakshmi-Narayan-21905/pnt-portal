@@ -68,7 +68,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'profileStatus': 'PENDING', // Reset verification on edit
       };
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).update(updates);
+      String collection = 'students'; // Default to students since this is student feature
+      final role = Provider.of<AuthService>(context, listen: false).userRole;
+      
+      if (role == 'admin') collection = 'admin';
+      else if (role == 'placement_head') collection = 'placement_heads'; // Verify if matches AuthService
+      else if (role == 'training_head') collection = 'training_heads';
+      else if (role == 'dept_coordinator') collection = 'dept_coordinators';
+      else if (role == 'class_coordinator') collection = 'class_coordinators';
+      
+      // The user reported "students" collection usage for their profile.
+      // We will try to update the collection that corresponds to their role.
+      
+      await FirebaseFirestore.instance.collection(collection).doc(uid).update(updates);
       
       // Force refresh profile in AuthService (optional, but good practice)
       // For now, AuthService listens to realtime updates if I implemented it that way, 
