@@ -6,6 +6,7 @@ import '../../auth/services/auth_service.dart';
 import '../../../core/theme/app_theme.dart';
 import 'dept_coordinator/dept_coordinator_company_drives_screen.dart';
 import 'dept_coordinator/dept_coordinator_trainings_screen.dart';
+import 'dept_coordinator/dept_class_coordinators_screen.dart';
 
 class DeptCoordinatorDashboardScreen extends StatelessWidget {
   const DeptCoordinatorDashboardScreen({super.key});
@@ -94,7 +95,7 @@ class DeptCoordinatorDashboardScreen extends StatelessWidget {
                   'Class Coordinators',
                   LucideIcons.userCog,
                   Colors.teal,
-                  () => {}, // TODO
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => DeptClassCoordinatorsScreen(department: department))),
                 ),
               ],
             ),

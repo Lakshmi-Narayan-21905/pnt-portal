@@ -25,11 +25,16 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
       ],
-      child: MaterialApp.router(
-        title: 'Placement Portal',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        routerConfig: appRouter,
+      child: Builder(
+        builder: (context) {
+          final authService = Provider.of<AuthService>(context, listen: false);
+          return MaterialApp.router(
+            title: 'PNT',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            routerConfig: AppRouter(authService).router,
+          );
+        },
       ),
     );
   }

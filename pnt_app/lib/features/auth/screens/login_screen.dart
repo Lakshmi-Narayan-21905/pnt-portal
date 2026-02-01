@@ -39,6 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
         context.go('/dept/dashboard');
       } else if (role == 'training_head') {
         context.go('/training/dashboard');
+      } else if (role == 'class_coordinator') {
+        context.go('/class/dashboard');
       } else {
         context.go('/dashboard'); // Default to student
       }
@@ -74,13 +76,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary600.withOpacity(0.1),
-                    shape: BoxShape.circle,
+                    // color: AppTheme.primary600.withOpacity(0.1), // Removed circle bg
+                    // shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    LucideIcons.graduationCap,
-                    size: 64,
-                    color: AppTheme.primary600,
+                  child: Image.asset(
+                    'lib/assets/logo.png',
+                    height: 80,
+                    width: 80,
                   ),
                 ),
                 const SizedBox(height: 32),
