@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Company } from '../../types';
-import { Briefcase, Calendar, CheckCircle, XCircle, AlertCircle, Info, Filter, Search, RotateCcw, MapPin } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, RotateCcw, MapPin } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
@@ -183,6 +183,7 @@ const StudentDrives: React.FC = () => {
             </div>
 
             {/* Drives Grid - Reference Design Match */}
+            {/* Drives Grid - Reference Design Match */}
             {companies.filter(company => {
                 // Role Filter
                 if (roleFilter && !company.roles.includes(roleFilter)) return false;
@@ -209,8 +210,8 @@ const StudentDrives: React.FC = () => {
 
                 return true;
             }).length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-center py-20 bg-white/70 backdrop-blur-xl rounded-2xl border border-white/60 shadow-sm">
+                    <div className="bg-gray-50/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
                         <Search className="w-8 h-8 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900">No drives found</h3>
@@ -242,11 +243,11 @@ const StudentDrives: React.FC = () => {
                         const isExpired = Date.now() > company.deadline;
 
                         return (
-                            <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
+                            <div key={company.id} className="bg-white/60 backdrop-blur-xl rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-lg hover:shadow-blue-900/10 transition-all duration-300 flex flex-col h-full group">
                                 {/* Header: Name & Salary */}
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{company.name}</h3>
-                                    <span className="bg-blue-50 text-brand-blue text-sm font-bold px-3 py-1.5 rounded-lg">
+                                    <span className="bg-blue-50/80 backdrop-blur-sm text-brand-blue text-sm font-bold px-3 py-1.5 rounded-lg">
                                         {company.salary}
                                     </span>
                                 </div>

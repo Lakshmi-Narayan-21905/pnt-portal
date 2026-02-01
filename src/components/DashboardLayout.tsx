@@ -131,38 +131,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                         )}
                     </div>
 
-                    {/* Profile Section (Inside Header Area) */}
-                    {isSidebarOpen && (
-                        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 backdrop-blur-sm">
-                            <div className="w-10 h-10 rounded-full bg-brand-ice flex items-center justify-center overflow-hidden border border-gray-200 flex-shrink-0">
-                                {userProfile?.photoURL ? (
-                                    <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-brand-blue font-bold text-xs">{userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}</span>
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 truncate">{userProfile?.displayName || 'User'}</p>
-                                <p className="text-xs text-gray-500 truncate">{userProfile?.email}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Collapsed Profile Avatar (Just below logo if space allows, or merged? 
-                        User said: "The profile picture must stay aligned at the top". 
-                        If collapsed, we can show avatar just under logo or maybe HIDE it to avoid clutter if requested? 
-                        No, "Profile picture must STAY aligned at the top". Implies visibility.
-                        Let's put Avatar under Logo in collapsed state.
-                    */}
-                    {!isSidebarOpen && (
-                        <div className="mt-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/20 transition-all duration-300">
-                            {userProfile?.photoURL ? (
-                                <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="text-white font-bold text-xs">{userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}</span>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 {/* 2. Navigation (Middle - No Scrollbar) */}
@@ -213,18 +181,45 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                     })}
                 </nav>
 
-                {/* 3. Footer with Logout (Fixed Bottom) */}
-                <div className={`p-4 border-t ${currentTheme.border} bg-black/10 mt-auto`}>
+                {/* 3. Footer with Profile & Logout (Fixed Bottom) */}
+                <div className={`p-4 border-t ${currentTheme.border} mt-auto flex flex-col gap-4`}>
+
+                    {/* Profile Section (Moved to Bottom) */}
+                    {isSidebarOpen ? (
+                        <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100 backdrop-blur-sm">
+                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-200 flex-shrink-0 shadow-sm">
+                                {userProfile?.photoURL ? (
+                                    <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-brand-blue font-bold text-xs">{userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}</span>
+                                )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-gray-900 truncate">{userProfile?.displayName || 'User'}</p>
+                                <p className="text-xs text-brand-blue font-medium truncate">{userProfile?.email}</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="w-10 h-10 mx-auto rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm mb-2">
+                            {userProfile?.photoURL ? (
+                                <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-brand-blue font-bold text-xs">{userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}</span>
+                            )}
+                        </div>
+                    )}
+
                     <button
                         onClick={handleLogout}
                         className={`
-                            flex items-center w-full px-3 py-2.5 rounded-xl text-red-300 hover:bg-white/5 hover:text-red-200 transition-colors
+                            flex items-center w-full px-3 py-3 rounded-xl transition-all duration-200 shadow-sm border border-gray-100
+                            bg-white text-red-500 hover:bg-red-50 hover:border-red-100 hover:shadow-md
                             ${!isSidebarOpen && 'justify-center'}
                         `}
                         title="Logout"
                     >
                         <LogOut className="w-5 h-5 flex-shrink-0" />
-                        {isSidebarOpen && <span className="ml-3 font-medium text-sm">Logout</span>}
+                        {isSidebarOpen && <span className="ml-3 font-bold text-sm">Logout</span>}
                     </button>
                 </div>
             </aside>

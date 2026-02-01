@@ -98,7 +98,7 @@ const StudentTrainings: React.FC = () => {
                                         <button
                                             onClick={() => handleRegister(training.id)}
                                             disabled={registering === training.id}
-                                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
+                                            className="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors shadow-sm shadow-brand-primary/30"
                                         >
                                             {registering === training.id ? 'Joining...' : 'Register'}
                                         </button>
