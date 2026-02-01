@@ -89,32 +89,32 @@ const StudentDrives: React.FC = () => {
 
     return (
         <StudentPageContainer title="Drives & Opportunities" subtitle="Explore and apply for campus placement drives">
-            {/* Filter Section */}
-            <div className="bg-white/70 backdrop-blur-xl p-4 rounded-xl shadow-sm border border-white/60 mb-6">
-                <div className="flex items-center mb-3">
-                    <Filter className="w-4 h-4 text-blue-600 mr-2" />
-                    <h2 className="text-sm font-semibold text-gray-700">Filter Opportunities</h2>
-                    <button
-                        onClick={() => {
-                            setRoleFilter('');
-                            setMinSalaryFilter('');
-                            setEligibilityFilter('all');
-                            setStatusFilter('all');
-                        }}
-                        className="ml-auto text-xs text-blue-600 hover:text-blue-800"
-                    >
-                        Reset Filters
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Role Filter */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Job Role</label>
-                        <select
+            {/* Search & Filter Bar - Comprehensive & Clean */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+                {/* Top Row: Search */}
+                <div className="mb-6">
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Search Opportunities</label>
+                    <div className="relative group">
+                        <input
+                            type="text"
+                            placeholder="Search by company or role..."
+                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary transition-all text-gray-700"
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            className="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
+                        />
+                        <Search className="absolute left-3.5 top-3.5 w-4.5 h-4.5 text-gray-400 group-focus-within:text-brand-primary transition-colors" />
+                    </div>
+                </div>
+
+                {/* Bottom Row: Detailed Filters */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {/* Role Filter */}
+                    <div className="relative">
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Role</label>
+                        <select
+                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary appearance-none cursor-pointer"
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            value={roleFilter === '' ? '' : (JOB_ROLES.includes(roleFilter) ? roleFilter : '')}
                         >
                             <option value="">All Roles</option>
                             {JOB_ROLES.map(role => (
@@ -125,25 +125,25 @@ const StudentDrives: React.FC = () => {
 
                     {/* Salary Filter */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Min Salary (LPA)</label>
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Min Salary</label>
                         <input
-                            type="text"
-                            placeholder="e.g. 5"
+                            type="number"
+                            placeholder="e.g. 5 LPA"
+                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary"
                             value={minSalaryFilter}
                             onChange={(e) => setMinSalaryFilter(e.target.value)}
-                            className="w-full pl-2 text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         />
                     </div>
 
                     {/* Eligibility Filter */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Eligibility</label>
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Eligibility</label>
                         <select
+                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary appearance-none cursor-pointer"
                             value={eligibilityFilter}
                             onChange={(e) => setEligibilityFilter(e.target.value as any)}
-                            className="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         >
-                            <option value="all">Check All</option>
+                            <option value="all">All</option>
                             <option value="eligible">Eligible Only</option>
                             <option value="not_eligible">Not Eligible</option>
                         </select>
@@ -151,27 +151,43 @@ const StudentDrives: React.FC = () => {
 
                     {/* Status Filter */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">My Status</label>
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">My Status</label>
                         <select
+                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary appearance-none cursor-pointer"
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white/50"
                         >
-                            <option value="all">All Status</option>
+                            <option value="all">All</option>
                             <option value="opted_in">Opted In</option>
                             <option value="opted_out">Opted Out</option>
                             <option value="not_registered">Not Registered</option>
                         </select>
                     </div>
+
+                    {/* Reset Button */}
+                    <div className="flex items-end">
+                        <button
+                            onClick={() => {
+                                setRoleFilter('');
+                                setMinSalaryFilter('');
+                                setEligibilityFilter('all');
+                                setStatusFilter('all');
+                            }}
+                            className="w-full h-[42px] border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            Reset
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            {/* Drives Grid - Reference Design Match */}
             {companies.filter(company => {
-                // ... (filtering logic remains same, implicit via React rendering but we're inside the return, so we just wrap the result)
                 // Role Filter
                 if (roleFilter && !company.roles.includes(roleFilter)) return false;
 
-                // Salary Filter (Heuristic: extract first number)
+                // Salary Filter
                 if (minSalaryFilter) {
                     const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
                     const minSalary = parseFloat(minSalaryFilter) || 0;
@@ -179,7 +195,7 @@ const StudentDrives: React.FC = () => {
                 }
 
                 // Eligibility Filter
-                const { eligible } = checkEligibility(userProfile, company);
+                const { eligible } = checkEligibility(userProfile!, company);
                 if (eligibilityFilter === 'eligible' && !eligible) return false;
                 if (eligibilityFilter === 'not_eligible' && eligible) return false;
 
@@ -193,122 +209,121 @@ const StudentDrives: React.FC = () => {
 
                 return true;
             }).length === 0 ? (
-                <div className="text-center py-12 bg-white/60 backdrop-blur-xl rounded-xl shadow border border-white/60">
-                    <p className="text-gray-500 text-lg">No drives match your filters.</p>
+                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Search className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">No drives found</h3>
+                    <p className="text-gray-500 max-w-sm mx-auto mt-2">We couldn't find any opportunities matching your current filters. Try adjusting them.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {companies.filter(company => {
                         // Role Filter
                         if (roleFilter && !company.roles.includes(roleFilter)) return false;
-
-                        // Salary Filter
                         if (minSalaryFilter) {
                             const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
                             const minSalary = parseFloat(minSalaryFilter) || 0;
                             if (companySalary < minSalary) return false;
                         }
-
-                        // Eligibility Filter
-                        const { eligible } = checkEligibility(userProfile, company);
+                        const { eligible } = checkEligibility(userProfile!, company);
                         if (eligibilityFilter === 'eligible' && !eligible) return false;
                         if (eligibilityFilter === 'not_eligible' && eligible) return false;
-
-                        // Status Filter
                         const hasApplied = company.applicants?.includes(userProfile?.uid || '');
                         const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-
                         if (statusFilter === 'opted_in' && !hasApplied) return false;
                         if (statusFilter === 'opted_out' && !hasOptedOut) return false;
                         if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
-
                         return true;
-                    }).map(company => {
-                        const hasApplied = company.applicants?.includes(userProfile?.uid || '');
-                        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-                        const { eligible, reason } = checkEligibility(userProfile, company);
-                        const isExpired = company.deadline < Date.now();
+                    }).map((company) => {
+                        const { eligible, reason } = checkEligibility(userProfile!, company);
+                        const hasApplied = (company.applicants || []).includes(userProfile!.uid);
+                        const hasOptedOut = (company.optedOut || []).includes(userProfile!.uid);
+                        const isExpired = Date.now() > company.deadline;
 
                         return (
-                            <div key={company.id} className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/60 overflow-hidden hover:shadow-lg hover:shadow-blue-900/5 transition-all duration-300">
-                                <div className="p-6">
-                                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                                        <div>
-                                            <h2 className="text-xl font-bold text-gray-900">{company.name}</h2>
-                                            <p className="text-sm text-gray-500 mt-1">{company.type} • {company.roles.join(', ')}</p>
-                                        </div>
-                                        <div className="flex flex-col items-end w-full md:w-auto">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100/80 text-green-800 backdrop-blur-sm">
-                                                {company.salary}
-                                            </span>
-                                            <span className="text-xs text-gray-500 mt-2 flex items-center">
-                                                <Calendar className="w-3 h-3 mr-1" />
-                                                Drive: {new Date(company.driveDate).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                    </div>
+                            <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
+                                {/* Header: Name & Salary */}
+                                <div className="flex justify-between items-start mb-1">
+                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{company.name}</h3>
+                                    <span className="bg-blue-50 text-brand-blue text-sm font-bold px-3 py-1.5 rounded-lg">
+                                        {company.salary}
+                                    </span>
+                                </div>
 
-                                    <div className="mt-4 prose prose-sm text-gray-600 line-clamp-2">
-                                        {company.description}
-                                    </div>
+                                {/* Role */}
+                                <p className="text-brand-primary font-medium text-sm mb-4">
+                                    {company.roles && company.roles.length > 0 ? company.roles.join(', ') : 'Software Engineer'}
+                                </p>
 
-                                    <div className="mt-6 flex flex-wrap items-center justify-between border-t border-gray-200/50 pt-4 gap-4">
-                                        <div className="flex space-x-4 text-sm text-gray-500">
-                                            <span className="font-medium bg-gray-50 px-2 py-1 rounded-md">Min CGPA: {company.eligibilityCriteria.minCGPA}</span>
-                                            <span className="font-medium bg-red-50 text-red-600 px-2 py-1 rounded-md">Deadline: {new Date(company.deadline).toLocaleDateString()}</span>
-                                        </div>
+                                {/* Description */}
+                                <p className="text-gray-500 text-sm mb-5 line-clamp-2 leading-relaxed">
+                                    {company.description || "Join our team to build scalable systems and solve complex problems at scale."}
+                                </p>
 
-                                        <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
+                                {/* Location */}
+                                <div className="flex items-center text-gray-500 text-sm mb-6">
+                                    <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                                    {company.location || "Bangalore"}
+                                </div>
+
+                                {/* Spacer */}
+                                <div className="flex-grow"></div>
+
+                                {/* Eligibility Banner */}
+                                <div className={`w-full py-2.5 px-4 rounded-lg mb-6 flex items-center ${eligible ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                                    {eligible ? <CheckCircle className="w-4 h-4 mr-2" /> : <AlertCircle className="w-4 h-4 mr-2" />}
+                                    <span className="text-sm font-semibold">{eligible ? 'Eligible' : 'Not Eligible'}</span>
+                                </div>
+
+                                {/* Action Buttons - Grid Layout to match Reference */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Primary Action Button (Left) */}
+                                    {isExpired ? (
+                                        <button disabled className="w-full py-2.5 bg-gray-100 text-gray-400 font-medium rounded-lg text-sm cursor-not-allowed">
+                                            Expired
+                                        </button>
+                                    ) : hasApplied ? (
+                                        <button disabled className="w-full py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg text-sm cursor-default border border-gray-200">
+                                            Applied
+                                        </button>
+                                    ) : hasOptedOut ? (
+                                        <button disabled className="w-full py-2.5 bg-red-50 text-red-600 font-medium rounded-lg text-sm cursor-default border border-red-100">
+                                            Opted Out
+                                        </button>
+                                    ) : !eligible ? (
+                                        <button disabled className="w-full py-2.5 bg-gray-100 text-gray-400 font-medium rounded-lg text-sm cursor-not-allowed">
+                                            Not Eligible
+                                        </button>
+                                    ) : (
+                                        <div className="flex gap-2"> {/* Container for potential multiple buttons if needed */}
+                                            {/* Standard Opt In */}
                                             <button
-                                                onClick={() => setSelectedCompany(company)}
-                                                className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium mr-4"
+                                                onClick={() => handleApply(company.id)}
+                                                disabled={applying === company.id}
+                                                className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition-all shadow-sm active:translate-y-0.5"
                                             >
-                                                <Info className="w-4 h-4 mr-1" />
-                                                View Details
+                                                {applying === company.id ? '...' : 'Opt In'}
                                             </button>
 
-                                            {isExpired ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
-                                                    <XCircle className="w-4 h-4 mr-2" />
-                                                    Expired
-                                                </button>
-                                            ) : hasApplied ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600/90 cursor-default">
-                                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                                    Opted In
-                                                </button>
-                                            ) : hasOptedOut ? (
-                                                <button disabled className="flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-400/90 cursor-default">
-                                                    <XCircle className="w-4 h-4 mr-2" />
-                                                    Opted Out
-                                                </button>
-                                            ) : !eligible ? (
-                                                <div className="flex items-center text-red-500 text-sm font-medium cursor-not-allowed" title={reason}>
-                                                    <AlertCircle className="w-5 h-5 mr-2" />
-                                                    Not Eligible
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleApply(company.id)}
-                                                        disabled={applying === company.id}
-                                                        className="flex items-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-all"
-                                                    >
-                                                        {applying === company.id ? 'Processing...' : 'Opt In'}
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleOptOut(company.id)}
-                                                        disabled={applying === company.id}
-                                                        className="flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-all"
-                                                    >
-                                                        {applying === company.id ? 'Processing...' : 'Opt Out'}
-                                                    </button>
-
-                                                </>
-                                            )}
+                                            {/* Opt Out Button (Small Icon) */}
+                                            <button
+                                                onClick={() => handleOptOut(company.id)}
+                                                className="px-3 py-2.5 bg-red-100 text-red-600 font-medium rounded-lg text-sm hover:bg-red-200 transition-colors"
+                                                title="Opt Out"
+                                            >
+                                                <XCircle className="w-4 h-4" />
+                                            </button>
                                         </div>
-                                    </div>
+                                    )}
+
+                                    {/* View Details Button (Right) */}
+                                    <button
+                                        onClick={() => setSelectedCompany(company)}
+                                        className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 font-medium rounded-lg text-sm transition-all shadow-sm"
+                                    >
+                                        View Details
+                                    </button>
                                 </div>
                             </div>
                         );
