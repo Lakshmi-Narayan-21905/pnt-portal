@@ -59,14 +59,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             border: 'border-purple-700/50',
         },
         blue: {
-            sidebarGradient: 'from-blue-900 via-blue-800 to-blue-900',
-            activeItemBg: 'bg-white/20 shadow-inner backdrop-blur-sm border border-white/10',
-            activeItemText: 'text-white font-semibold',
-            accentText: 'text-blue-200',
-            logoBg: 'bg-blue-600',
-            hoverBg: 'hover:bg-white/10 hover:backdrop-blur-sm',
-            lightAccent: 'bg-white/10 backdrop-blur-sm shadow-sm border border-white/20 text-white',
-            border: 'border-blue-700/50',
+            sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
+            activeItemBg: 'bg-brand-ice text-brand-blue border-r-[3px] border-brand-primary rounded-none', // Professional Active Indicator
+            activeItemText: 'text-brand-blue font-bold',
+            accentText: 'text-gray-500', // Subtle subtext
+            logoBg: 'bg-brand-blue', // Solid Brand Blue Logo
+            hoverBg: 'hover:bg-gray-50 hover:text-gray-900', // Subtle gray hover
+            lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200', // Toggle button
+            border: 'border-gray-200',
         },
         green: {
             sidebarGradient: 'from-green-900 via-green-800 to-green-900',
@@ -123,7 +123,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                         </div>
                         {isSidebarOpen && (
                             <div className="flex flex-col overflow-hidden">
-                                <span className="font-bold text-lg text-white leading-tight truncate">{title}</span>
+                                <span className="font-bold text-lg text-gray-900 leading-tight truncate">{title}</span>
                                 <span className={`text-[10px] uppercase tracking-wider ${currentTheme.accentText} font-semibold truncate`}>
                                     {userRoleLabel}
                                 </span>
@@ -134,16 +134,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                     {/* Profile Section (Inside Header Area) */}
                     {isSidebarOpen && (
                         <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 backdrop-blur-sm">
-                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/20 flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-brand-ice flex items-center justify-center overflow-hidden border border-gray-200 flex-shrink-0">
                                 {userProfile?.photoURL ? (
                                     <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-white font-bold text-xs">{userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}</span>
+                                    <span className="text-brand-blue font-bold text-xs">{userProfile?.displayName?.charAt(0) || <User className="w-4 h-4" />}</span>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-white truncate">{userProfile?.displayName || 'User'}</p>
-                                <p className="text-xs text-gray-400 truncate">{userProfile?.email}</p>
+                                <p className="text-sm font-semibold text-gray-900 truncate">{userProfile?.displayName || 'User'}</p>
+                                <p className="text-xs text-gray-500 truncate">{userProfile?.email}</p>
                             </div>
                         </div>
                     )}
@@ -183,8 +183,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                                 className={`
                                     relative flex items-center px-3.5 py-3 rounded-xl transition-all duration-200 group
                                     ${active
-                                        ? `${currentTheme.activeItemBg} ${currentTheme.activeItemText} shadow-md`
-                                        : `text-gray-300 ${currentTheme.hoverBg} hover:text-white`
+                                        ? `${currentTheme.activeItemBg} ${currentTheme.activeItemText} shadow-none`
+                                        : `text-gray-600 ${currentTheme.hoverBg} hover:text-gray-900`
                                     }
                                     ${!isSidebarOpen && 'justify-center px-0'}
                                 `}
@@ -192,7 +192,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                                 <item.icon
                                     className={`
                                         w-5 h-5 flex-shrink-0 transition-transform duration-200
-                                        ${active ? 'text-white' : `text-gray-400 group-hover:text-white`}
+                                        ${active ? 'text-brand-blue' : `text-gray-500 group-hover:text-gray-700`}
                                     `}
                                 />
 
@@ -231,7 +231,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
 
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 bg-transparent h-screen overflow-hidden">
-                <header className="h-16 bg-white/60 backdrop-blur-xl border-b border-white/20 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
+                <header className="h-16 bg-transparent border-none flex items-center justify-between px-6 sticky top-0 z-30 shadow-none">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}

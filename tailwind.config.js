@@ -27,6 +27,15 @@ export default {
                     dim: '#D87E0A',
                     gold: '#DC940F',
                 },
+                brand: {
+                    ice: '#EDF3FB',      // Background
+                    light: '#CAF0F8',    // Light Accent
+                    cyan: '#90E0EF',     // Cyan Accent
+                    primary: '#00B4D8',  // Primary Buttons/Highlights
+                    blue: '#0077B6',     // Secondary Brand
+                    navy: '#03045E',     // Text/Dark Elements
+                    dark: '#023E8A',     // Darker Blue
+                }
             },
         },
     },

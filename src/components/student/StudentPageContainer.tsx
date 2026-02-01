@@ -22,8 +22,8 @@ const StudentPageContainer: React.FC<StudentPageContainerProps> = ({ children, t
                         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">
                             {title.includes('Hello') ? (
                                 <>
-                                    Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{firstName}</span>
-                                    <span className="text-2xl ml-2 inline-block hover:animate-wave origin-bottom-right">👋</span>
+                                    Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-blue">{firstName}</span>
+                                    <span className="text-2xl ml-2 inline-block hover:animate-wave origin-bottom-right"></span>
                                 </>
                             ) : (
                                 title

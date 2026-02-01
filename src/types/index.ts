@@ -35,6 +35,7 @@ export interface Company {
     type: string; // Product, Service, etc.
     targetYear: number;
     salary: string;
+    location?: string; // Added for UI redesign match
     eligibilityCriteria: {
         minCGPA: number;
         backlogsAllowed: number; // Keeping for backward compatibility (Standing Arrears)

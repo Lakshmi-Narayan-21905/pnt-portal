@@ -7,18 +7,8 @@ const AnimatedBackground: React.FC = () => {
             {/* Rich Animated Background */}
             <div className="student-bg-wrapper absolute inset-0 w-full h-full">
                 {/* Floating Squares */}
-                <ul className="bg-circles">
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                </ul>
+                {/* Floating Squares Removed */}
+
 
                 {/* Flowy Waves */}
                 <div className="wave-container">

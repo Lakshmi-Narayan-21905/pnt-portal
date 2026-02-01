@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Company } from '../../types';
-import { Briefcase, Calendar, CheckCircle, XCircle, AlertCircle, Info, Filter } from 'lucide-react';
+import { Briefcase, Calendar, CheckCircle, XCircle, AlertCircle, Info, Filter, Search, RotateCcw, MapPin } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
