@@ -99,6 +99,20 @@ const PlacementRecords: React.FC = () => {
         e.preventDefault();
         setProcessing(true);
         try {
+            // Check for duplicates
+            const isDuplicate = records.some(r =>
+                r.rollNo.toLowerCase() === formData.rollNo.toLowerCase() &&
+                r.companyName.toLowerCase() === formData.companyName.toLowerCase() &&
+                // If editing, exclude the current record itself
+                (!editMode || !selectedRecord || r.id !== selectedRecord.id)
+            );
+
+            if (isDuplicate) {
+                await showAlert('This student is already placed in this company.', 'error', 'Duplicate Record');
+                setProcessing(false);
+                return;
+            }
+
             if (editMode && selectedRecord) {
                 // Update
                 await PlacementRecordService.updateRecord(selectedRecord.id, {
@@ -206,6 +220,17 @@ const PlacementRecords: React.FC = () => {
                             message = 'Not there in company database';
                         } else {
                             finalCompanyName = company.name; // Use canonical name
+
+                            // Check for duplicate placement record
+                            const isDuplicate = records.some(r =>
+                                r.rollNo.toLowerCase() === finalRollNo.toLowerCase() &&
+                                r.companyName.toLowerCase() === finalCompanyName.toLowerCase()
+                            );
+
+                            if (isDuplicate) {
+                                status = 'ERROR';
+                                message = 'Already placed in this company';
+                            }
                         }
                     }
                 }
