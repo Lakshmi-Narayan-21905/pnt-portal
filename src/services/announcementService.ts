@@ -5,7 +5,8 @@ import {
     where,
     getDocs,
     deleteDoc,
-    doc
+    doc,
+    updateDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Announcement } from '../types';
@@ -143,6 +144,22 @@ export const AnnouncementService = {
             await deleteDoc(doc(db, COLLECTION_NAME, id));
         } catch (error) {
             console.error("Error deleting announcement:", error);
+            throw error;
+        }
+    },
+
+    // Update announcement
+    updateAnnouncement: async (id: string, data: Partial<Announcement>) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, id);
+            await updateDoc(docRef, {
+                ...data,
+                // Optionally update date, or create a new 'updatedAt' field. 
+                // Creating 'updatedAt' is safer to preserve original order if sorted by creation date.
+                // For now, let's just update the content.
+            });
+        } catch (error) {
+            console.error("Error updating announcement:", error);
             throw error;
         }
     }

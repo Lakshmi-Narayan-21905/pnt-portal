@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Upload, Download, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Upload, Download, Pencil, Trash2, UserMinus } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -139,6 +139,18 @@ const DeptStudents: React.FC = () => {
                 fetchStudents();
             } catch (error: any) {
                 await showAlert('Failed to delete: ' + error.message, 'error', 'Error');
+            }
+        }
+    };
+
+    const handleDemote = async (student: UserProfile) => {
+        if (await showConfirm(`Remove ${student.displayName} from Coordinator role? They will become a regular student.`, 'Remove Coordinator', 'Yes, Remove Role', 'delete')) {
+            try {
+                await UserService.changeUserRole(student.uid, 'STUDENT');
+                await showAlert('User removed from Coordinator role', 'success', 'Role Updated');
+                fetchStudents();
+            } catch (error: any) {
+                await showAlert('Failed to update role: ' + error.message, 'error', 'Error');
             }
         }
     };
@@ -378,6 +390,15 @@ const DeptStudents: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end space-x-2">
+                                            {student.role === 'CLASS_COORDINATOR' && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDemote(student); }}
+                                                    className="p-1 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded transition"
+                                                    title="Remove Coordinator Role"
+                                                >
+                                                    <UserMinus className="w-4 h-4" />
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleEdit(student); }}
                                                 className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition"

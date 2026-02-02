@@ -55,10 +55,20 @@ const DeptCoordinators: React.FC = () => {
 
         setAssigning(true);
         try {
-            // 1. Remove from Students collection
+            // 1. Demote previous coordinator if exists
+            const currentCoord = coordinators.find(c => c.section === targetSection);
+            if (currentCoord) {
+                // Prevent demoting if we are somehow re-assigning the same person (though UI prevents this)
+                if (currentCoord.uid !== student.uid) {
+                    await UserService.changeUserRole(currentCoord.uid, 'STUDENT');
+                    // We could alert here, but a single success message at the end is cleaner
+                }
+            }
+
+            // 2. Remove new coordinator from Students collection (Promote)
             await UserService.deleteUserProfile(student.uid);
 
-            // 2. Add to Class Coordinators collection
+            // 3. Add to Class Coordinators collection
             // Preserve all student data, just update Role and Section
             const newProfile: UserProfile = {
                 ...student,
@@ -69,14 +79,11 @@ const DeptCoordinators: React.FC = () => {
 
             await UserService.createUserProfile(newProfile);
 
-            // 3. Optional: Demote previous coordinator of this section? 
-            // For now, we just rely on the new one being set. 
-            // If we wanted to clean up, we'd find the old one and set their section to null or move them back to students.
-            // Leaving as is to minimize destructive actions unless requested.
-
-            await showAlert(`Successfully assigned ${student.displayName} as Class Coordinator.`, 'success', 'Success');
+            await showAlert(`Successfully assigned ${student.displayName} as Class Coordinator.${currentCoord ? ' Previous coordinator demoted.' : ''}`, 'success', 'Success');
             setIsSelectModalOpen(false);
-            fetchData();
+            setIsSelectModalOpen(false);
+            // Small delay to ensure Firestore indexes update (if any) or just consistency
+            setTimeout(fetchData, 500);
         } catch (error: any) {
             console.error(error);
             await showAlert('Failed to assign coordinator: ' + error.message, 'error', 'Error');

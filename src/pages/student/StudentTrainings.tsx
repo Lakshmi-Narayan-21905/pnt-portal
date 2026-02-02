@@ -25,10 +25,19 @@ const StudentTrainings: React.FC = () => {
             const data = await TrainingService.getAllTrainings();
 
             // Filter by Department
+            // Filter by Department and Year
             const dept = userProfile?.department;
-            const filteredData = data.filter(t =>
-                !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept)
-            );
+            const currentYearStr = userProfile?.currentYear; // "1st Year", etc.
+            const currentYearNum = currentYearStr ? parseInt(currentYearStr) : 0;
+
+            const filteredData = data.filter(t => {
+                const deptMatch = !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept);
+
+                // Filter by Year of Study
+                const yearMatch = !t.eligibility?.year || !currentYearNum || t.eligibility.year === currentYearNum;
+
+                return deptMatch && yearMatch;
+            });
 
             // Sort by start date (upcoming first)
             filteredData.sort((a, b) => a.startDate - b.startDate);

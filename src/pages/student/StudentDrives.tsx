@@ -3,7 +3,7 @@ import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAlert } from '../../contexts/AlertContext';
 import type { Company } from '../../types';
-import { CheckCircle, XCircle, AlertCircle, Search, RotateCcw, MapPin } from 'lucide-react';
+import { CheckCircle, AlertCircle, Search, RotateCcw, MapPin } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
 import { formatDate } from '../../utils/dateUtils';
 import Modal from '../../components/Modal';
@@ -35,9 +35,17 @@ const StudentDrives: React.FC = () => {
 
             // Filter by Department
             const dept = userProfile?.department;
-            const filteredData = data.filter(c =>
-                !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept)
-            );
+            const passoutYear = userProfile?.passoutYear;
+
+            const filteredData = data.filter(c => {
+                // Filter by Department
+                const deptMatch = !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept);
+
+                // Filter by Target Year (Passout Year)
+                const yearMatch = !c.targetYear || !passoutYear || c.targetYear === passoutYear;
+
+                return deptMatch && yearMatch;
+            });
 
             // Sort by drive date descending
             filteredData.sort((a, b) => b.driveDate - a.driveDate);
@@ -242,7 +250,7 @@ const StudentDrives: React.FC = () => {
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {filteredCompanies.map((company) => {
-                        const { eligible } = checkEligibility(userProfile!, company);
+                        const { eligible, reasons } = checkEligibility(userProfile!, company);
                         const hasApplied = (company.applicants || []).includes(userProfile!.uid);
                         const hasOptedOut = (company.optedOut || []).includes(userProfile!.uid);
                         const isExpired = Date.now() > company.deadline;
@@ -277,10 +285,29 @@ const StudentDrives: React.FC = () => {
                                 <div className="flex-grow"></div>
 
                                 {/* Eligibility Banner */}
-                                <div className={`w-full py-2.5 px-4 rounded-lg mb-6 flex items-center ${eligible ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                    {eligible ? <CheckCircle className="w-4 h-4 mr-2" /> : <AlertCircle className="w-4 h-4 mr-2" />}
-                                    <span className="text-sm font-semibold">{eligible ? 'Eligible' : 'Not Eligible'}</span>
-                                </div>
+                                {eligible ? (
+                                    <div className="w-full py-2.5 px-4 rounded-lg mb-6 flex items-center bg-green-50 text-green-700">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        <span className="text-sm font-semibold">Eligible</span>
+                                    </div>
+                                ) : (
+                                    <div className="w-full py-3 px-4 rounded-lg mb-6 bg-red-50 text-red-700">
+                                        <div className="flex items-center mb-1">
+                                            <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
+                                            <span className="text-sm font-bold text-red-800">Not Eligible</span>
+                                        </div>
+                                        {/* Show Reasons */}
+                                        {reasons && reasons.length > 0 ? (
+                                            <ul className="list-disc pl-8 text-xs text-red-600 space-y-0.5 mt-1">
+                                                {reasons.map((reason, idx) => (
+                                                    <li key={idx}>{reason}</li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-xs text-red-600 ml-6">Criteria not met</p>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Action Buttons - Grid Layout to match Reference */}
                                 <div className="grid grid-cols-2 gap-4">
@@ -312,13 +339,13 @@ const StudentDrives: React.FC = () => {
                                                 {applying === company.id ? '...' : 'Opt In'}
                                             </button>
 
-                                            {/* Opt Out Button (Small Icon) */}
+                                            {/* Opt Out Button (Explicit Text) */}
                                             <button
                                                 onClick={() => handleOptOut(company.id)}
-                                                className="px-3 py-2.5 bg-red-100 text-red-600 font-medium rounded-lg text-sm hover:bg-red-200 transition-colors"
-                                                title="Opt Out"
+                                                className="px-3 py-2.5 bg-red-50 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-colors border border-red-100 whitespace-nowrap"
+                                                title="Opt Out of this drive"
                                             >
-                                                <XCircle className="w-4 h-4" />
+                                                Opt Out
                                             </button>
                                         </div>
                                     )}

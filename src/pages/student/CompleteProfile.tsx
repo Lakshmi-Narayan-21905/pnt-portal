@@ -18,8 +18,12 @@ const CompleteProfile: React.FC = () => {
         tenthMark: userProfile?.tenthMark?.toString() || '',
         twelfthMark: userProfile?.twelfthMark?.toString() || '',
         standingArreas: userProfile?.standingArreas?.toString() || '0',
-        historyOfArreas: userProfile?.historyOfArreas?.toString() || '0'
+        historyOfArreas: userProfile?.historyOfArreas?.toString() || '0',
+        passoutYear: userProfile?.passoutYear?.toString() || new Date().getFullYear().toString(),
+        currentYear: userProfile?.currentYear || '1st Year'
     });
+
+    const currentYearNum = new Date().getFullYear();
 
     const validateRollNo = (roll: string) => {
         // Format: 2 digits + 3 letters + 3 digits (e.g. 23csr118) -> Total 8 chars
@@ -51,6 +55,8 @@ const CompleteProfile: React.FC = () => {
                 twelfthMark: parseFloat(formData.twelfthMark),
                 standingArreas: parseInt(formData.standingArreas),
                 historyOfArreas: parseInt(formData.historyOfArreas),
+                passoutYear: parseInt(formData.passoutYear),
+                currentYear: formData.currentYear,
                 profileCompleted: true,
                 profileStatus: 'APPROVAL_PENDING'
             });
@@ -110,6 +116,33 @@ const CompleteProfile: React.FC = () => {
                                 <input type="tel" required className="mt-1 block w-full input-field" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                             </div>
 
+                            <div className="sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700">Passout Year</label>
+                                <select
+                                    required
+                                    className="mt-1 block w-full input-field"
+                                    value={formData.passoutYear}
+                                    onChange={e => setFormData({ ...formData, passoutYear: e.target.value })}
+                                >
+                                    <option value={currentYearNum}>{currentYearNum} </option>
+                                    <option value={currentYearNum + 1}>{currentYearNum + 1} </option>
+                                </select>
+                            </div>
+
+                            <div className="sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700">Current Study Year</label>
+                                <select
+                                    required
+                                    className="mt-1 block w-full input-field"
+                                    value={formData.currentYear}
+                                    onChange={e => setFormData({ ...formData, currentYear: e.target.value })}
+                                >
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                </select>
+                            </div>
                             <div className="sm:col-span-6">
                                 <label className="block text-sm font-medium text-gray-700">Address</label>
                                 <textarea required rows={3} className="mt-1 block w-full input-field" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
@@ -140,6 +173,8 @@ const CompleteProfile: React.FC = () => {
                                 <label className="block text-sm font-medium text-gray-700">History of Arrears</label>
                                 <input type="number" required className="mt-1 block w-full input-field" value={formData.historyOfArreas} onChange={e => setFormData({ ...formData, historyOfArreas: e.target.value })} />
                             </div>
+
+
                         </div>
 
                         <button

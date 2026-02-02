@@ -96,6 +96,16 @@ const StudentProfile: React.FC = () => {
                                 <dt className="font-medium text-gray-500 mb-1">History of Arrears</dt>
                                 <dd className="text-gray-900">{userProfile?.historyOfArreas || 0}</dd>
                             </div>
+
+                            {/* Row 3 */}
+                            <div className="px-6 py-4 sm:border-t sm:border-r border-gray-100">
+                                <dt className="font-medium text-gray-500 mb-1">Passout Year</dt>
+                                <dd className="text-gray-900 font-semibold">{userProfile?.passoutYear || '-'}</dd>
+                            </div>
+                            <div className="px-6 py-4 sm:border-t lg:col-span-3 border-gray-100">
+                                <dt className="font-medium text-gray-500 mb-1">Current Year</dt>
+                                <dd className="text-gray-900 font-semibold">{userProfile?.currentYear || '-'}</dd>
+                            </div>
                         </dl>
                     </div>
                 </div>

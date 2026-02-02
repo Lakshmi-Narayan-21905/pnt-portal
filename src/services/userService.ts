@@ -148,5 +148,36 @@ export const UserService = {
             // Don't throw, just log, so bulk upload continues
             return false;
         }
+    },
+
+    // Change user role (Move doc between collections)
+    changeUserRole: async (uid: string, newRole: UserRole) => {
+        try {
+            // 1. Find current user doc
+            const currentDoc = await UserService.findUserDoc(uid);
+            if (!currentDoc) throw new Error("User not found");
+
+            const userData = currentDoc.data;
+            const oldCollectionRef = currentDoc.ref;
+
+            // 2. Prepare new data
+            const newData: UserProfile = {
+                ...userData,
+                role: newRole
+            };
+
+            // 3. Create in new collection
+            const newCollectionName = ROLE_COLLECTIONS[newRole];
+            if (!newCollectionName) throw new Error("Invalid new role");
+
+            await setDoc(doc(db, newCollectionName, uid), newData);
+
+            // 4. Delete from old collection
+            await deleteDoc(oldCollectionRef);
+
+        } catch (error) {
+            console.error("Error changing user role:", error);
+            throw error;
+        }
     }
 };

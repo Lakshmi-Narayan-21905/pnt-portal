@@ -23,11 +23,13 @@ export interface UserProfile {
     twelfthMark?: number;
     standingArreas?: number;
     historyOfArreas?: number;
+    passoutYear?: number;
+    currentYear?: string;
     profileCompleted: boolean;
     profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
 
     placementStatus?: 'PLACED' | 'UNPLACED' | 'OFFERED';
-    photoURL?: string;
+
 
     createdAt: number;
 }
