@@ -47,6 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             border: 'border-gray-200',
+            pageBg: 'bg-brand-purple-ice/30'
         },
         blue: {
             sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
@@ -57,6 +58,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900', // Subtle gray hover
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200', // Toggle button
             border: 'border-gray-200',
+            pageBg: 'bg-brand-ice/50'
         },
         green: {
             sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
@@ -67,6 +69,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900', // Subtle gray hover
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200', // Toggle button
             border: 'border-gray-200',
+            pageBg: 'bg-brand-green-ice/30'
         },
         lavender: {
             sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
@@ -77,6 +80,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             border: 'border-gray-200',
+            pageBg: 'bg-brand-lavender-ice/30'
         },
         orange: {
             sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
@@ -87,6 +91,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             border: 'border-gray-200',
+            pageBg: 'bg-brand-orange-ice/30'
         },
         indigo: {
             sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
@@ -97,6 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
             lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             border: 'border-gray-200',
+            pageBg: 'bg-brand-indigo-ice/30'
         },
         amber: {
             sidebarGradient: 'from-stone-900 via-stone-800 to-stone-900',
@@ -107,13 +113,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/10 hover:backdrop-blur-sm',
             lightAccent: 'bg-white/10 backdrop-blur-sm shadow-sm border border-white/20 text-white',
             border: 'border-stone-700/50',
+            pageBg: 'bg-stone-50'
         }
     };
 
     const currentTheme = themeConfig[theme];
 
     return (
-        <div className="flex h-screen font-sans overflow-hidden relative">
+        <div className={`flex h-screen font-sans overflow-hidden relative ${currentTheme.pageBg}`}>
 
             {/* Mobile Overlay */}
             {isMobileMenuOpen && (
@@ -136,7 +143,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className={`
-                        absolute -right-3 top-20 z-50 p-1 rounded-full bg-white border shadow-md transition-all duration-200
+                        absolute -right-3 top-9 z-50 p-1 rounded-full bg-white border shadow-md transition-all duration-200
                         ${currentTheme.border} hover:bg-gray-50 text-gray-400 hover:text-gray-600 hidden md:flex items-center justify-center
                     `}
                 >

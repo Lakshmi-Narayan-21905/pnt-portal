@@ -18,6 +18,7 @@ const StudentDrives: React.FC = () => {
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
     // Filters
+    const [searchTerm, setSearchTerm] = useState<string>(''); // New state for text search
     const [roleFilter, setRoleFilter] = useState<string>('');
     const [minSalaryFilter, setMinSalaryFilter] = useState<string>('');
     const [eligibilityFilter, setEligibilityFilter] = useState<'all' | 'eligible' | 'not_eligible'>('all');
@@ -92,9 +93,45 @@ const StudentDrives: React.FC = () => {
     };
 
     // Use utility instead of local function
-    // const isEligible = ... (removed)
+    const filterCompanies = (company: Company) => {
+        // 1. Text Search (Name or Role)
+        if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            const nameMatch = company.name.toLowerCase().includes(searchLower);
+            const roleMatch = company.roles.some(r => r.toLowerCase().includes(searchLower));
+            if (!nameMatch && !roleMatch) return false;
+        }
+
+        // 2. Role Dropdown Filter
+        if (roleFilter && !company.roles.includes(roleFilter)) return false;
+
+        // 3. Salary Filter
+        if (minSalaryFilter) {
+            const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
+            const minSalary = parseFloat(minSalaryFilter) || 0;
+            if (companySalary < minSalary) return false;
+        }
+
+        // 4. Eligibility Filter
+        const { eligible } = checkEligibility(userProfile!, company);
+        if (eligibilityFilter === 'eligible' && !eligible) return false;
+        if (eligibilityFilter === 'not_eligible' && eligible) return false;
+
+        // 5. Status Filter
+        const hasApplied = company.applicants?.includes(userProfile?.uid || '');
+        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
+
+        if (statusFilter === 'opted_in' && !hasApplied) return false;
+        if (statusFilter === 'opted_out' && !hasOptedOut) return false;
+        if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
+
+        return true;
+    };
+
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading drives...</div>;
+
+    const filteredCompanies = companies.filter(filterCompanies);
 
     return (
         <StudentPageContainer title="Drives & Opportunities" subtitle="Explore and apply for campus placement drives">
@@ -108,8 +145,8 @@ const StudentDrives: React.FC = () => {
                             type="text"
                             placeholder="Search by company or role..."
                             className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary transition-all text-gray-700"
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <Search className="absolute left-3.5 top-3.5 w-4.5 h-4.5 text-gray-400 group-focus-within:text-brand-primary transition-colors" />
                     </div>
@@ -123,7 +160,7 @@ const StudentDrives: React.FC = () => {
                         <select
                             className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary appearance-none cursor-pointer"
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            value={roleFilter === '' ? '' : (JOB_ROLES.includes(roleFilter) ? roleFilter : '')}
+                            value={roleFilter}
                         >
                             <option value="">All Roles</option>
                             {JOB_ROLES.map(role => (
@@ -177,6 +214,7 @@ const StudentDrives: React.FC = () => {
                     <div className="flex items-end">
                         <button
                             onClick={() => {
+                                setSearchTerm('');
                                 setRoleFilter('');
                                 setMinSalaryFilter('');
                                 setEligibilityFilter('all');
@@ -192,33 +230,7 @@ const StudentDrives: React.FC = () => {
             </div>
 
             {/* Drives Grid - Reference Design Match */}
-            {/* Drives Grid - Reference Design Match */}
-            {companies.filter(company => {
-                // Role Filter
-                if (roleFilter && !company.roles.includes(roleFilter)) return false;
-
-                // Salary Filter
-                if (minSalaryFilter) {
-                    const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
-                    const minSalary = parseFloat(minSalaryFilter) || 0;
-                    if (companySalary < minSalary) return false;
-                }
-
-                // Eligibility Filter
-                const { eligible } = checkEligibility(userProfile!, company);
-                if (eligibilityFilter === 'eligible' && !eligible) return false;
-                if (eligibilityFilter === 'not_eligible' && eligible) return false;
-
-                // Status Filter
-                const hasApplied = company.applicants?.includes(userProfile?.uid || '');
-                const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-
-                if (statusFilter === 'opted_in' && !hasApplied) return false;
-                if (statusFilter === 'opted_out' && !hasOptedOut) return false;
-                if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
-
-                return true;
-            }).length === 0 ? (
+            {filteredCompanies.length === 0 ? (
                 <div className="text-center py-20 bg-white/70 backdrop-blur-xl rounded-2xl border border-white/60 shadow-sm">
                     <div className="bg-gray-50/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
                         <Search className="w-8 h-8 text-gray-400" />
@@ -228,24 +240,7 @@ const StudentDrives: React.FC = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {companies.filter(company => {
-                        // Role Filter
-                        if (roleFilter && !company.roles.includes(roleFilter)) return false;
-                        if (minSalaryFilter) {
-                            const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
-                            const minSalary = parseFloat(minSalaryFilter) || 0;
-                            if (companySalary < minSalary) return false;
-                        }
-                        const { eligible } = checkEligibility(userProfile!, company);
-                        if (eligibilityFilter === 'eligible' && !eligible) return false;
-                        if (eligibilityFilter === 'not_eligible' && eligible) return false;
-                        const hasApplied = company.applicants?.includes(userProfile?.uid || '');
-                        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-                        if (statusFilter === 'opted_in' && !hasApplied) return false;
-                        if (statusFilter === 'opted_out' && !hasOptedOut) return false;
-                        if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
-                        return true;
-                    }).map((company) => {
+                    {filteredCompanies.map((company) => {
                         const { eligible, reason } = checkEligibility(userProfile!, company);
                         const hasApplied = (company.applicants || []).includes(userProfile!.uid);
                         const hasOptedOut = (company.optedOut || []).includes(userProfile!.uid);
