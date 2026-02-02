@@ -5,6 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { UserService } from '../services/userService';
 import type { UserProfile } from '../types';
+import { realtimeListenerService } from '../services/realtimeListenerService';
 
 interface AuthContextType {
     currentUser: User | null;
@@ -50,6 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     useEffect(() => {
+        // Initialize real-time listeners for cache invalidation
+        realtimeListenerService.initializeAllListeners();
+        
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
             if (user) {
@@ -61,7 +65,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setLoading(false);
         });
 
-        return unsubscribe;
+        return () => {
+            unsubscribe();
+            // Clean up listeners when app unmounts
+            realtimeListenerService.stopAllListeners();
+        };
     }, []);
 
     const logout = async () => {

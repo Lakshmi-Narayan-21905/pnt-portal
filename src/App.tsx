@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageUsers from './pages/admin/ManageUsers';
 import AdminLayout from './pages/admin/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import CacheMonitor from './components/CacheMonitor';
 
 import PlacementHeadLayout from './pages/placement/PlacementHeadLayout';
 import PlacementHeadDashboard from './pages/placement/PlacementHeadDashboard';
@@ -46,6 +47,9 @@ const App: React.FC = () => {
   return (
     <Router>
       <AlertProvider>
+        {/* Cache Monitor - floating button available on all pages */}
+        <CacheMonitor />
+        
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
