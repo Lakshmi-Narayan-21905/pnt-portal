@@ -4,7 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { UserService } from '../../services/userService';
 import { CompanyService } from '../../services/companyService';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const DeptCoordinatorDashboard: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [stats, setStats] = useState({
         totalStudents: 0,
@@ -47,7 +50,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group">
+                <div className={`bg-white border border-l-4 ${theme.borderLeft} p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group`}>
                     <div className="p-4 bg-purple-50 rounded-xl shadow-sm mr-4 group-hover:bg-purple-100 transition-colors">
                         <Users className="w-8 h-8 text-purple-600" />
                     </div>
@@ -57,7 +60,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group">
+                <div className={`bg-white border border-l-4 ${theme.borderLeft} p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group`}>
                     <div className="p-4 bg-purple-50 rounded-xl shadow-sm mr-4 group-hover:bg-purple-100 transition-colors">
                         <Building2 className="w-8 h-8 text-purple-600" />
                     </div>
@@ -67,7 +70,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group">
+                <div className={`bg-white border border-l-4 ${theme.borderLeft} p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group`}>
                     <div className="p-4 bg-purple-50 rounded-xl shadow-sm mr-4 group-hover:bg-purple-100 transition-colors">
                         <GraduationCap className="w-8 h-8 text-purple-600" />
                     </div>

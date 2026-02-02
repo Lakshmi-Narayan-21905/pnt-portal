@@ -35,7 +35,10 @@ const STATUS_COLORS = {
     completed: '#6B7280' // Gray 500
 };
 
+import { useTheme } from '../../hooks/useTheme';
+
 const TrainingHeadDashboard: React.FC = () => {
+    const theme = useTheme();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
@@ -216,7 +219,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={CheckCircle2}
                     color="text-emerald-600"
                     bg="bg-emerald-50"
-                    border="border-emerald-100"
+                    border={`${theme.borderLeft} border-emerald-100`}
                 />
                 <KPICard
                     title="Upcoming Programs"
@@ -224,7 +227,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={Clock}
                     color="text-blue-600"
                     bg="bg-blue-50"
-                    border="border-blue-100"
+                    border={`${theme.borderLeft} border-blue-100`}
                 />
                 <KPICard
                     title="Total Trainings"
@@ -232,7 +235,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={GraduationCap}
                     color="text-purple-600"
                     bg="bg-purple-50"
-                    border="border-purple-100"
+                    border={`${theme.borderLeft} border-purple-100`}
                 />
                 <KPICard
                     title="Unique Participants"
@@ -240,7 +243,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={Users}
                     color="text-orange-600"
                     bg="bg-orange-50"
-                    border="border-orange-100"
+                    border={`${theme.borderLeft} border-orange-100`}
                 />
             </div>
 
@@ -455,7 +458,7 @@ interface KPICardProps {
 }
 
 const KPICard: React.FC<KPICardProps> = ({ title, value, icon: Icon, color, bg, border }) => (
-    <div className={`p-6 rounded-xl shadow-md border ${border} bg-white/70 backdrop-blur-md hover:shadow-lg transition-all duration-300 group`}>
+    <div className={`p-6 rounded-xl shadow-md border ${border} border-l-4 bg-white/70 backdrop-blur-md hover:shadow-lg transition-all duration-300 group`}>
         <div className="flex items-start justify-between mb-4">
             <div className={`p-3 rounded-xl bg-white shadow-sm transition-transform group-hover:scale-110`}>
                 <Icon className={`w-6 h-6 ${color}`} />
