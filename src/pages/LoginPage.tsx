@@ -32,32 +32,37 @@ const LoginPage: React.FC = () => {
 
     useEffect(() => {
         if (userProfile) {
-            // Redirect based on role
+            // Check if already on the target path to prevent loops
+            const currentPath = window.location.pathname;
+            let targetPath = '/';
+
             switch (userProfile.role) {
                 case 'ADMIN':
-                    navigate('/admin/dashboard');
+                    targetPath = '/admin/dashboard';
                     break;
                 case 'PLACEMENT_HEAD':
-                    navigate('/placement-head/dashboard');
+                    targetPath = '/placement-head/dashboard';
                     break;
                 case 'TRAINING_HEAD':
-                    navigate('/training-head/dashboard');
+                    targetPath = '/training-head/dashboard';
                     break;
                 case 'DEPT_COORDINATOR':
-                    navigate('/dept-coordinator/dashboard');
+                    targetPath = '/dept-coordinator/dashboard';
                     break;
                 case 'CLASS_COORDINATOR':
-                    navigate('/class-coordinator/dashboard');
+                    targetPath = '/class-coordinator/dashboard';
                     break;
                 case 'STUDENT':
                     if (!userProfile.profileCompleted) {
-                        navigate('/student/complete-profile');
+                        targetPath = '/student/complete-profile';
                     } else {
-                        navigate('/student/dashboard');
+                        targetPath = '/student/dashboard';
                     }
                     break;
-                default:
-                    navigate('/');
+            }
+
+            if (currentPath !== targetPath && !currentPath.startsWith(targetPath)) {
+                navigate(targetPath, { replace: true });
             }
         }
     }, [userProfile, navigate]);
