@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, LogOut, ChevronLeft, ChevronRight, Bell, Search, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import AnimatedBackground from './AnimatedBackground';
 
 interface NavigationItem {
     label: string;
@@ -40,14 +39,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
     const themeConfig = {
 
         purple: {
-            sidebarGradient: 'from-purple-900 via-purple-800 to-purple-900',
-            activeItemBg: 'bg-white/20 shadow-inner backdrop-blur-sm border border-white/10',
-            activeItemText: 'text-white font-semibold',
-            accentText: 'text-purple-200',
-            logoBg: 'bg-purple-600',
-            hoverBg: 'hover:bg-white/10 hover:backdrop-blur-sm',
-            lightAccent: 'bg-white/10 backdrop-blur-sm shadow-sm border border-white/20 text-white',
-            border: 'border-purple-700/50',
+            sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
+            activeItemBg: 'bg-brand-purple-ice text-brand-purple-deep border-r-[3px] border-brand-purple-primary rounded-none',
+            activeItemText: 'text-brand-purple-deep font-bold',
+            accentText: 'text-gray-500',
+            logoBg: 'bg-brand-purple-primary', // Solid Brand Purple Logo
+            hoverBg: 'hover:bg-gray-50 hover:text-gray-900',
+            lightAccent: 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+            border: 'border-gray-200',
         },
         blue: {
             sidebarGradient: 'bg-white border-r border-gray-200 shadow-sm', // Clean White Sidebar
@@ -115,7 +114,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
 
     return (
         <div className="flex h-screen font-sans overflow-hidden relative">
-            <AnimatedBackground />
 
             {/* Mobile Overlay */}
             {isMobileMenuOpen && (
@@ -128,12 +126,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed md:relative z-50 h-[calc(100vh-2rem)] my-4 ml-4 flex flex-col transition-all duration-300 ease-in-out shadow-lg rounded-2xl overflow-hidden
+                    fixed md:relative z-50 h-[calc(100vh-2rem)] my-4 ml-4 flex flex-col transition-all duration-300 ease-in-out shadow-lg rounded-2xl
                     ${isSidebarOpen ? 'w-72' : 'w-20'} 
                     ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     bg-gradient-to-b ${currentTheme.sidebarGradient} text-gray-100
                 `}
             >
+                {/* Sidebar Toggle Button (Absolute Positioned on Right Edge) */}
+                <button
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className={`
+                        absolute -right-3 top-20 z-50 p-1 rounded-full bg-white border shadow-md transition-all duration-200
+                        ${currentTheme.border} hover:bg-gray-50 text-gray-400 hover:text-gray-600 hidden md:flex items-center justify-center
+                    `}
+                >
+                    {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </button>
+
                 {/* 1. Header with Profile (Top Aligned) */}
                 <div className={`flex flex-col border-b ${currentTheme.border} relative transition-all duration-300 ${isSidebarOpen ? 'p-6' : 'p-4 items-center'}`}>
 
@@ -255,12 +264,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                         >
                             <Menu className="w-6 h-6" />
                         </button>
-                        <button
-                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className={`hidden md:flex p-2 hover:text-white ${currentTheme.lightAccent} rounded-xl transition-all duration-200`}
-                        >
-                            {isSidebarOpen ? <ChevronLeft className="w-5 h-5 text-gray-600" /> : <ChevronRight className="w-5 h-5 text-gray-600" />}
-                        </button>
+
                     </div>
                 </header>
 
@@ -268,7 +272,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                     <Outlet />
                 </main>
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -14,6 +14,40 @@ import StudentPageContainer from '../../components/student/StudentPageContainer'
 import { Trophy } from 'lucide-react';
 
 
+// StatCard Component
+interface StatCardProps {
+    title: string;
+    count: number;
+    subtitle: string;
+    icon: React.ElementType;
+    delay: number;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon, delay }) => (
+    <div
+        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+        style={{ animation: `fadeInUp 0.5s ease-out ${delay}s backwards` }}
+    >
+        <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-indigo-50 rounded-xl">
+                <Icon className="w-6 h-6 text-indigo-600" />
+            </div>
+            <span className="flex items-center text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                +12% <span className="ml-1 text-gray-400 font-normal">vs last month</span>
+            </span>
+        </div>
+        <div>
+            <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
+            <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-gray-800">
+                    <AnimatedCounter value={count} />
+                </span>
+            </div>
+            <p className="text-xs text-gray-400 mt-2 font-medium">{subtitle}</p>
+        </div>
+    </div>
+);
+
 const StudentDashboard: React.FC = () => {
     const { userProfile } = useAuth();
     const navigate = useNavigate();
@@ -115,55 +149,6 @@ const StudentDashboard: React.FC = () => {
 
         fetchStats();
     }, [userProfile, placementFilter, trainingFilter]);
-
-
-    return (
-        <div className="">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">Welcome Back, {userProfile?.displayName?.split(' ')[0]}!</h1>
-                <p className="text-gray-600 mt-2">Here's an overview of your placement journey.</p>
-            </div>
-
-            {userProfile?.placementStatus === 'PLACED' && (
-                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-8 rounded-r shadow-sm flex items-center">
-                    <div className="bg-green-200 rounded-full p-2 mr-4">
-                        <Trophy className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-lg">Congratulations! You are Placed!</h3>
-                        <p className="text-sm">Great job on securing a placement. We are proud of your achievement!</p>
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Active Drives</h3>
-                    <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.activeDrives}</p>
-                    <p className="text-xs text-gray-400 mt-1">Companies hiring now</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">My Applications</h3>
-                    <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.myApplications}</p>
-                    <p className="text-xs text-gray-400 mt-1">Applied so far</p>
-
-                </div>
-
-                <div className="flex items-center gap-3 my-4">
-                    <span className="text-4xl font-extrabold text-gray-800 tracking-tight">
-                        <AnimatedCounter value={count} />
-                    </span>
-                </div>
-
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent my-2"></div>
-
-                <p className="text-xs text-gray-500 font-medium flex items-center justify-between group-hover:text-blue-700 transition-colors">
-                    {subtitle}
-                    <ChevronRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-blue-500" />
-                </p>
-            </div>
-        </div>
-    );
 
     return (
         <StudentPageContainer

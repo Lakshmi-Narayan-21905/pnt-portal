@@ -85,32 +85,6 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Recent Activity Section */}
-            <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800">Recent Company Drives</h2>
-                </div>
-                <div className="p-6">
-                    {recentDrives.length === 0 ? (
-                        <div className="text-center text-gray-500">No recent activity found.</div>
-                    ) : (
-                        <div className="space-y-4">
-                            {recentDrives.map(drive => (
-                                <div key={drive.id} className="flex justify-between items-center border-b border-gray-50 pb-2 last:border-0">
-                                    <div>
-                                        <h4 className="font-medium text-gray-800">{drive.name}</h4>
-                                        <p className="text-sm text-gray-500">{drive.roles.join(', ')}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-sm font-medium text-indigo-600 block">{new Date(drive.driveDate).toLocaleDateString()}</span>
-                                        <span className="text-xs text-gray-400">{drive.type}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
         </div>
     );
 };

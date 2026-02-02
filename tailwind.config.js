@@ -45,6 +45,13 @@ export default {
                     deep: '#047857',     // Deep Green Text
                     dark: '#064E3B',     // Darkest Green
                 },
+                'brand-purple': {
+                    ice: '#F3E8FF',      // Very Light Purple
+                    light: '#E9D5FF',    // Light Purple
+                    primary: '#9333EA',  // Purple 600
+                    deep: '#6B21A8',     // Purple 800
+                    dark: '#581C87',     // Purple 900
+                },
                 'brand-lavender': {
                     ice: '#F8F7FC',      // Very Light Lavender Background
                     light: '#EBE9F7',    // Light Lavender Accent
