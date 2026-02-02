@@ -1,8 +1,7 @@
 import { auth } from '../config/firebase';
 
-// Production Cloud Functions URL
-// For local development, switch to: http://127.0.0.1:5001/test-b6e4c/us-central1/api
-const API_BASE_URL = "https://us-central1-test-b6e4c.cloudfunctions.net/api";
+// Use environment variable or fallback to direct Cloud Functions URL for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://us-central1-test-b6e4c.cloudfunctions.net/api";
 
 export const apiRequest = async <T>(endpoint: string, method: string = 'GET', body?: any): Promise<T> => {
     let token = null;
