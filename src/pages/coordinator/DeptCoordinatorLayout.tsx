@@ -12,6 +12,7 @@ const DeptCoordinatorLayout: React.FC = () => {
         { icon: Users, label: 'Class Coordinators', path: '/dept-coordinator/coordinators' },
         { icon: Building2, label: 'Companies', path: '/dept-coordinator/companies' },
         { icon: GraduationCap, label: 'Trainings', path: '/dept-coordinator/trainings' },
+        { icon: LayoutDashboard, label: 'Announcements', path: '/dept-coordinator/announcements' }, // Using existing icon for speed
     ];
 
     return (

@@ -7,7 +7,8 @@ const StudentLayout: React.FC = () => {
         { icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
         { icon: User, label: 'My Profile', path: '/student/profile' },
         { icon: Briefcase, label: 'Company Drives', path: '/student/drives' }, // Placeholder for now
-        { icon: GraduationCap, label: 'My Trainings', path: '/student/trainings' }, // Placeholder for now
+        { icon: GraduationCap, label: 'My Trainings', path: '/student/trainings' },
+        { icon: LayoutDashboard, label: 'Announcements', path: '/student/announcements' },
     ];
 
     return (

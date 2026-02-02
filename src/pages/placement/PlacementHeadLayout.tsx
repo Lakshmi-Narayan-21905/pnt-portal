@@ -14,6 +14,7 @@ const PlacementHeadLayout: React.FC = () => {
         { path: '/placement-head/coordinators', label: 'Coordinators', icon: Users },
         { path: '/placement-head/companies', label: 'Company Drives', icon: Building2 },
         { path: '/placement-head/students', label: 'Students', icon: Briefcase },
+        { path: '/placement-head/announcements', label: 'Announcements', icon: ClipboardList }, // Using ClipboardList as substitute or import Bell
         { path: '/placement-head/records', label: 'Placement Records', icon: ClipboardList },
     ];
 

@@ -40,6 +40,8 @@ import CompleteProfile from './pages/student/CompleteProfile';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentDrives from './pages/student/StudentDrives';
 import StudentTrainings from './pages/student/StudentTrainings';
+import ManageAnnouncements from './components/announcements/ManageAnnouncements';
+import StudentAnnouncements from './components/announcements/StudentAnnouncements';
 
 const App: React.FC = () => {
   return (
@@ -58,6 +60,8 @@ const App: React.FC = () => {
           </Route>
         </Route>
 
+
+
         {/* Placement Head Routes */}
         <Route element={<ProtectedRoute allowedRoles={['PLACEMENT_HEAD']} />}>
           <Route path="/placement-head" element={<PlacementHeadLayout />}>
@@ -67,6 +71,7 @@ const App: React.FC = () => {
             <Route path="companies/:companyId" element={<CompanyDetails />} />
             <Route path="students" element={<PlacementStudents />} />
             <Route path="records" element={<PlacementRecords />} />
+            <Route path="announcements" element={<ManageAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>
@@ -78,6 +83,7 @@ const App: React.FC = () => {
             <Route path="trainings/:trainingId" element={<TrainingDetails />} />
             <Route path="coordinators" element={<TrainingCoordinators />} />
             <Route path="students" element={<TrainingStudents />} />
+            <Route path="announcements" element={<ManageAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>
@@ -88,11 +94,11 @@ const App: React.FC = () => {
             <Route path="dashboard" element={<DeptCoordinatorDashboard />} />
             <Route path="students" element={<DeptStudents />} />
             <Route path="coordinators" element={<DeptCoordinators />} />
-            <Route path="coordinators" element={<DeptCoordinators />} />
             <Route path="companies" element={<DeptPlacements />} />
             <Route path="companies/:companyId" element={<CompanyDetails />} />
             <Route path="trainings" element={<DeptTrainings />} />
             <Route path="trainings/:trainingId" element={<TrainingDetails />} />
+            <Route path="announcements" element={<ManageAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>
@@ -114,6 +120,7 @@ const App: React.FC = () => {
             <Route path="profile" element={<StudentProfile />} />
             <Route path="drives" element={<StudentDrives />} />
             <Route path="trainings" element={<StudentTrainings />} />
+            <Route path="announcements" element={<StudentAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>

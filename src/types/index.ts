@@ -81,3 +81,14 @@ export interface PlacementRecord {
     academicYear: string; // e.g. "2023-2027" or just "2026"
     createdAt?: number;
 }
+
+export interface Announcement {
+    id: string;
+    title: string;
+    content: string;
+    date: number; // Stored as timestamp
+    authorId: string;
+    authorRole: UserRole;
+    authorName: string;
+    targetDept: string; // 'all' or specific Dept like 'CSE'
+}
