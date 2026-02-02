@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Calendar } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
+import { useAuth } from '../../contexts/AuthContext';
 import type { Training } from '../../types';
+import { useTheme } from '../../hooks/useTheme';
 
 const DeptTrainings: React.FC = () => {
+    const theme = useTheme();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { userProfile } = useAuth();
 
     const fetchTrainings = async () => {
         setLoading(true);
         try {
             const data = await TrainingService.getAllTrainings();
-            setTrainings(data);
+            // Filter trainings to only show those with coordinator's department in eligible branches
+            const filteredData = data.filter(training => {
+                const branches = training.eligibility?.branches || [];
+                // Show if no branches specified (open to all) or if coordinator's dept is in branches
+                return branches.length === 0 || (userProfile?.department && branches.includes(userProfile.department));
+            });
+            setTrainings(filteredData);
         } catch (error) {
             console.error(error);
         } finally {
@@ -42,28 +52,28 @@ const DeptTrainings: React.FC = () => {
                         <div
                             key={training.id}
                             onClick={() => handleCardClick(training)}
-                            className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-lavender-primary/5 transition cursor-pointer relative group"
+                            className={`bg-white border ${theme.border} rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 cursor-pointer relative group`}
                         >
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-brand-lavender-light text-brand-lavender-deep px-2 py-1 rounded">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
                                 Click for details
                             </div>
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-brand-lavender-ice rounded-lg border border-brand-lavender-lilac/20">
-                                    <GraduationCap className="w-6 h-6 text-brand-lavender-primary" />
+                                <div className="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors">
+                                    <GraduationCap className="w-6 h-6 text-purple-600" />
                                 </div>
-                                <span className="px-2 py-1 text-xs rounded-full font-medium bg-brand-lavender-light text-brand-lavender-deep">
+                                <span className="px-2 py-1 text-xs rounded-full font-medium bg-purple-50 text-purple-700 border border-purple-100">
                                     Year {training.eligibility.year}
                                 </span>
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 mb-1">{training.title}</h3>
                             <p className="text-gray-500 text-sm mb-4">by {training.trainer}</p>
 
-                            <div className="flex justify-between items-center border-t border-brand-lavender-lilac/20 pt-4">
+                            <div className="flex justify-between items-center border-t border-purple-50 pt-4">
                                 <div className="flex items-center text-sm text-gray-500">
-                                    <Calendar className="w-4 h-4 mr-2 text-brand-lavender-purple" />
+                                    <Calendar className="w-4 h-4 mr-2 text-purple-400" />
                                     {new Date(training.startDate).toLocaleDateString()}
                                 </div>
-                                <div className="text-sm font-medium text-brand-lavender-deep bg-brand-lavender-light px-3 py-1 rounded-full">
+                                <div className="text-sm font-medium text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
                                     {training.participants?.length || 0} Reg.
                                 </div>
                             </div>

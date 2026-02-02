@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Upload, Trash2, Search, FileText } from 'lucide-react';
+import { useAlert } from '../../contexts/AlertContext';
+import { Plus, Upload, Trash2, Search, FileText, Pencil } from 'lucide-react';
 import { PlacementRecordService } from '../../services/placementRecordService';
 import { UserService } from '../../services/userService';
-import type { PlacementRecord } from '../../types';
+import { CompanyService } from '../../services/companyService';
+import type { PlacementRecord, UserProfile, Company } from '../../types';
 import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
 import { DEPARTMENTS } from '../../utils/constants';
@@ -17,14 +19,25 @@ interface PreviewRecord {
     message?: string;
 }
 
+import { useTheme } from '../../hooks/useTheme';
+
 const PlacementRecords: React.FC = () => {
+    const theme = useTheme();
+    const { showAlert, showConfirm } = useAlert();
     const [records, setRecords] = useState<PlacementRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Form Data Sources
+    const [students, setStudents] = useState<UserProfile[]>([]);
+    const [companies, setCompanies] = useState<Company[]>([]);
+
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+    const [selectedRecord, setSelectedRecord] = useState<PlacementRecord | null>(null);
+    const [editMode, setEditMode] = useState(false);
 
     // Manual Form
     const [formData, setFormData] = useState({
@@ -40,11 +53,22 @@ const PlacementRecords: React.FC = () => {
     const [previewData, setPreviewData] = useState<PreviewRecord[]>([]);
     const [processing, setProcessing] = useState(false);
 
-    const fetchRecords = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const data = await PlacementRecordService.getAllRecords();
-            setRecords(data);
+            const [recordsData, allStudents, companiesData] = await Promise.all([
+                PlacementRecordService.getAllRecords(),
+                UserService.getAllStudents(),
+                CompanyService.getAllCompanies()
+            ]);
+
+            setRecords(recordsData);
+            setStudents(allStudents);
+
+            // Filter companies that have completed drives (driveDate < today)
+            const completedCompanies = companiesData.filter(c => new Date(c.driveDate).getTime() < Date.now());
+            setCompanies(completedCompanies);
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -53,29 +77,77 @@ const PlacementRecords: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchRecords();
+        fetchData();
     }, []);
 
-    // Manual Add
-    const handleAddRecord = async (e: React.FormEvent) => {
+    const handleEdit = (record: PlacementRecord) => {
+        setSelectedRecord(record);
+        setFormData({
+            name: record.name,
+            rollNo: record.rollNo,
+            department: record.department,
+            companyName: record.companyName,
+            package: record.package || '',
+            academicYear: record.academicYear || new Date().getFullYear().toString()
+        });
+        setEditMode(true);
+        setIsAddModalOpen(true);
+    };
+
+    // Auto-save (Create or Update)
+    const handleSaveRecord = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
         try {
-            await PlacementRecordService.addRecord({
-                name: formData.name,
-                rollNo: formData.rollNo,
-                department: formData.department,
-                companyName: formData.companyName,
-                package: formData.package,
-                academicYear: formData.academicYear
-            });
-            alert('Record added successfully');
+            // Check for duplicates
+            const isDuplicate = records.some(r =>
+                r.rollNo.toLowerCase() === formData.rollNo.toLowerCase() &&
+                r.companyName.toLowerCase() === formData.companyName.toLowerCase() &&
+                // If editing, exclude the current record itself
+                (!editMode || !selectedRecord || r.id !== selectedRecord.id)
+            );
+
+            if (isDuplicate) {
+                await showAlert('This student is already placed in this company.', 'error', 'Duplicate Record');
+                setProcessing(false);
+                return;
+            }
+
+            if (editMode && selectedRecord) {
+                // Update
+                await PlacementRecordService.updateRecord(selectedRecord.id, {
+                    name: formData.name,
+                    rollNo: formData.rollNo,
+                    department: formData.department,
+                    companyName: formData.companyName,
+                    package: formData.package,
+                    academicYear: formData.academicYear
+                });
+                // Also update status in case it was changed or missed
+                await UserService.updateUserStatusByRollNo(formData.rollNo, 'PLACED');
+                await showAlert('Record updated successfully', 'success', 'Success');
+            } else {
+                // Create
+                await PlacementRecordService.addRecord({
+                    name: formData.name,
+                    rollNo: formData.rollNo,
+                    department: formData.department,
+                    companyName: formData.companyName,
+                    package: formData.package,
+                    academicYear: formData.academicYear
+                });
+                await UserService.updateUserStatusByRollNo(formData.rollNo, 'PLACED');
+                await showAlert('Record added successfully', 'success', 'Success');
+            }
+
             setIsAddModalOpen(false);
+            setEditMode(false);
+            setSelectedRecord(null);
             setFormData({ name: '', rollNo: '', department: '', companyName: '', package: '', academicYear: new Date().getFullYear().toString() });
-            fetchRecords();
+            fetchData();
         } catch (error: any) {
             console.error(error);
-            alert('Failed to add record: ' + error.message);
+            await showAlert('Failed to save record: ' + error.message, 'error', 'Error');
         } finally {
             setProcessing(false);
         }
@@ -94,42 +166,84 @@ const PlacementRecords: React.FC = () => {
             const data: any[] = XLSX.utils.sheet_to_json(ws);
 
             if (data.length === 0) {
-                alert("File is empty");
+                showAlert("File is empty", "error", "Empty File");
                 return;
             }
 
-            // Simple validation logic
-            // Allow sloppy headers: "Name" or "Student Name", "Roll No" or "Roll Number", "Dept" or "Department"
-            // We map them manually
-
             const mappedData: PreviewRecord[] = data.map(row => {
-                // Try to find fields case-insensitively
                 const getField = (keys: string[]) => {
                     const rowKeys = Object.keys(row);
                     const found = rowKeys.find(k => keys.includes(k.toLowerCase().replace(/[\s_.]/g, '')));
                     return found ? row[found] : undefined;
                 };
 
-                const name = getField(['name', 'studentname', 'fullname']);
-                const rollNo = getField(['rollno', 'regno', 'rollnumber', 'register number']);
-                const dept = getField(['dept', 'department', 'branch']);
-                const company = getField(['company', 'companyname', 'placedin']);
-                const pkg = getField(['package', 'ctc', 'salary']);
+                // Mandatory fields in Excel (at least Roll No and Company)
+                const rollNoRaw = getField(['rollno', 'regno', 'rollnumber', 'register number']);
+                const companyRaw = getField(['company', 'companyname', 'placedin']);
+                const pkgRaw = getField(['package', 'ctc', 'salary']);
+
+                // Optional overrides from Excel, otherwise auto-fill
+                const nameOverride = getField(['name', 'studentname', 'fullname']);
+                const deptOverride = getField(['dept', 'department', 'branch']);
 
                 let status: 'PENDING' | 'VALID' | 'ERROR' = 'VALID';
                 let message = '';
+                let finalName = nameOverride || '';
+                let finalDept = deptOverride || '';
+                let finalRollNo = rollNoRaw || '';
+                let finalCompanyName = companyRaw || '';
 
-                if (!name || !rollNo || !dept || !company) {
+                if (!rollNoRaw) {
                     status = 'ERROR';
-                    message = 'Missing required fields';
+                    message = 'Roll No is missing';
+                } else {
+                    const student = students.find(s => s.rollNo?.toLowerCase() === rollNoRaw.toString().toLowerCase().trim());
+                    if (!student) {
+                        status = 'ERROR';
+                        message = 'Doesnt exist in student/coordinator database';
+                    } else {
+                        finalName = nameOverride || student.displayName || '';
+                        finalDept = deptOverride || student.department || '';
+                        finalRollNo = student.rollNo || rollNoRaw; // Use canonical Roll No from DB if found
+                    }
                 }
 
+                if (status !== 'ERROR') {
+                    if (!companyRaw) {
+                        status = 'ERROR';
+                        message = 'Company Name is missing';
+                    } else {
+                        // Check exact or case-insensitive match
+                        const company = companies.find(c => c.name.toLowerCase() === companyRaw.toString().toLowerCase().trim());
+                        if (!company) {
+                            status = 'ERROR';
+                            message = 'Not there in company database';
+                        } else {
+                            finalCompanyName = company.name; // Use canonical name
+
+                            // Check for duplicate placement record
+                            const isDuplicate = records.some(r =>
+                                r.rollNo.toLowerCase() === finalRollNo.toLowerCase() &&
+                                r.companyName.toLowerCase() === finalCompanyName.toLowerCase()
+                            );
+
+                            if (isDuplicate) {
+                                status = 'ERROR';
+                                message = 'Already placed in this company';
+                            }
+                        }
+                    }
+                }
+
+                // If still no error, check if already placed (optional warning? or just overwrite? logic says update status, so maybe okay)
+                // Existing record check could be added here if needed to avoid duplicates, but currently just validating existence of entities.
+
                 return {
-                    name: name || '',
-                    rollNo: rollNo || '',
-                    department: dept || '',
-                    companyName: company || '',
-                    package: pkg ? pkg.toString() : '',
+                    name: finalName,
+                    rollNo: finalRollNo,
+                    department: finalDept,
+                    companyName: finalCompanyName,
+                    package: pkgRaw ? pkgRaw.toString() : '',
                     status,
                     message
                 };
@@ -146,7 +260,7 @@ const PlacementRecords: React.FC = () => {
         try {
             const validRecords = previewData.filter(r => r.status === 'VALID');
             if (validRecords.length === 0) {
-                alert("No valid records to upload.");
+                await showAlert("No valid records to upload.", "warning", "No Valid Data");
                 setProcessing(false);
                 return;
             }
@@ -166,13 +280,13 @@ const PlacementRecords: React.FC = () => {
                 UserService.updateUserStatusByRollNo(r.rollNo, 'PLACED')
             ));
 
-            alert(`Successfully uploaded ${validRecords.length} records and updated student statuses.`);
+            await showAlert(`Successfully uploaded ${validRecords.length} records and updated student statuses.`, 'success', 'Upload Complete');
             setIsUploadModalOpen(false);
             setPreviewData([]);
-            fetchRecords();
+            fetchData();
         } catch (error: any) {
             console.error(error);
-            alert('Bulk upload failed: ' + error.message);
+            await showAlert('Bulk upload failed: ' + error.message, 'error', 'Upload Failed');
         } finally {
             setProcessing(false);
         }
@@ -180,7 +294,7 @@ const PlacementRecords: React.FC = () => {
 
     // Delete
     const handleDelete = async (id: string) => {
-        if (confirm("Are you sure you want to delete this record?")) {
+        if (await showConfirm("Are you sure you want to delete this record?", "Confirm Delete", "Yes, Delete", 'delete')) {
             try {
                 // Check if this is the last record for this student
                 const recordToDelete = records.find(r => r.id === id);
@@ -197,10 +311,11 @@ const PlacementRecords: React.FC = () => {
                 }
 
                 await PlacementRecordService.deleteRecord(id);
-                fetchRecords();
+                fetchData();
+                await showAlert("Record deleted successfully.", "success", "Deleted");
             } catch (error) {
                 console.error(error);
-                alert("Failed to delete");
+                await showAlert("Failed to delete record.", "error", "Error");
             }
         }
     };
@@ -262,32 +377,35 @@ const PlacementRecords: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-emerald-50/50 backdrop-blur-sm border-b border-emerald-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package (LPA)</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Student Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Roll No</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Department</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Company</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Package (LPA)</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={6} className="p-4 text-center">Loading...</td></tr>
                         ) : filteredRecords.length === 0 ? (
                             <tr><td colSpan={6} className="p-4 text-center">No records found.</td></tr>
                         ) : (
                             filteredRecords.map((record) => (
-                                <tr key={record.id} className="hover:bg-gray-50">
+                                <tr key={record.id} className="hover:bg-emerald-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{record.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.rollNo}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.department}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.companyName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.package || '-'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end space-x-2">
+                                        <button onClick={() => handleEdit(record)} className="text-indigo-600 hover:text-indigo-900" title="Edit">
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
                                         <button onClick={() => handleDelete(record.id)} className="text-red-600 hover:text-red-900">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -299,20 +417,78 @@ const PlacementRecords: React.FC = () => {
                 </table>
             </div>
 
-            {/* Add Modal */}
-            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Placement Record">
-                <form onSubmit={handleAddRecord} className="space-y-4">
-                    <input required placeholder="Student Name" className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                    <input required placeholder="Roll Number" className="input-field" value={formData.rollNo} onChange={e => setFormData({ ...formData, rollNo: e.target.value })} />
-                    <select required className="input-field" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })}>
-                        <option value="">Select Department</option>
-                        {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                    <input required placeholder="Company Name" className="input-field" value={formData.companyName} onChange={e => setFormData({ ...formData, companyName: e.target.value })} />
-                    <input placeholder="Package (LPA) - Optional" className="input-field" value={formData.package} onChange={e => setFormData({ ...formData, package: e.target.value })} />
+            {/* Add/Edit Modal */}
+            <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditMode(false); }} title={`${editMode ? 'Edit' : 'Add'} Placement Record`}>
+                <form onSubmit={handleSaveRecord} className="space-y-4">
+                    {/* Roll No with Auto-Fill */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number <span className="text-red-500">*</span></label>
+                        <input
+                            required
+                            list="student-rollNos"
+                            placeholder="Search or Enter Roll Number"
+                            className="input-field w-full"
+                            value={formData.rollNo}
+                            onChange={e => {
+                                const val = e.target.value;
+                                const student = students.find(s => s.rollNo?.toLowerCase() === val.toLowerCase());
+
+                                setFormData({
+                                    ...formData,
+                                    rollNo: val,
+                                    name: student ? (student.displayName || '') : formData.name,
+                                    department: student ? (student.department || '') : formData.department
+                                });
+                            }}
+                        />
+                        <datalist id="student-rollNos">
+                            {students.filter(s => s.rollNo).map(s => (
+                                <option key={s.uid} value={s.rollNo}>{s.displayName} ({s.department})</option>
+                            ))}
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Student Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Student Name" className="input-field w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Department <span className="text-red-500">*</span></label>
+                        <select required className="input-field w-full" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })}>
+                            <option value="">Select Department</option>
+                            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                    </div>
+
+                    {/* Company Dropdown (Completed Drives) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <input
+                                required
+                                list="company-list"
+                                placeholder="Select or Type Company Name"
+                                className="input-field w-full"
+                                value={formData.companyName}
+                                onChange={e => setFormData({ ...formData, companyName: e.target.value })}
+                            />
+                            <datalist id="company-list">
+                                {companies.map(c => (
+                                    <option key={c.id} value={c.name}>{c.type} - {new Date(c.driveDate).toLocaleDateString()}</option>
+                                ))}
+                            </datalist>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Shows companies with completed drives.</p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Package (LPA)</label>
+                        <input placeholder="Package (LPA) - Optional" className="input-field w-full" value={formData.package} onChange={e => setFormData({ ...formData, package: e.target.value })} />
+                    </div>
 
                     <button disabled={processing} type="submit" className="w-full btn-primary mt-4">
-                        {processing ? 'Saving...' : 'Save Record'}
+                        {processing ? 'Saving...' : (editMode ? 'Update Record' : 'Save Record')}
                     </button>
                 </form>
             </Modal>
@@ -323,7 +499,8 @@ const PlacementRecords: React.FC = () => {
                     <div className="space-y-4 text-center">
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
                             <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                            <p className="mt-1 text-sm text-gray-500">Upload Excel with headers: Name, Roll No, Dept, Company, Package</p>
+                            <p className="mt-1 text-sm text-gray-500">Upload Excel with headers: Roll No, Company, Package (Optional)</p>
+                            <p className="text-xs text-gray-400 mt-1">Student details will be auto-filled.</p>
                             <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
                         </div>
                     </div>

@@ -10,6 +10,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Company } from '../types';
+import { AnnouncementService } from './announcementService';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
 
 const COLLECTION_NAME = 'companies';
 
@@ -19,8 +21,32 @@ export const CompanyService = {
         try {
             const docRef = await addDoc(collection(db, COLLECTION_NAME), {
                 ...companyData,
-                applicants: []
+                applicants: [],
+                id: '' // Will be ignored by addDoc but needed for type
             });
+
+            // Automated Announcement
+            try {
+                const targetDepts = (companyData.eligibilityCriteria?.branches && companyData.eligibilityCriteria.branches.length > 0)
+                    ? companyData.eligibilityCriteria.branches
+                    : ['all'];
+
+                await AnnouncementService.createAnnouncement({
+                    title: `New Drive: ${companyData.name}`,
+                    content: `A new placement drive for ${companyData.name} has been scheduled.\n\nType: ${companyData.type}\nRole(s): ${companyData.roles.join(', ')}\nDeadline: ${new Date(companyData.deadline).toLocaleDateString()}\n\nCheck 'Company Drives' for more details and to apply!`,
+                    authorId: 'SYSTEM',
+                    authorRole: 'PLACEMENT_HEAD', // Impersonating system/head
+                    authorName: 'System (Auto)',
+                    targetDepts
+                });
+            } catch (annError) {
+                console.warn("Failed to create automated announcement:", annError);
+                // Don't fail the whole operation if announcement fails
+            }
+
+            // Invalidate companies cache
+            cacheService.invalidatePattern(CACHE_KEYS.COMPANIES.PATTERN);
+
             return docRef.id;
         } catch (error) {
             console.error("Error adding company:", error);
@@ -31,11 +57,17 @@ export const CompanyService = {
     // Get all companies
     getAllCompanies: async (): Promise<Company[]> => {
         try {
-            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-            return querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Company));
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.COMPANIES.ALL,
+                async () => {
+                    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+                    return querySnapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        id: doc.id
+                    } as Company));
+                },
+                CACHE_TTL.SHORT // Companies change frequently
+            );
         } catch (error) {
             console.error("Error fetching companies:", error);
             throw error;
@@ -45,12 +77,18 @@ export const CompanyService = {
     // Get a single company by ID
     getCompanyById: async (id: string): Promise<Company | null> => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                return { id: docSnap.id, ...docSnap.data() } as Company;
-            }
-            return null;
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.COMPANIES.SINGLE(id),
+                async () => {
+                    const docRef = doc(db, COLLECTION_NAME, id);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        return { ...docSnap.data(), id: docSnap.id } as Company;
+                    }
+                    return null;
+                },
+                CACHE_TTL.SHORT
+            );
         } catch (error) {
             console.error("Error fetching company:", error);
             throw error;
@@ -62,6 +100,8 @@ export const CompanyService = {
         try {
             const docRef = doc(db, COLLECTION_NAME, id);
             await updateDoc(docRef, updates);
+            // Invalidate cache
+            cacheService.invalidatePattern(CACHE_KEYS.COMPANIES.PATTERN);
         } catch (error) {
             console.error("Error updating company:", error);
             throw error;
@@ -72,6 +112,8 @@ export const CompanyService = {
     deleteCompany: async (id: string) => {
         try {
             await deleteDoc(doc(db, COLLECTION_NAME, id));
+            // Invalidate cache
+            cacheService.invalidatePattern(CACHE_KEYS.COMPANIES.PATTERN);
         } catch (error) {
             console.error("Error deleting company:", error);
             throw error;

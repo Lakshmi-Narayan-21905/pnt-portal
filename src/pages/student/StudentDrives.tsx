@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAlert } from '../../contexts/AlertContext';
 import type { Company } from '../../types';
-import { Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, RotateCcw, MapPin } from 'lucide-react';
+import { CheckCircle, AlertCircle, Search, RotateCcw, MapPin, Loader2 } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
+import { formatDate } from '../../utils/dateUtils';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
+import { useTheme } from '../../hooks/useTheme';
 
 const StudentDrives: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
+    const { showAlert, showConfirm } = useAlert();
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [applying, setApplying] = useState<string | null>(null);
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
     // Filters
+    const [searchTerm, setSearchTerm] = useState<string>(''); // New state for text search
     const [roleFilter, setRoleFilter] = useState<string>('');
     const [minSalaryFilter, setMinSalaryFilter] = useState<string>('');
     const [eligibilityFilter, setEligibilityFilter] = useState<'all' | 'eligible' | 'not_eligible'>('all');
@@ -31,9 +37,17 @@ const StudentDrives: React.FC = () => {
 
             // Filter by Department
             const dept = userProfile?.department;
-            const filteredData = data.filter(c =>
-                !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept)
-            );
+            const passoutYear = userProfile?.passoutYear;
+
+            const filteredData = data.filter(c => {
+                // Filter by Department
+                const deptMatch = !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept);
+
+                // Filter by Target Year (Passout Year)
+                const yearMatch = !c.targetYear || !passoutYear || c.targetYear === passoutYear;
+
+                return deptMatch && yearMatch;
+            });
 
             // Sort by drive date descending
             filteredData.sort((a, b) => b.driveDate - a.driveDate);
@@ -47,7 +61,14 @@ const StudentDrives: React.FC = () => {
 
     const handleApply = async (companyId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to 'Opt In' for this drive? This counts as an application.")) return;
+
+        // Check verification status
+        if (userProfile.profileStatus !== 'VERIFIED') {
+            await showAlert("Your profile must be VERIFIED by your class coordinator before you can opt in for drives.", "warning", "Profile Not Verified");
+            return;
+        }
+
+        if (!await showConfirm("Are you sure you want to 'Opt In' for this drive? This counts as an application.", "Confirm Application", "Yes, Opt In")) return;
 
         setApplying(companyId);
         try {
@@ -58,10 +79,10 @@ const StudentDrives: React.FC = () => {
                     ? { ...c, applicants: [...(c.applicants || []), userProfile.uid] }
                     : c
             ));
-            alert("Opted In successfully!");
+            await showAlert("Opted In successfully!", "success", "Success");
         } catch (error) {
             console.error("Error opting in:", error);
-            alert("Failed to opt in. Please try again.");
+            await showAlert("Failed to opt in. Please try again.", "error", "Error");
         } finally {
             setApplying(null);
         }
@@ -69,7 +90,7 @@ const StudentDrives: React.FC = () => {
 
     const handleOptOut = async (companyId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to 'Opt Out'? You will NOT be able to apply for this drive later.")) return;
+        if (!await showConfirm("Are you sure you want to 'Opt Out'? You will NOT be able to apply for this drive later.", "Confirm Opt-Out", "Yes, Opt Out")) return;
 
         setApplying(companyId);
         try {
@@ -80,24 +101,60 @@ const StudentDrives: React.FC = () => {
                     ? { ...c, optedOut: [...(c.optedOut || []), userProfile.uid] }
                     : c
             ));
-            alert("Opted Out successfully.");
+            await showAlert("Opted Out successfully.", "success", "Opte Out");
         } catch (error) {
             console.error("Error opting out:", error);
-            alert("Failed to opt out.");
+            await showAlert("Failed to opt out.", "error", "Error");
         } finally {
             setApplying(null);
         }
     };
 
     // Use utility instead of local function
-    // const isEligible = ... (removed)
+    const filterCompanies = (company: Company) => {
+        // 1. Text Search (Name or Role)
+        if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            const nameMatch = company.name.toLowerCase().includes(searchLower);
+            const roleMatch = company.roles.some(r => r.toLowerCase().includes(searchLower));
+            if (!nameMatch && !roleMatch) return false;
+        }
+
+        // 2. Role Dropdown Filter
+        if (roleFilter && !company.roles.includes(roleFilter)) return false;
+
+        // 3. Salary Filter
+        if (minSalaryFilter) {
+            const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
+            const minSalary = parseFloat(minSalaryFilter) || 0;
+            if (companySalary < minSalary) return false;
+        }
+
+        // 4. Eligibility Filter
+        const { eligible } = checkEligibility(userProfile!, company);
+        if (eligibilityFilter === 'eligible' && !eligible) return false;
+        if (eligibilityFilter === 'not_eligible' && eligible) return false;
+
+        // 5. Status Filter
+        const hasApplied = company.applicants?.includes(userProfile?.uid || '');
+        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
+
+        if (statusFilter === 'opted_in' && !hasApplied) return false;
+        if (statusFilter === 'opted_out' && !hasOptedOut) return false;
+        if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
+
+        return true;
+    };
+
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading drives...</div>;
+
+    const filteredCompanies = companies.filter(filterCompanies);
 
     return (
         <StudentPageContainer title="Drives & Opportunities" subtitle="Explore and apply for campus placement drives">
             {/* Search & Filter Bar - Comprehensive & Clean */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+            <div className={`bg-white rounded-xl p-6 shadow-md border ${theme.border} mb-8`}>
                 {/* Top Row: Search */}
                 <div className="mb-6">
                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Search Opportunities</label>
@@ -106,8 +163,8 @@ const StudentDrives: React.FC = () => {
                             type="text"
                             placeholder="Search by company or role..."
                             className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary transition-all text-gray-700"
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <Search className="absolute left-3.5 top-3.5 w-4.5 h-4.5 text-gray-400 group-focus-within:text-brand-primary transition-colors" />
                     </div>
@@ -121,7 +178,7 @@ const StudentDrives: React.FC = () => {
                         <select
                             className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-primary appearance-none cursor-pointer"
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            value={roleFilter === '' ? '' : (JOB_ROLES.includes(roleFilter) ? roleFilter : '')}
+                            value={roleFilter}
                         >
                             <option value="">All Roles</option>
                             {JOB_ROLES.map(role => (
@@ -175,6 +232,7 @@ const StudentDrives: React.FC = () => {
                     <div className="flex items-end">
                         <button
                             onClick={() => {
+                                setSearchTerm('');
                                 setRoleFilter('');
                                 setMinSalaryFilter('');
                                 setEligibilityFilter('all');
@@ -190,33 +248,7 @@ const StudentDrives: React.FC = () => {
             </div>
 
             {/* Drives Grid - Reference Design Match */}
-            {/* Drives Grid - Reference Design Match */}
-            {companies.filter(company => {
-                // Role Filter
-                if (roleFilter && !company.roles.includes(roleFilter)) return false;
-
-                // Salary Filter
-                if (minSalaryFilter) {
-                    const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
-                    const minSalary = parseFloat(minSalaryFilter) || 0;
-                    if (companySalary < minSalary) return false;
-                }
-
-                // Eligibility Filter
-                const { eligible } = checkEligibility(userProfile!, company);
-                if (eligibilityFilter === 'eligible' && !eligible) return false;
-                if (eligibilityFilter === 'not_eligible' && eligible) return false;
-
-                // Status Filter
-                const hasApplied = company.applicants?.includes(userProfile?.uid || '');
-                const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-
-                if (statusFilter === 'opted_in' && !hasApplied) return false;
-                if (statusFilter === 'opted_out' && !hasOptedOut) return false;
-                if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
-
-                return true;
-            }).length === 0 ? (
+            {filteredCompanies.length === 0 ? (
                 <div className="text-center py-20 bg-white/70 backdrop-blur-xl rounded-2xl border border-white/60 shadow-sm">
                     <div className="bg-gray-50/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
                         <Search className="w-8 h-8 text-gray-400" />
@@ -226,31 +258,14 @@ const StudentDrives: React.FC = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {companies.filter(company => {
-                        // Role Filter
-                        if (roleFilter && !company.roles.includes(roleFilter)) return false;
-                        if (minSalaryFilter) {
-                            const companySalary = parseFloat(company.salary.match(/[\d.]+/)?.[0] || '0');
-                            const minSalary = parseFloat(minSalaryFilter) || 0;
-                            if (companySalary < minSalary) return false;
-                        }
-                        const { eligible } = checkEligibility(userProfile!, company);
-                        if (eligibilityFilter === 'eligible' && !eligible) return false;
-                        if (eligibilityFilter === 'not_eligible' && eligible) return false;
-                        const hasApplied = company.applicants?.includes(userProfile?.uid || '');
-                        const hasOptedOut = company.optedOut?.includes(userProfile?.uid || '');
-                        if (statusFilter === 'opted_in' && !hasApplied) return false;
-                        if (statusFilter === 'opted_out' && !hasOptedOut) return false;
-                        if (statusFilter === 'not_registered' && (hasApplied || hasOptedOut)) return false;
-                        return true;
-                    }).map((company) => {
-                        const { eligible, reason } = checkEligibility(userProfile!, company);
+                    {filteredCompanies.map((company) => {
+                        const { eligible, reasons } = checkEligibility(userProfile!, company);
                         const hasApplied = (company.applicants || []).includes(userProfile!.uid);
                         const hasOptedOut = (company.optedOut || []).includes(userProfile!.uid);
                         const isExpired = Date.now() > company.deadline;
 
                         return (
-                            <div key={company.id} className="bg-white/60 backdrop-blur-xl rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-lg hover:shadow-blue-900/10 transition-all duration-300 flex flex-col h-full group">
+                            <div key={company.id} className={`bg-white rounded-xl p-6 border ${theme.border} shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300 flex flex-col h-full group`}>
                                 {/* Header: Name & Salary */}
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{company.name}</h3>
@@ -279,10 +294,29 @@ const StudentDrives: React.FC = () => {
                                 <div className="flex-grow"></div>
 
                                 {/* Eligibility Banner */}
-                                <div className={`w-full py-2.5 px-4 rounded-lg mb-6 flex items-center ${eligible ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                    {eligible ? <CheckCircle className="w-4 h-4 mr-2" /> : <AlertCircle className="w-4 h-4 mr-2" />}
-                                    <span className="text-sm font-semibold">{eligible ? 'Eligible' : 'Not Eligible'}</span>
-                                </div>
+                                {eligible ? (
+                                    <div className="w-full py-2.5 px-4 rounded-lg mb-6 flex items-center bg-green-50 text-green-700">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        <span className="text-sm font-semibold">Eligible</span>
+                                    </div>
+                                ) : (
+                                    <div className="w-full py-3 px-4 rounded-lg mb-6 bg-red-50 text-red-700">
+                                        <div className="flex items-center mb-1">
+                                            <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
+                                            <span className="text-sm font-bold text-red-800">Not Eligible</span>
+                                        </div>
+                                        {/* Show Reasons */}
+                                        {reasons && reasons.length > 0 ? (
+                                            <ul className="list-disc pl-8 text-xs text-red-600 space-y-0.5 mt-1">
+                                                {reasons.map((reason, idx) => (
+                                                    <li key={idx}>{reason}</li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-xs text-red-600 ml-6">Criteria not met</p>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Action Buttons - Grid Layout to match Reference */}
                                 <div className="grid grid-cols-2 gap-4">
@@ -308,19 +342,30 @@ const StudentDrives: React.FC = () => {
                                             {/* Standard Opt In */}
                                             <button
                                                 onClick={() => handleApply(company.id)}
-                                                disabled={applying === company.id}
-                                                className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition-all shadow-sm active:translate-y-0.5"
+                                                disabled={applying === company.id || userProfile?.profileStatus !== 'VERIFIED'}
+                                                className={`flex-1 py-2.5 font-bold rounded-lg text-sm transition-all shadow-sm active:translate-y-0.5 flex items-center justify-center ${userProfile?.profileStatus !== 'VERIFIED'
+                                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                    : 'bg-green-600 hover:bg-green-700 text-white'
+                                                    }`}
+                                                title={userProfile?.profileStatus !== 'VERIFIED' ? "Profile verification required" : "Opt In"}
                                             >
-                                                {applying === company.id ? '...' : 'Opt In'}
+                                                {applying === company.id ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                                        Opting In...
+                                                    </>
+                                                ) : (
+                                                    userProfile?.profileStatus !== 'VERIFIED' ? 'Verification Pending' : 'Opt In'
+                                                )}
                                             </button>
 
-                                            {/* Opt Out Button (Small Icon) */}
+                                            {/* Opt Out Button (Explicit Text) */}
                                             <button
                                                 onClick={() => handleOptOut(company.id)}
-                                                className="px-3 py-2.5 bg-red-100 text-red-600 font-medium rounded-lg text-sm hover:bg-red-200 transition-colors"
-                                                title="Opt Out"
+                                                className="px-3 py-2.5 bg-red-50 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-colors border border-red-100 whitespace-nowrap"
+                                                title="Opt Out of this drive"
                                             >
-                                                <XCircle className="w-4 h-4" />
+                                                Opt Out
                                             </button>
                                         </div>
                                     )}
@@ -359,11 +404,11 @@ const StudentDrives: React.FC = () => {
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">Drive Date</span>
-                                <span className="font-medium text-gray-900">{new Date(selectedCompany.driveDate).toLocaleDateString()}</span>
+                                <span className="font-medium text-gray-900">{formatDate(selectedCompany.driveDate)}</span>
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">Deadline</span>
-                                <span className="font-medium text-red-700">{new Date(selectedCompany.deadline).toLocaleDateString()}</span>
+                                <span className="font-medium text-red-700">{formatDate(selectedCompany.deadline)}</span>
                             </div>
                         </div>
 

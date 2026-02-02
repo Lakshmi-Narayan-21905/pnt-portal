@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { Plus, Upload } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
@@ -6,8 +7,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
+import { useTheme } from '../../hooks/useTheme';
 
 const ClassStudents: React.FC = () => {
+    const theme = useTheme();
+    const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [students, setStudents] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -27,8 +31,18 @@ const ClassStudents: React.FC = () => {
         if (!userProfile?.department) return;
         setLoading(true);
         try {
-            // Fetch all students and filter by department (and classId if available)
-            const allStudents = await UserService.getUsersByRole('STUDENT');
+            const allStudents = await UserService.getAllStudents();
+            // Filter by department of the current class coordinator
+            // We need to know current user's department. Assuming it's available in context or passed as prop.
+            // Wait, ClassStudents fetches ALL students then filters?
+            // Let's check how it filters.
+
+            // Looking at previous code, it fetches 'STUDENT' then filters.
+            // We should use getAllStudents() here too.
+
+            // However, we need to make sure we are not showing the current class coordinator in the list if that's not desired.
+            // But the requirement is to "fetch from both", so let's stick to that.
+
             let filtered = allStudents.filter(u => u.department === userProfile.department);
 
             // If class coordinator has a specific classId, filter by it (Deprecated logic?)
@@ -41,7 +55,30 @@ const ClassStudents: React.FC = () => {
                 filtered = filtered.filter(u => u.section === userProfile.section);
             }
 
-            setStudents(filtered);
+            // Deduplicate filtered list in case user is in both collections or coordinator is added twice
+            const uniqueStudentsMap = new Map();
+            filtered.forEach(u => uniqueStudentsMap.set(u.uid, u));
+
+            // Ensure current coordinator is in the list (if not already)
+            // Note: If coordinator fetches themselves via getAllStudents, they might already be in 'filtered'.
+            // If we want to pin them to top or ensure they are present:
+
+            // Mark coordinator for display or just rely on role
+            // Let's just merge and dedupe.
+            if (!uniqueStudentsMap.has(userProfile.uid)) {
+                uniqueStudentsMap.set(userProfile.uid, { ...userProfile });
+            }
+
+            // Convert back to array
+            const uniqueStudents = Array.from(uniqueStudentsMap.values());
+
+            // Optional: Sort so coordinator is at top or just alphabetical?
+            // User requested duplicates removal.
+            // Let's sort alphabetically or keep coordinator first if needed.
+            // Sorting by name is usually best.
+            uniqueStudents.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+
+            setStudents(uniqueStudents);
         } catch (error) {
             console.error(error);
         } finally {
@@ -78,10 +115,10 @@ const ClassStudents: React.FC = () => {
             setIsAddModalOpen(false);
             setFormData({ email: '', password: '', displayName: '' });
             fetchStudents();
-            alert('Student created successfully');
+            await showAlert('Student created successfully', 'success', 'Success');
         } catch (error: any) {
             console.error(error);
-            alert('Failed to create student: ' + error.message);
+            await showAlert('Failed to create student: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
         }
@@ -99,7 +136,7 @@ const ClassStudents: React.FC = () => {
             const ws = wb.Sheets[wsname];
             const data: any[] = XLSX.utils.sheet_to_json(ws);
 
-            if (confirm(`Found ${data.length} records. Create students?`)) {
+            if (await showConfirm(`Found ${data.length} records. Create students?`, 'Confirm Upload', 'Yes, Create')) {
                 setCreating(true);
                 let successCount = 0;
                 for (const row of data) {
@@ -127,7 +164,7 @@ const ClassStudents: React.FC = () => {
                 setCreating(false);
                 setIsUploadModalOpen(false);
                 fetchStudents();
-                alert(`Successfully created ${successCount} students.`);
+                await showAlert(`Successfully created ${successCount} students.`, 'success', 'Success');
             }
         };
         reader.readAsBinaryString(file);
@@ -135,7 +172,7 @@ const ClassStudents: React.FC = () => {
 
     const handleApprove = async () => {
         if (!selectedStudent) return;
-        if (confirm(`Approve ${selectedStudent.displayName}?`)) {
+        if (await showConfirm(`Approve ${selectedStudent.displayName}?`, 'Approve Student', 'Yes, Approve', 'approve')) {
             try {
                 await UserService.updateUserProfile(selectedStudent.uid, {
                     ...selectedStudent,
@@ -143,15 +180,16 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
+                await showAlert('Student approved successfully', 'success', 'Approved', { hideButton: true });
             } catch (e) {
-                alert('Failed to approve');
+                await showAlert('Failed to approve', 'error', 'Error');
             }
         }
     };
 
     const handleDecline = async () => {
         if (!selectedStudent) return;
-        if (confirm(`Decline ${selectedStudent.displayName}? They will need to resubmit details.`)) {
+        if (await showConfirm(`Decline ${selectedStudent.displayName}? They will need to resubmit details.`, 'Decline Student', 'Yes, Decline', 'delete')) {
             try {
                 await UserService.updateUserProfile(selectedStudent.uid, {
                     ...selectedStudent,
@@ -160,8 +198,9 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
+                await showAlert('Student declined and profile reset', 'info', 'Declined', { hideButton: true });
             } catch (e) {
-                alert('Failed to decline');
+                await showAlert('Failed to decline', 'error', 'Error');
             }
         }
     };
@@ -191,16 +230,16 @@ const ClassStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
-                <table className="min-w-full divide-y divide-brand-orange-light/30">
-                    <thead className="bg-brand-orange-ice/50">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-orange-50/50 backdrop-blur-sm border-b border-orange-100">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-orange-900/70 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-orange-900/70 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-orange-900/70 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-brand-orange-light/30">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={3} className="p-8 text-center text-gray-500">Loading...</td></tr>
                         ) : students.length === 0 ? (
@@ -210,11 +249,11 @@ const ClassStudents: React.FC = () => {
                                 <tr
                                     key={student.uid}
                                     onClick={() => setSelectedStudent(student)}
-                                    className="cursor-pointer hover:bg-brand-orange-ice/30 transition-colors"
+                                    className="cursor-pointer hover:bg-orange-50/30 transition-colors group"
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-brand-orange-ice flex items-center justify-center text-brand-orange-primary font-bold shadow-sm border border-brand-orange-light/30">
+                                            <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 font-bold shadow-sm group-hover:scale-110 transition-transform duration-300">
                                                 {student.displayName?.charAt(0)}
                                             </div>
                                             <div className="ml-4 text-sm font-medium text-gray-900">{student.displayName}</div>
@@ -222,9 +261,9 @@ const ClassStudents: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileStatus === 'VERIFIED' ? 'bg-brand-green-ice text-brand-green-deep border-brand-green-light' :
-                                            student.profileStatus === 'APPROVAL_PENDING' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                'bg-brand-orange-ice text-brand-orange-deep border-brand-orange-light'
+                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileStatus === 'VERIFIED' ? 'bg-green-50 text-green-700 border-green-100' :
+                                            student.profileStatus === 'APPROVAL_PENDING' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                'bg-orange-50 text-orange-700 border-orange-100'
                                             }`}>
                                             {student.profileStatus === 'VERIFIED' ? 'Verified' :
                                                 student.profileStatus === 'APPROVAL_PENDING' ? 'Approval Pending' :
@@ -240,9 +279,18 @@ const ClassStudents: React.FC = () => {
 
             <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Student">
                 <form onSubmit={handleCreateStudent} className="space-y-4">
-                    <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
-                    <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                    <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Display Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Display Name" className="input-field w-full" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                        <input required type="email" placeholder="Email" className="input-field w-full" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                        <input required type="password" placeholder="Password" className="input-field w-full" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    </div>
 
                     <button disabled={creating} type="submit" className="w-full py-2.5 bg-brand-orange-primary text-white font-bold rounded-lg hover:bg-brand-orange-deep transition shadow-lg shadow-brand-orange-primary/30 mt-4 disabled:opacity-70">
                         {creating ? 'Creating...' : 'Create Student'}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import type { UserProfile } from '../../types';
 import { DEPARTMENTS } from '../../utils/constants';
@@ -8,6 +8,7 @@ import { PlacementRecordService } from '../../services/placementRecordService';
 import type { PlacementRecord } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { Briefcase } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 const PlacementDetailsSection: React.FC<{ rollNo?: string }> = ({ rollNo }) => {
     const [records, setRecords] = useState<PlacementRecord[]>([]);
@@ -43,20 +44,20 @@ const PlacementDetailsSection: React.FC<{ rollNo?: string }> = ({ rollNo }) => {
     if (records.length === 0) return null;
 
     return (
-        <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
-            <h4 className="flex items-center text-indigo-800 font-bold mb-3">
+        <div className="bg-emerald-50/50 rounded-lg p-4 border border-emerald-100">
+            <h4 className="flex items-center text-emerald-800 font-bold mb-3">
                 <Briefcase className="w-4 h-4 mr-2" />
                 Placement Offers
             </h4>
             <div className="space-y-3">
                 {records.map(rec => (
-                    <div key={rec.id} className="bg-white p-3 rounded border border-indigo-100 shadow-sm flex justify-between items-center">
+                    <div key={rec.id} className="bg-white p-3 rounded-lg border border-emerald-100 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
                         <div>
                             <p className="font-bold text-gray-800">{rec.companyName}</p>
                             <p className="text-xs text-gray-500">{rec.role || 'Role not specified'}</p>
                         </div>
                         <div className="text-right">
-                            <p className="font-bold text-indigo-600">{rec.package} LPA</p>
+                            <p className="font-bold text-emerald-600">{rec.package} LPA</p>
                             <p className="text-xs text-gray-400">Package</p>
                         </div>
                     </div>
@@ -75,19 +76,30 @@ const PlacementStudents: React.FC = () => {
     const [selectedStudent, setSelectedStudent] = useState<UserProfile | null>(null);
     const [placementStatusFilter, setPlacementStatusFilter] = useState('');
 
+    const theme = useTheme();
+
     useEffect(() => {
         const load = async () => {
-            const data = await UserService.getUsersByRole('STUDENT');
-            setStudents(data);
+            const [studentsData, coordinatorsData] = await Promise.all([
+                UserService.getUsersByRole('STUDENT'),
+                UserService.getUsersByRole('CLASS_COORDINATOR')
+            ]);
+            // Combine and sort by name
+            const combined = [...studentsData, ...coordinatorsData].sort((a, b) =>
+                (a.displayName || '').localeCompare(b.displayName || '')
+            );
+            setStudents(combined);
             setLoading(false);
         };
         load();
     }, []);
 
     const filteredStudents = students.filter(student => {
+        const query = searchQuery.toLowerCase();
         const matchesSearch =
-            student.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.email?.toLowerCase().includes(searchQuery.toLowerCase());
+            student.displayName?.toLowerCase().startsWith(query) ||
+            student.email?.toLowerCase().startsWith(query);
+
         const matchesDept = departmentFilter ? student.department === departmentFilter : true;
 
         // Fix: logic for 'All Status' (Verification)
@@ -175,25 +187,25 @@ const PlacementStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="card overflow-x-auto !p-0">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <table className="min-w-full divide-y divide-gray-100">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-emerald-50/50 backdrop-blur-sm border-b border-emerald-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Department</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Email</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={3} className="p-4 text-center">Loading...</td></tr>
                         ) : filteredStudents.length === 0 ? (
                             <tr><td colSpan={3} className="p-4 text-center">No students found matching your filters.</td></tr>
                         ) : (
                             filteredStudents.map((student) => (
-                                <tr key={student.uid} className="hover:bg-gray-50 transition-colors">
+                                <tr key={student.uid} className="hover:bg-emerald-50/30 transition-colors group">
                                     <td
-                                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-600 hover:text-emerald-900 cursor-pointer"
                                         onClick={() => setSelectedStudent(student)}
                                     >
                                         {student.displayName}

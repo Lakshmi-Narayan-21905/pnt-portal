@@ -6,6 +6,7 @@ import { UserService } from '../../services/userService';
 import type { Company, UserProfile } from '../../types';
 import { DEPARTMENTS } from '../../utils/constants';
 import { ArrowLeft, Building2, Calendar } from 'lucide-react';
+import { formatDate } from '../../utils/dateUtils';
 
 const CompanyDetails: React.FC = () => {
     const { companyId } = useParams();
@@ -53,7 +54,7 @@ const CompanyDetails: React.FC = () => {
     const fetchCompanyStudents = async (targetCompany: Company) => {
         setLoadingStudents(true);
         try {
-            const students = await UserService.getUsersByRole('STUDENT');
+            const students = await UserService.getAllStudents(); // Changed from getUsersByRole('STUDENT') to getAllStudents()
 
             // Filter strictly for Dept Coordinator
             let relevantStudents = students;
@@ -177,12 +178,12 @@ const CompanyDetails: React.FC = () => {
                         <Calendar className="w-5 h-5 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500 font-semibold uppercase">Drive Date</p>
-                            <p className="font-medium">{new Date(company.driveDate).toLocaleDateString()}</p>
+                            <p className="font-medium">{formatDate(company.driveDate)}</p>
                         </div>
                     </div>
                     <div>
                         <p className="text-xs text-gray-500 font-semibold uppercase block mb-1">Deadline</p>
-                        <p className="font-medium">{new Date(company.deadline).toLocaleDateString()}</p>
+                        <p className="font-medium">{formatDate(company.deadline)}</p>
                     </div>
                     <div>
                         <p className="text-xs text-gray-500 font-semibold uppercase block mb-1">Target Batch</p>
@@ -284,8 +285,11 @@ const CompanyDetails: React.FC = () => {
                                 value={filterDept}
                                 onChange={(e) => setFilterDept(e.target.value)}
                             >
-                                <option value="">All Departments</option>
-                                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                <option value="">All Eligible Departments</option>
+                                {(company?.eligibilityCriteria?.branches && company.eligibilityCriteria.branches.length > 0
+                                    ? company.eligibilityCriteria.branches
+                                    : DEPARTMENTS
+                                ).map(d => <option key={d} value={d}>{d}</option>)}
                             </select>
                         </div>
                     )}

@@ -1,3 +1,4 @@
+
 import {
     collection,
     addDoc,
@@ -5,11 +6,12 @@ import {
     deleteDoc,
     doc,
     getDocs,
-    getDoc,
     arrayUnion
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Training } from '../types';
+import { AnnouncementService } from './announcementService';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
 
 const COLLECTION_NAME = 'trainings';
 
@@ -21,6 +23,28 @@ export const TrainingService = {
                 ...trainingData,
                 participants: []
             });
+
+            // Automated Announcement
+            try {
+                const targetDepts = (trainingData.eligibility?.branches && trainingData.eligibility.branches.length > 0)
+                    ? trainingData.eligibility.branches
+                    : ['all'];
+
+                await AnnouncementService.createAnnouncement({
+                    title: `New Training: ${trainingData.title} `,
+                    content: `A new training program "${trainingData.title}" by ${trainingData.trainer} has been announced.\n\nDuration: ${new Date(trainingData.startDate).toLocaleDateString()} - ${new Date(trainingData.endDate).toLocaleDateString()} \n\nCheck 'My Trainings' to register!`,
+                    authorId: 'SYSTEM',
+                    authorRole: 'TRAINING_HEAD',
+                    authorName: 'System (Auto)',
+                    targetDepts
+                });
+            } catch (annError) {
+                console.warn("Failed to create automated announcement:", annError);
+            }
+
+            // Invalidate trainings cache
+            cacheService.invalidatePattern(CACHE_KEYS.TRAININGS.PATTERN);
+
             return docRef.id;
         } catch (error) {
             console.error("Error adding training:", error);
@@ -31,13 +55,53 @@ export const TrainingService = {
     // Get all trainings
     getAllTrainings: async (): Promise<Training[]> => {
         try {
-            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-            return querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Training));
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.TRAININGS.ALL,
+                async () => {
+                    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+                    return querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    } as Training));
+                },
+                CACHE_TTL.SHORT
+            );
         } catch (error) {
             console.error("Error fetching trainings:", error);
+            throw error;
+        }
+    },
+
+    // Get a specific training by ID
+    getTrainingById: async (id: string): Promise<Training> => {
+        try {
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.TRAININGS.SINGLE(id),
+                async () => {
+                    const docRef = await import('firebase/firestore').then(mod => mod.getDoc(doc(db, COLLECTION_NAME, id)));
+                    if (docRef.exists()) {
+                        return { id: docRef.id, ...docRef.data() } as Training;
+                    } else {
+                        throw new Error("Training program not found");
+                    }
+                },
+                CACHE_TTL.SHORT
+            );
+        } catch (error) {
+            console.error("Error fetching training by ID:", error);
+            throw error;
+        }
+    },
+
+    // Update a training program
+    updateTraining: async (id: string, trainingData: Partial<Training>) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, id);
+            await updateDoc(docRef, trainingData);
+            // Invalidate cache
+            cacheService.invalidatePattern(CACHE_KEYS.TRAININGS.PATTERN);
+        } catch (error) {
+            console.error("Error updating training:", error);
             throw error;
         }
     },
@@ -46,6 +110,8 @@ export const TrainingService = {
     deleteTraining: async (id: string) => {
         try {
             await deleteDoc(doc(db, COLLECTION_NAME, id));
+            // Invalidate cache
+            cacheService.invalidatePattern(CACHE_KEYS.TRAININGS.PATTERN);
         } catch (error) {
             console.error("Error deleting training:", error);
             throw error;

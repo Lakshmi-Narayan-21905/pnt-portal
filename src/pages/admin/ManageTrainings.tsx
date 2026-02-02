@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Plus, Trash2, Download } from 'lucide-react';
+import { useAlert } from '../../contexts/AlertContext';
+import { GraduationCap, Plus, Trash2, Download, Loader2 } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const ManageTrainings: React.FC = () => {
+    const theme = useTheme();
+    const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -48,6 +54,13 @@ const ManageTrainings: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (new Date(formData.endDate) < new Date(formData.startDate)) {
+            await showAlert("End Date cannot be before Start Date", "warning", "Invalid Date Range");
+            return;
+        }
+
+        setSubmitting(true);
         try {
             await TrainingService.addTraining({
                 title: formData.title,
@@ -65,14 +78,18 @@ const ManageTrainings: React.FC = () => {
             setFormData({
                 title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
             });
+            await showAlert('Training program created successfully!', 'success', 'Success');
         } catch (error) {
-            alert('Failed to add training');
+            await showAlert('Failed to add training.', 'error', 'Error');
+        } finally {
+            setSubmitting(false);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Delete this training?')) {
+        if (await showConfirm('Are you sure you want to delete this training program?', 'Confirm Delete', 'Yes, Delete', 'delete')) {
             await TrainingService.deleteTraining(id);
+            await showAlert('Training deleted successfully.', 'success', 'Deleted');
             fetchTrainings();
         }
     };
@@ -112,28 +129,28 @@ const ManageTrainings: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Training Title</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trainer</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Training Title</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Trainer</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Duration</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
                         ) : trainings.length === 0 ? (
                             <tr><td colSpan={4} className="p-4 text-center">No trainings found.</td></tr>
                         ) : (
                             trainings.map((training) => (
-                                <tr key={training.id}>
+                                <tr key={training.id} className="hover:bg-indigo-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
-                                                <GraduationCap className="h-5 w-5 text-green-600" />
+                                            <div className="flex-shrink-0 h-10 w-10 bg-indigo-100/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <GraduationCap className="h-5 w-5 text-indigo-600" />
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{training.title}</div>
@@ -159,9 +176,18 @@ const ManageTrainings: React.FC = () => {
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Training Program">
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input required placeholder="Training Title" className="input-field" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                    <input required placeholder="Trainer / Organization" className="input-field" value={formData.trainer} onChange={e => setFormData({ ...formData, trainer: e.target.value })} />
-                    <textarea required placeholder="Description" className="input-field" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Training Title <span className="text-red-500">*</span></label>
+                        <input required placeholder="Training Title" className="input-field w-full" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Trainer / Organization <span className="text-red-500">*</span></label>
+                        <input required placeholder="Trainer / Organization" className="input-field w-full" value={formData.trainer} onChange={e => setFormData({ ...formData, trainer: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
+                        <textarea required placeholder="Description" className="input-field w-full" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Target Branches</label>
@@ -195,16 +221,23 @@ const ManageTrainings: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs text-gray-500">Start Date</label>
-                            <input required type="date" className="input-field" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                            <label className="text-xs text-gray-500 block mb-1">Start Date <span className="text-red-500">*</span></label>
+                            <input required type="date" className="input-field w-full" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-500">End Date</label>
-                            <input required type="date" className="input-field" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                            <label className="text-xs text-gray-500 block mb-1">End Date <span className="text-red-500">*</span></label>
+                            <input required type="date" className="input-field w-full" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full btn-primary mt-4">Create Training</button>
+                    <button disabled={submitting} type="submit" className="w-full btn-primary mt-4 flex justify-center items-center">
+                        {submitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Creating...
+                            </>
+                        ) : 'Create Training'}
+                    </button>
                 </form>
             </Modal>
         </div>

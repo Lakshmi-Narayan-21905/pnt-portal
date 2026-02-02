@@ -4,8 +4,10 @@ import StudentPageContainer from '../../components/student/StudentPageContainer'
 
 import { useNavigate } from 'react-router-dom';
 import { Pencil } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 const StudentProfile: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ const StudentProfile: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
+                <div className={`bg-white shadow rounded-lg border ${theme.border} overflow-hidden mb-6`}>
                     <div className="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
                         <h3 className="text-lg leading-6 font-medium text-gray-900">Personal Details</h3>
                     </div>
@@ -55,8 +57,8 @@ const StudentProfile: React.FC = () => {
                 </div>
 
                 {/* Academic Details Card */}
-                <div className="bg-white/70 backdrop-blur-xl shadow-lg rounded-2xl overflow-hidden border border-white/60">
-                    <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40">
+                <div className={`bg-white shadow-md rounded-2xl overflow-hidden border ${theme.border}`}>
+                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
                         <h3 className="text-lg leading-6 font-bold text-gray-800">Academic Details</h3>
                         <p className="mt-1 text-sm text-gray-500">Current educational status and performance.</p>
                     </div>
@@ -95,6 +97,16 @@ const StudentProfile: React.FC = () => {
                             <div className="px-6 py-4 sm:border-t lg:col-span-2 border-gray-100">
                                 <dt className="font-medium text-gray-500 mb-1">History of Arrears</dt>
                                 <dd className="text-gray-900">{userProfile?.historyOfArreas || 0}</dd>
+                            </div>
+
+                            {/* Row 3 */}
+                            <div className="px-6 py-4 sm:border-t sm:border-r border-gray-100">
+                                <dt className="font-medium text-gray-500 mb-1">Passout Year</dt>
+                                <dd className="text-gray-900 font-semibold">{userProfile?.passoutYear || '-'}</dd>
+                            </div>
+                            <div className="px-6 py-4 sm:border-t lg:col-span-3 border-gray-100">
+                                <dt className="font-medium text-gray-500 mb-1">Current Year</dt>
+                                <dd className="text-gray-900 font-semibold">{userProfile?.currentYear || '-'}</dd>
                             </div>
                         </dl>
                     </div>

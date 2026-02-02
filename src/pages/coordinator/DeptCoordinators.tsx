@@ -1,37 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Upload, Eye, EyeOff, Pencil, Trash2, Download } from 'lucide-react';
+import { useAlert } from '../../contexts/AlertContext';
+import { Pencil, Check } from 'lucide-react';
 import { UserService } from '../../services/userService';
-import { AdminAuthService } from '../../services/adminAuthService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
-import * as XLSX from 'xlsx';
+import { useTheme } from '../../hooks/useTheme';
 
 const DeptCoordinators: React.FC = () => {
+    const theme = useTheme();
+    const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [coordinators, setCoordinators] = useState<UserProfile[]>([]);
+    const [students, setStudents] = useState<UserProfile[]>([]); // All students in dept
     const [loading, setLoading] = useState(true);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [creating, setCreating] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [selectedCoord, setSelectedCoord] = useState<UserProfile | null>(null);
 
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-        displayName: '',
-        section: '',
-    });
+    // Selection Modal State
+    const [isSelectModalOpen, setIsSelectModalOpen] = useState(false);
+    const [targetSection, setTargetSection] = useState<string>('');
+    const [assigning, setAssigning] = useState(false);
 
-    const fetchCoordinators = async () => {
+    // Fetch data
+    const fetchData = async () => {
         if (!userProfile?.department) return;
         setLoading(true);
         try {
+            // 1. Get current coordinators
             const allCoordinators = await UserService.getUsersByRole('CLASS_COORDINATOR');
             const deptCoordinators = allCoordinators.filter(u => u.department === userProfile.department);
             setCoordinators(deptCoordinators);
+
+            // 2. Get students for selection pool
+            const allStudents = await UserService.getUsersByRole('STUDENT');
+            const deptStudents = allStudents.filter(u => u.department === userProfile.department);
+            setStudents(deptStudents);
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -40,126 +43,63 @@ const DeptCoordinators: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchCoordinators();
+        fetchData();
     }, [userProfile]);
 
-    const handleEdit = (coord: UserProfile) => {
-        setFormData({
-            email: coord.email,
-            password: '', // Don't show password
-            displayName: coord.displayName,
-            section: coord.section || '',
-        });
-        setSelectedCoord(coord);
-        setEditMode(true);
-        setIsAddModalOpen(true);
+
+    const handleOpenAssignModal = (section: string) => {
+        setTargetSection(section);
+        setIsSelectModalOpen(true);
     };
 
-    const handleDelete = async (uid: string, name: string) => {
-        if (!confirm(`Are you sure you want to delete coordinator ${name}? This cannot be undone.`)) return;
+    const handleAssignCoordinator = async (student: UserProfile) => {
+        if (!await showConfirm(`Promote ${student.displayName} to Class Coordinator for Section ${targetSection}?`, 'Confirm Assignment', 'Yes, Assign')) return;
 
+        setAssigning(true);
         try {
-            await UserService.deleteUserProfile(uid);
-            alert('Coordinator deleted successfully');
-            fetchCoordinators();
-        } catch (error: any) {
-            console.error(error);
-            alert('Failed to delete: ' + error.message);
-        }
-    };
-
-    const handleCreateCoordinator = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!userProfile?.department) return;
-        setCreating(true);
-        try {
-            if (editMode && selectedCoord) {
-                // Update existing
-                await UserService.updateUserProfile(selectedCoord.uid, {
-                    displayName: formData.displayName,
-                    section: formData.section.toUpperCase(),
-                });
-                // Note: Not updating email/password here as it requires Admin auth specialized calls usually
-                // or re-authentication. For now assuming simple profile update.
-                alert('Coordinator updated successfully');
-            } else {
-                // Create new
-                const newUser = await AdminAuthService.createUser(
-                    formData.email,
-                    formData.password
-                );
-
-                await UserService.createUserProfile({
-                    uid: newUser.uid,
-                    email: formData.email,
-                    displayName: formData.displayName,
-                    role: 'CLASS_COORDINATOR',
-                    department: userProfile.department,
-                    section: formData.section.toUpperCase(),
-                    profileCompleted: true,
-                    createdAt: Date.now()
-                });
-                alert('Class Coordinator created successfully');
-            }
-
-            setIsAddModalOpen(false);
-            setFormData({ email: '', password: '', displayName: '', section: '' });
-            setEditMode(false);
-            setSelectedCoord(null);
-            fetchCoordinators();
-        } catch (error: any) {
-            console.error(error);
-            alert('Operation failed: ' + error.message);
-        } finally {
-            setCreating(false);
-        }
-    };
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !userProfile?.department) return;
-
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            const bstr = evt.target?.result;
-            const wb = XLSX.read(bstr, { type: 'binary' });
-            const wsname = wb.SheetNames[0];
-            const ws = wb.Sheets[wsname];
-            const data: any[] = XLSX.utils.sheet_to_json(ws);
-
-            if (confirm(`Found ${data.length} records. Create Class Coordinators for ${userProfile.department}?`)) {
-                setCreating(true);
-                let successCount = 0;
-                for (const row of data) {
-                    try {
-                        const email = row.email || row.username;
-                        const pwd = row.password || 'password123';
-                        const name = row.displayName || row.name || 'Coordinator';
-
-                        const newUser = await AdminAuthService.createUser(email, pwd);
-                        await UserService.createUserProfile({
-                            uid: newUser.uid,
-                            email,
-                            role: 'CLASS_COORDINATOR',
-                            displayName: name,
-                            department: userProfile.department,
-                            section: row.section ? row.section.toString().toUpperCase() : '',
-                            profileCompleted: true,
-                            createdAt: Date.now()
-                        });
-                        successCount++;
-                    } catch (err) {
-                        console.error("Failed for row:", row, err);
-                    }
+            // 1. Demote previous coordinator if exists
+            const currentCoord = coordinators.find(c => c.section === targetSection);
+            if (currentCoord) {
+                // Prevent demoting if we are somehow re-assigning the same person (though UI prevents this)
+                if (currentCoord.uid !== student.uid) {
+                    await UserService.changeUserRole(currentCoord.uid, 'STUDENT');
+                    // We could alert here, but a single success message at the end is cleaner
                 }
-                setCreating(false);
-                setIsUploadModalOpen(false);
-                fetchCoordinators();
-                alert(`Successfully created ${successCount} coordinators.`);
             }
-        };
-        reader.readAsBinaryString(file);
+
+            // 2. Remove new coordinator from Students collection (Promote)
+            await UserService.deleteUserProfile(student.uid);
+
+            // 3. Add to Class Coordinators collection
+            // Preserve all student data, just update Role and Section
+            const newProfile: UserProfile = {
+                ...student,
+                role: 'CLASS_COORDINATOR',
+                section: targetSection,
+                // Ensure accessing student features is still possible by role permissions in App.tsx
+            };
+
+            await UserService.createUserProfile(newProfile);
+
+            await showAlert(`Successfully assigned ${student.displayName} as Class Coordinator.${currentCoord ? ' Previous coordinator demoted.' : ''}`, 'success', 'Success');
+            setIsSelectModalOpen(false);
+            setIsSelectModalOpen(false);
+            // Small delay to ensure Firestore indexes update (if any) or just consistency
+            setTimeout(fetchData, 500);
+        } catch (error: any) {
+            console.error(error);
+            await showAlert('Failed to assign coordinator: ' + error.message, 'error', 'Error');
+        } finally {
+            setAssigning(false);
+        }
     };
+
+    // Also include current coordinator in the list if we verify they are "in this section" locally? 
+    // Actually current coordinator is NOT in 'students' list anymore (since we moved them). 
+    // The user screenshot shows "KOWSHIK P (Current)". 
+    // So we should merge available students + the current coordinator for display.
+
+    const currentCoordinator = coordinators.find(c => c.section === targetSection);
 
     return (
         <div className="p-6">
@@ -168,143 +108,100 @@ const DeptCoordinators: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-800">Class Coordinators</h1>
                     <p className="text-sm text-gray-500">Department: {userProfile?.department}</p>
                 </div>
-
-                <div className="flex space-x-3">
-                    <button
-                        onClick={() => {
-                            const exportData = coordinators.map(c => ({
-                                Name: c.displayName,
-                                Email: c.email,
-                                Department: c.department,
-                                Section: c.section
-                            }));
-                            import('../../utils/excelParser').then(mod => {
-                                mod.ExcelParser.exportToExcel(exportData, `${userProfile?.department}_Coordinators`);
-                            });
-                        }}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                        title="Export Coordinators"
-                    >
-                        <Download className="w-4 h-4 mr-2" />
-                        Export
-                    </button>
-                    <button
-                        onClick={() => setIsUploadModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-brand-lavender-light text-brand-lavender-dark font-medium rounded-lg hover:bg-brand-lavender-lilac/50 transition border border-brand-lavender-lilac/30"
-                    >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Excel
-                    </button>
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-brand-lavender-primary text-white font-bold rounded-lg hover:bg-brand-lavender-dark transition shadow-lg shadow-brand-lavender-primary/30"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Coordinator
-                    </button>
-                </div>
+                {/* Removed Export/Add buttons to match simplified "Section View" request */}
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+            <div className={`bg-white/70 backdrop-blur-md shadow-sm border ${theme.border} rounded-xl overflow-hidden`}>
                 <table className="min-w-full divide-y divide-brand-lavender-light/30">
                     <thead className="bg-brand-lavender-ice/50">
                         <tr>
-
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-
+                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Section</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Coordinator</th>
+                            <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-brand-lavender-light/30">
                         {loading ? (
-
                             <tr><td colSpan={3} className="p-8 text-center text-gray-500">Loading...</td></tr>
-                        ) : coordinators.length === 0 ? (
-                            <tr><td colSpan={3} className="p-8 text-center text-gray-500">No coordinators found.</td></tr>
-
                         ) : (
-                            coordinators.map((coord) => (
-                                <tr key={coord.uid} className="hover:bg-brand-lavender-ice/30 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-brand-lavender-light flex items-center justify-center text-brand-lavender-primary font-bold shadow-sm border border-brand-lavender-lilac/30">
-                                                {coord.displayName?.charAt(0)}
-                                            </div>
-                                            <div className="ml-4 text-sm font-medium text-gray-900">{coord.displayName}</div>
-                                        </div>
-                                    </td>
-
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.department} {coord.section ? `(${coord.section})` : ''}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            onClick={() => handleEdit(coord)}
-                                            className="text-indigo-600 hover:text-indigo-900 mr-4"
-                                            title="Edit"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(coord.uid, coord.displayName)}
-                                            className="text-red-600 hover:text-red-900"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-
-                                    </td>
-                                </tr>
-                            ))
+                            ['A', 'B', 'C', 'D'].map((section) => {
+                                const coord = coordinators.find(c => c.section === section);
+                                return (
+                                    <tr key={section} className="hover:bg-brand-lavender-ice/30 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{section}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {coord ? (
+                                                <span className="font-semibold text-gray-800">{coord.displayName}</span>
+                                            ) : (
+                                                <span className="text-gray-400 italic">NIL</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button
+                                                onClick={() => handleOpenAssignModal(section)}
+                                                className="text-indigo-600 hover:text-indigo-900 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                                                title="Assign Coordinator"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
             </div>
 
-            <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditMode(false); setFormData({ email: '', password: '', displayName: '', section: '' }); }} title={`${editMode ? 'Edit' : 'Add'} Class Coordinator`}>
-                <form onSubmit={handleCreateCoordinator} className="space-y-4">
-                    <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
-                    <input placeholder="Section (Optional)" className="input-field" value={formData.section} onChange={e => setFormData({ ...formData, section: e.target.value })} />
+            {/* Selection Modal */}
+            <Modal
+                isOpen={isSelectModalOpen}
+                onClose={() => setIsSelectModalOpen(false)}
+                title={`Assign Coordinator – Section ${targetSection}`}
+            >
+                <div>
+                    <p className="text-sm text-gray-500 mb-4">Select a student from the department to assign as Class Coordinator for Section <strong>{targetSection}</strong>.</p>
 
-                    {!editMode && (
-                        <>
-                            <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                            <div className="relative">
-                                <input
-                                    required
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Password"
-                                    className="input-field pr-10"
-                                    value={formData.password}
-                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        {/* List Current Coordinator if exists */}
+                        {currentCoordinator && (
+                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex justify-between items-center mb-4">
+                                <div>
+                                    <h4 className="font-bold text-gray-800">{currentCoordinator.displayName}</h4>
+                                    <p className="text-xs text-green-700 font-semibold">(Current Coordinator)</p>
+                                </div>
+                                <span className="text-green-600"><Check className="w-5 h-5" /></span>
                             </div>
-                        </>
-                    )}
+                        )}
 
-
-                    <button disabled={creating} type="submit" className="w-full btn-primary mt-4">
-                        {creating ? 'Processing...' : (editMode ? 'Update Coordinator' : 'Create Coordinator')}
-
-                    </button>
-                </form>
-            </Modal>
-            <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} title="Bulk Upload Class Coordinators">
-                <div className="space-y-4 text-center">
-                    <div className="border-2 border-dashed border-brand-lavender-lilac/50 rounded-xl p-8 bg-brand-lavender-ice/30">
-                        <Upload className="mx-auto h-12 w-12 text-brand-lavender-lilac" />
-                        <p className="mt-2 text-sm text-gray-600">Upload Excel file with columns: email, password, displayName, section</p>
-                        <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-lavender-light file:text-brand-lavender-dark hover:file:bg-brand-lavender-lilac transition cursor-pointer" />
+                        {/* List All Students of Dept */}
+                        {/* List Students of THIS Section */}
+                        {students.filter(s => s.section === targetSection).length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">No unassigned students found in Section {targetSection}.</p>
+                        ) : (
+                            students.filter(s => s.section === targetSection).sort((a, b) => a.displayName.localeCompare(b.displayName)).map(student => (
+                                <button
+                                    key={student.uid}
+                                    disabled={assigning}
+                                    onClick={() => handleAssignCoordinator(student)}
+                                    className="w-full text-left p-4 bg-white border border-gray-100 hover:border-blue-300 hover:bg-blue-50 rounded-lg transition-all group flex justify-between items-center shadow-sm"
+                                >
+                                    <div>
+                                        <h4 className="font-medium text-gray-800 group-hover:text-blue-800">{student.displayName}</h4>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <span>{student.email}</span>
+                                            {student.section && (
+                                                <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
+                                                    Sec {student.section}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <span className="opacity-0 group-hover:opacity-100 text-blue-600 font-medium text-sm">Select</span>
+                                </button>
+                            ))
+                        )}
                     </div>
-                    {creating && <p className="text-brand-lavender-primary font-medium">Processing file... Please wait...</p>}
                 </div>
             </Modal>
         </div>
@@ -312,3 +209,4 @@ const DeptCoordinators: React.FC = () => {
 };
 
 export default DeptCoordinators;
+// Force refresh

@@ -9,6 +9,7 @@ export type UserRole =
 export interface UserProfile {
     uid: string;
     email: string;
+    photoURL?: string;
     role: UserRole;
     displayName: string;
     rollNo?: string;
@@ -22,10 +23,13 @@ export interface UserProfile {
     twelfthMark?: number;
     standingArreas?: number;
     historyOfArreas?: number;
+    passoutYear?: number;
+    currentYear?: string;
     profileCompleted: boolean;
     profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
 
     placementStatus?: 'PLACED' | 'UNPLACED' | 'OFFERED';
+
 
     createdAt: number;
 }
@@ -77,7 +81,19 @@ export interface PlacementRecord {
     rollNo: string;
     department: string;
     companyName: string;
+    role?: string; // Added to support role display
     package?: string; // Optional (LPA)
     academicYear: string; // e.g. "2023-2027" or just "2026"
     createdAt?: number;
+}
+
+export interface Announcement {
+    id: string;
+    title: string;
+    content: string;
+    date: number; // Stored as timestamp
+    authorId: string;
+    authorRole: UserRole;
+    authorName: string;
+    targetDepts: string[]; // Changed from targetDept string to array
 }

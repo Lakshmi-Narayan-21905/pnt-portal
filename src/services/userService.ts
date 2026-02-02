@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { UserProfile, UserRole } from '../types';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
 
 const ROLE_COLLECTIONS: Record<UserRole, string> = {
     'ADMIN': 'admin',
@@ -55,8 +56,14 @@ export const UserService = {
     // Get a user profile by UID (searching only new collections)
     getUserProfile: async (uid: string): Promise<UserProfile | null> => {
         try {
-            const result = await UserService.findUserDoc(uid);
-            return result ? result.data : null;
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.USERS.SINGLE(uid),
+                async () => {
+                    const result = await UserService.findUserDoc(uid);
+                    return result ? result.data : null;
+                },
+                CACHE_TTL.MEDIUM
+            );
         } catch (error) {
             console.error("Error getting user profile:", error);
             throw error;
@@ -69,6 +76,11 @@ export const UserService = {
             const result = await UserService.findUserDoc(uid);
             if (result) {
                 await updateDoc(result.ref, data);
+                // Invalidate cache for this user and their role
+                cacheService.delete(CACHE_KEYS.USERS.SINGLE(uid));
+                if (result.data.role) {
+                    cacheService.delete(CACHE_KEYS.USERS.ALL(result.data.role));
+                }
             } else {
                 throw new Error("User not found for update (New Collection)");
             }
@@ -84,6 +96,11 @@ export const UserService = {
             const result = await UserService.findUserDoc(uid);
             if (result) {
                 await deleteDoc(result.ref);
+                // Invalidate cache for this user and all users of their role
+                cacheService.delete(CACHE_KEYS.USERS.SINGLE(uid));
+                if (result.data.role) {
+                    cacheService.delete(CACHE_KEYS.USERS.ALL(result.data.role));
+                }
             } else {
                 throw new Error("User not found for deletion");
             }
@@ -96,17 +113,37 @@ export const UserService = {
     // Get all users with a specific role (Only new collection)
     getUsersByRole: async (role: UserRole): Promise<UserProfile[]> => {
         try {
-            const users: UserProfile[] = [];
-            const newCollection = ROLE_COLLECTIONS[role];
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.USERS.ALL(role),
+                async () => {
+                    const q = query(collection(db, role === 'STUDENT' ? 'students' :
+                        role === 'ADMIN' ? 'admins' :
+                            role === 'PLACEMENT_HEAD' ? 'placement_heads' :
+                                role === 'TRAINING_HEAD' ? 'training_heads' :
+                                    role === 'DEPT_COORDINATOR' ? 'dept_coordinators' :
+                                        'class_coordinators'));
 
-            if (newCollection) {
-                const newSnapshot = await getDocs(collection(db, newCollection));
-                newSnapshot.forEach((doc) => users.push(doc.data() as UserProfile));
-            }
-
-            return users;
+                    const snapshot = await getDocs(q);
+                    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+                },
+                CACHE_TTL.MEDIUM
+            );
         } catch (error) {
-            console.error("Error fetching users by role:", error);
+            console.error(`Error fetching users for role ${role}:`, error);
+            throw error;
+        }
+    },
+
+    // Helper to fetch all "student-like" users (Students + Class Coordinators)
+    getAllStudents: async (): Promise<UserProfile[]> => {
+        try {
+            const [students, coordinators] = await Promise.all([
+                UserService.getUsersByRole('STUDENT'),
+                UserService.getUsersByRole('CLASS_COORDINATOR')
+            ]);
+            return [...students, ...coordinators];
+        } catch (error) {
+            console.error("Error fetching all students:", error);
             throw error;
         }
     },
@@ -133,20 +170,55 @@ export const UserService = {
     updateUserStatusByRollNo: async (rollNo: string, status: 'PLACED' | 'UNPLACED' | 'OFFERED') => {
         try {
             const normalizedRoll = rollNo.toLowerCase().trim();
-            // Students are in 'students' collection
-            const q = query(collection(db, 'students'), where('rollNo', '==', normalizedRoll));
-            const snapshot = await getDocs(q);
+            // Check 'students', 'class_coordinators', and 'dept_coordinators'
+            const collectionsToCheck = ['students', 'class_coordinators', 'dept_coordinators'];
 
-            if (!snapshot.empty) {
-                const docRef = snapshot.docs[0].ref;
-                await updateDoc(docRef, { placementStatus: status });
-                return true;
+            for (const colName of collectionsToCheck) {
+                const q = query(collection(db, colName), where('rollNo', '==', normalizedRoll));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const docRef = snapshot.docs[0].ref;
+                    await updateDoc(docRef, { placementStatus: status });
+                    return true;
+                }
             }
-            return false; // User not found
+            return false; // User not found in any collection
         } catch (error) {
             console.error(`Error updating status for rollNo ${rollNo}:`, error);
             // Don't throw, just log, so bulk upload continues
             return false;
+        }
+    },
+
+    // Change user role (Move doc between collections)
+    changeUserRole: async (uid: string, newRole: UserRole) => {
+        try {
+            // 1. Find current user doc
+            const currentDoc = await UserService.findUserDoc(uid);
+            if (!currentDoc) throw new Error("User not found");
+
+            const userData = currentDoc.data;
+            const oldCollectionRef = currentDoc.ref;
+
+            // 2. Prepare new data
+            const newData: UserProfile = {
+                ...userData,
+                role: newRole
+            };
+
+            // 3. Create in new collection
+            const newCollectionName = ROLE_COLLECTIONS[newRole];
+            if (!newCollectionName) throw new Error("Invalid new role");
+
+            await setDoc(doc(db, newCollectionName, uid), newData);
+
+            // 4. Delete from old collection
+            await deleteDoc(oldCollectionRef);
+
+        } catch (error) {
+            console.error("Error changing user role:", error);
+            throw error;
         }
     }
 };

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
-import { GraduationCap, Calendar, CheckCircle, Info } from 'lucide-react';
+import { Calendar, CheckCircle, Info, Loader2 } from 'lucide-react';
 import Modal from '../../components/Modal';
+import { formatDate } from '../../utils/dateUtils';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
+import { useTheme } from '../../hooks/useTheme';
 
 const StudentTrainings: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
+    const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState<string | null>(null);
@@ -22,10 +27,19 @@ const StudentTrainings: React.FC = () => {
             const data = await TrainingService.getAllTrainings();
 
             // Filter by Department
+            // Filter by Department and Year
             const dept = userProfile?.department;
-            const filteredData = data.filter(t =>
-                !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept)
-            );
+            const currentYearStr = userProfile?.currentYear; // "1st Year", etc.
+            const currentYearNum = currentYearStr ? parseInt(currentYearStr) : 0;
+
+            const filteredData = data.filter(t => {
+                const deptMatch = !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept);
+
+                // Filter by Year of Study
+                const yearMatch = !t.eligibility?.year || !currentYearNum || t.eligibility.year === currentYearNum;
+
+                return deptMatch && yearMatch;
+            });
 
             // Sort by start date (upcoming first)
             filteredData.sort((a, b) => a.startDate - b.startDate);
@@ -39,7 +53,7 @@ const StudentTrainings: React.FC = () => {
 
     const handleRegister = async (trainingId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to register for this training?")) return;
+        if (!await showConfirm("Are you sure you want to register for this training?", "Confirm Registration", "Yes, Register")) return;
 
         setRegistering(trainingId);
         try {
@@ -49,10 +63,10 @@ const StudentTrainings: React.FC = () => {
                     ? { ...t, participants: [...(t.participants || []), userProfile.uid] }
                     : t
             ));
-            alert("Registered successfully!");
+            await showAlert("Registered successfully!", "success", "Success");
         } catch (error) {
             console.error("Error registering:", error);
-            alert("Failed to register. Please try again.");
+            await showAlert("Failed to register. Please try again.", "error", "Error");
         } finally {
             setRegistering(null);
         }
@@ -68,7 +82,7 @@ const StudentTrainings: React.FC = () => {
                     const isCompleted = training.endDate < Date.now();
 
                     return (
-                        <div key={training.id} className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/60 p-6 flex flex-col h-full hover:shadow-lg hover:shadow-blue-900/5 transition-all duration-300">
+                        <div key={training.id} className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} p-6 flex flex-col h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300`}>
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{training.title}</h3>
                                 <p className="text-sm text-gray-600 mb-4 bg-blue-50/50 inline-block px-2 py-1 rounded">Trainer: {training.trainer}</p>
@@ -76,7 +90,7 @@ const StudentTrainings: React.FC = () => {
 
                                 <div className="flex items-center text-sm text-gray-500 mb-2">
                                     <Calendar className="w-4 h-4 mr-2 text-blue-500" />
-                                    <span>{new Date(training.startDate).toLocaleDateString()} - {new Date(training.endDate).toLocaleDateString()}</span>
+                                    <span>{formatDate(training.startDate)} - {formatDate(training.endDate)}</span>
                                 </div>
                             </div>
 
@@ -105,9 +119,14 @@ const StudentTrainings: React.FC = () => {
                                         <button
                                             onClick={() => handleRegister(training.id)}
                                             disabled={registering === training.id}
-                                            className="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors shadow-sm shadow-brand-primary/30"
+                                            className="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors shadow-sm shadow-brand-primary/30 flex items-center justify-center min-w-[100px]"
                                         >
-                                            {registering === training.id ? 'Joining...' : 'Register'}
+                                            {registering === training.id ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                                    Joining...
+                                                </>
+                                            ) : 'Register'}
                                         </button>
                                     )}
                                 </div>
@@ -144,11 +163,11 @@ const StudentTrainings: React.FC = () => {
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">Start Date</span>
-                                <span className="font-medium text-gray-900">{new Date(selectedTraining.startDate).toLocaleDateString()}</span>
+                                <span className="font-medium text-gray-900">{formatDate(selectedTraining.startDate)}</span>
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">End Date</span>
-                                <span className="font-medium text-gray-900">{new Date(selectedTraining.endDate).toLocaleDateString()}</span>
+                                <span className="font-medium text-gray-900">{formatDate(selectedTraining.endDate)}</span>
                             </div>
                         </div>
 
