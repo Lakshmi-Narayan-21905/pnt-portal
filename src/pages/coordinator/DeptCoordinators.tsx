@@ -211,54 +211,48 @@ const DeptCoordinators: React.FC = () => {
                 <table className="min-w-full divide-y divide-brand-lavender-light/30">
                     <thead className="bg-brand-lavender-ice/50">
                         <tr>
-
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-
+                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Section</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Coordinator</th>
+                            <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-brand-lavender-light/30">
                         {loading ? (
-
                             <tr><td colSpan={3} className="p-8 text-center text-gray-500">Loading...</td></tr>
-                        ) : coordinators.length === 0 ? (
-                            <tr><td colSpan={3} className="p-8 text-center text-gray-500">No coordinators found.</td></tr>
-
                         ) : (
-                            coordinators.map((coord) => (
-                                <tr key={coord.uid} className="hover:bg-brand-lavender-ice/30 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-brand-lavender-light flex items-center justify-center text-brand-lavender-primary font-bold shadow-sm border border-brand-lavender-lilac/30">
-                                                {coord.displayName?.charAt(0)}
-                                            </div>
-                                            <div className="ml-4 text-sm font-medium text-gray-900">{coord.displayName}</div>
-                                        </div>
-                                    </td>
-
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.department} {coord.section ? `(${coord.section})` : ''}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            onClick={() => handleEdit(coord)}
-                                            className="text-indigo-600 hover:text-indigo-900 mr-4"
-                                            title="Edit"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(coord.uid, coord.displayName)}
-                                            className="text-red-600 hover:text-red-900"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-
-                                    </td>
-                                </tr>
-                            ))
+                            ['A', 'B', 'C', 'D'].map((section) => {
+                                const coord = coordinators.find(c => c.section === section);
+                                return (
+                                    <tr key={section} className="hover:bg-brand-lavender-ice/30 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{section}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {coord ? (
+                                                <span className="font-semibold text-gray-800">{coord.displayName}</span>
+                                            ) : (
+                                                <span className="text-gray-400 italic">NIL</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button
+                                                onClick={() => {
+                                                    if (coord) {
+                                                        handleEdit(coord);
+                                                    } else {
+                                                        // Pre-fill section for new coordinator
+                                                        setFormData({ email: '', password: '', displayName: '', section: section });
+                                                        setEditMode(false);
+                                                        setIsAddModalOpen(true);
+                                                    }
+                                                }}
+                                                className="text-indigo-600 hover:text-indigo-900 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                                                title={coord ? "Edit Coordinator" : "Add Coordinator"}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
