@@ -3,7 +3,7 @@ import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
-import { Calendar, CheckCircle, Info } from 'lucide-react';
+import { Calendar, CheckCircle, Info, Loader2 } from 'lucide-react';
 import Modal from '../../components/Modal';
 import { formatDate } from '../../utils/dateUtils';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
@@ -117,9 +117,14 @@ const StudentTrainings: React.FC = () => {
                                         <button
                                             onClick={() => handleRegister(training.id)}
                                             disabled={registering === training.id}
-                                            className="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors shadow-sm shadow-brand-primary/30"
+                                            className="px-4 py-2 bg-brand-blue text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors shadow-sm shadow-brand-primary/30 flex items-center justify-center min-w-[100px]"
                                         >
-                                            {registering === training.id ? 'Joining...' : 'Register'}
+                                            {registering === training.id ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                                    Joining...
+                                                </>
+                                            ) : 'Register'}
                                         </button>
                                     )}
                                 </div>

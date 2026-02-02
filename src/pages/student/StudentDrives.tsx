@@ -3,7 +3,7 @@ import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAlert } from '../../contexts/AlertContext';
 import type { Company } from '../../types';
-import { CheckCircle, AlertCircle, Search, RotateCcw, MapPin } from 'lucide-react';
+import { CheckCircle, AlertCircle, Search, RotateCcw, MapPin, Loader2 } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
 import { formatDate } from '../../utils/dateUtils';
 import Modal from '../../components/Modal';
@@ -59,6 +59,13 @@ const StudentDrives: React.FC = () => {
 
     const handleApply = async (companyId: string) => {
         if (!userProfile?.uid) return;
+
+        // Check verification status
+        if (userProfile.profileStatus !== 'VERIFIED') {
+            await showAlert("Your profile must be VERIFIED by your class coordinator before you can opt in for drives.", "warning", "Profile Not Verified");
+            return;
+        }
+
         if (!await showConfirm("Are you sure you want to 'Opt In' for this drive? This counts as an application.", "Confirm Application", "Yes, Opt In")) return;
 
         setApplying(companyId);
@@ -333,10 +340,21 @@ const StudentDrives: React.FC = () => {
                                             {/* Standard Opt In */}
                                             <button
                                                 onClick={() => handleApply(company.id)}
-                                                disabled={applying === company.id}
-                                                className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition-all shadow-sm active:translate-y-0.5"
+                                                disabled={applying === company.id || userProfile?.profileStatus !== 'VERIFIED'}
+                                                className={`flex-1 py-2.5 font-bold rounded-lg text-sm transition-all shadow-sm active:translate-y-0.5 flex items-center justify-center ${userProfile?.profileStatus !== 'VERIFIED'
+                                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                    : 'bg-green-600 hover:bg-green-700 text-white'
+                                                    }`}
+                                                title={userProfile?.profileStatus !== 'VERIFIED' ? "Profile verification required" : "Opt In"}
                                             >
-                                                {applying === company.id ? '...' : 'Opt In'}
+                                                {applying === company.id ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                                        Opting In...
+                                                    </>
+                                                ) : (
+                                                    userProfile?.profileStatus !== 'VERIFIED' ? 'Verification Pending' : 'Opt In'
+                                                )}
                                             </button>
 
                                             {/* Opt Out Button (Explicit Text) */}

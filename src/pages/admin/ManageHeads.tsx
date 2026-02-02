@@ -223,7 +223,7 @@ const ManageHeads: React.FC = () => {
                     {addMethod === 'MANUAL' ? (
                         <form onSubmit={handleManualAdd} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -233,7 +233,7 @@ const ManageHeads: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     required
@@ -243,7 +243,7 @@ const ManageHeads: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}

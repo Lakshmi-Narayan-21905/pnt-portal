@@ -343,14 +343,29 @@ const PlacementRecords: React.FC = () => {
             {/* Add/Edit Modal */}
             <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditMode(false); }} title={`${editMode ? 'Edit' : 'Add'} Placement Record`}>
                 <form onSubmit={handleSaveRecord} className="space-y-4">
-                    <input required placeholder="Student Name" className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                    <input required placeholder="Roll Number" className="input-field" value={formData.rollNo} onChange={e => setFormData({ ...formData, rollNo: e.target.value })} />
-                    <select required className="input-field" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })}>
-                        <option value="">Select Department</option>
-                        {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                    <input required placeholder="Company Name" className="input-field" value={formData.companyName} onChange={e => setFormData({ ...formData, companyName: e.target.value })} />
-                    <input placeholder="Package (LPA) - Optional" className="input-field" value={formData.package} onChange={e => setFormData({ ...formData, package: e.target.value })} />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Student Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Student Name" className="input-field w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number <span className="text-red-500">*</span></label>
+                        <input required placeholder="Roll Number" className="input-field w-full" value={formData.rollNo} onChange={e => setFormData({ ...formData, rollNo: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Department <span className="text-red-500">*</span></label>
+                        <select required className="input-field w-full" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })}>
+                            <option value="">Select Department</option>
+                            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Company Name" className="input-field w-full" value={formData.companyName} onChange={e => setFormData({ ...formData, companyName: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Package (LPA)</label>
+                        <input placeholder="Package (LPA) - Optional" className="input-field w-full" value={formData.package} onChange={e => setFormData({ ...formData, package: e.target.value })} />
+                    </div>
 
                     <button disabled={processing} type="submit" className="w-full btn-primary mt-4">
                         {processing ? 'Saving...' : (editMode ? 'Update Record' : 'Save Record')}

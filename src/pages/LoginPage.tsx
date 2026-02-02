@@ -150,7 +150,7 @@ const LoginPage: React.FC = () => {
                             /* Reset Password Form */
                             <form onSubmit={handleResetPassword} className="space-y-4">
                                 <div className="group">
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Email <span className="text-red-500">*</span></label>
                                     <input
                                         type="email"
                                         required
@@ -184,7 +184,7 @@ const LoginPage: React.FC = () => {
                             <form onSubmit={handleLogin} className="space-y-4">
                                 <div className="group">
                                     <label className="block text-xs font-medium text-slate-700 mb-1 transition-colors group-focus-within:text-black">
-                                        Email
+                                        Email <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="email"
@@ -201,7 +201,7 @@ const LoginPage: React.FC = () => {
 
                                 <div className="group">
                                     <label className="block text-xs font-medium text-slate-700 mb-1 transition-colors group-focus-within:text-black">
-                                        Password
+                                        Password <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
                                         <input

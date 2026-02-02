@@ -425,19 +425,31 @@ const DeptStudents: React.FC = () => {
             {/* Add/Edit Student Modal */}
             <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingStudent(null); setFormData({ email: '', password: '', displayName: '', section: '' }); }} title={editingStudent ? "Edit Student" : "Add Student"}>
                 <form onSubmit={handleCreateStudent} className="space-y-4">
-                    <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
-                    <input placeholder="Section " className="input-field" value={formData.section} onChange={e => setFormData({ ...formData, section: e.target.value })} />
-                    <input
-                        required
-                        type="email"
-                        placeholder="Email"
-                        className={`input-field ${editingStudent ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                        value={formData.email}
-                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        disabled={!!editingStudent}
-                    />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Display Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Display Name" className="input-field w-full" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
+                        <input placeholder="Section" className="input-field w-full" value={formData.section} onChange={e => setFormData({ ...formData, section: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                        <input
+                            required
+                            type="email"
+                            placeholder="Email"
+                            className={`input-field w-full ${editingStudent ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            disabled={!!editingStudent}
+                        />
+                    </div>
                     {!editingStudent && (
-                        <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                            <input required type="password" placeholder="Password" className="input-field w-full" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                        </div>
                     )}
 
                     <button disabled={creating} type="submit" className="w-full py-2.5 bg-brand-lavender-primary text-white font-bold rounded-lg hover:bg-brand-lavender-dark transition shadow-lg shadow-brand-lavender-primary/30 mt-4 disabled:opacity-70">

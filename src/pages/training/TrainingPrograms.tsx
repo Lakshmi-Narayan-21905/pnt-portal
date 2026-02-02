@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Plus, Calendar, Search, Edit, Trash2 } from 'lucide-react';
+import { GraduationCap, Plus, Calendar, Search, Edit, Trash2, Loader2 } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
+import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
@@ -10,9 +11,11 @@ const TrainingPrograms: React.FC = () => {
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [editingId, setEditingId] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
 
     // Form State
     const [formData, setFormData] = useState({
@@ -52,7 +55,25 @@ const TrainingPrograms: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const start = new Date(formData.startDate).getTime();
+        const end = new Date(formData.endDate).getTime();
+
+        if (isNaN(start) || isNaN(end)) {
+            await showAlert("Invalid Date Selection", "error", "Please select valid dates");
+            return;
+        }
+
+        if (end < start) {
+            await showAlert("End Date cannot be before Start Date", "warning", "Invalid Date Range");
+            return;
+        }
+
+        setSubmitting(true);
         try {
+            // ... logic continues ...
+
+
             const trainingPayload = {
                 title: formData.title,
                 description: formData.description,
@@ -61,8 +82,8 @@ const TrainingPrograms: React.FC = () => {
                     branches: formData.branches.split(',').map(b => b.trim()),
                     year: Number(formData.year)
                 },
-                startDate: new Date(formData.startDate).getTime(),
-                endDate: new Date(formData.endDate).getTime()
+                startDate: start,
+                endDate: end
             };
 
             if (editingId) {
@@ -73,8 +94,11 @@ const TrainingPrograms: React.FC = () => {
 
             handleCloseModal();
             fetchTrainings();
+            await showAlert(editingId ? 'Training updated successfully!' : 'Training created successfully!', 'success', 'Success');
         } catch (error) {
-            alert('Failed to save training');
+            await showAlert('Failed to save training program.', 'error', 'Error');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -254,7 +278,14 @@ const TrainingPrograms: React.FC = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full btn-primary mt-6 py-2.5">{editingId ? 'Update Training' : 'Create Training'}</button>
+                    <button disabled={submitting} type="submit" className="w-full btn-primary mt-6 py-2.5 flex justify-center items-center">
+                        {submitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                {editingId ? 'Updating...' : 'Creating...'}
+                            </>
+                        ) : (editingId ? 'Update Training' : 'Create Training')}
+                    </button>
                 </form>
             </Modal>
         </div>

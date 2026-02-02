@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserService } from '../../services/userService';
+import { Loader2 } from 'lucide-react';
 
 const CompleteProfile: React.FC = () => {
     const { userProfile, refreshProfile } = useAuth();
@@ -89,7 +90,7 @@ const CompleteProfile: React.FC = () => {
                         <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                             {/* Personal Details */}
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                                <label className="block text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
                                 <input type="text" required className="mt-1 block w-full input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
                             </div>
 
@@ -99,7 +100,7 @@ const CompleteProfile: React.FC = () => {
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Roll Number</label>
+                                <label className="block text-sm font-medium text-gray-700">Roll Number <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -112,12 +113,12 @@ const CompleteProfile: React.FC = () => {
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <label className="block text-sm font-medium text-gray-700">Phone Number <span className="text-red-500">*</span></label>
                                 <input type="tel" required className="mt-1 block w-full input-field" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Passout Year</label>
+                                <label className="block text-sm font-medium text-gray-700">Passout Year <span className="text-red-500">*</span></label>
                                 <select
                                     required
                                     className="mt-1 block w-full input-field"
@@ -130,7 +131,7 @@ const CompleteProfile: React.FC = () => {
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Current Study Year</label>
+                                <label className="block text-sm font-medium text-gray-700">Current Study Year <span className="text-red-500">*</span></label>
                                 <select
                                     required
                                     className="mt-1 block w-full input-field"
@@ -144,33 +145,33 @@ const CompleteProfile: React.FC = () => {
                                 </select>
                             </div>
                             <div className="sm:col-span-6">
-                                <label className="block text-sm font-medium text-gray-700">Address</label>
+                                <label className="block text-sm font-medium text-gray-700">Address <span className="text-red-500">*</span></label>
                                 <textarea required rows={3} className="mt-1 block w-full input-field" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
                             </div>
 
                             {/* Academic Details */}
                             <div className="sm:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">CGPA</label>
+                                <label className="block text-sm font-medium text-gray-700">CGPA <span className="text-red-500">*</span></label>
                                 <input type="number" step="0.01" required className="mt-1 block w-full input-field" value={formData.cgpa} onChange={e => setFormData({ ...formData, cgpa: e.target.value })} />
                             </div>
 
                             <div className="sm:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">10th Mark (%)</label>
+                                <label className="block text-sm font-medium text-gray-700">10th Mark (%) <span className="text-red-500">*</span></label>
                                 <input type="number" step="0.1" required className="mt-1 block w-full input-field" value={formData.tenthMark} onChange={e => setFormData({ ...formData, tenthMark: e.target.value })} />
                             </div>
 
                             <div className="sm:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">12th Mark (%)</label>
+                                <label className="block text-sm font-medium text-gray-700">12th Mark (%) <span className="text-red-500">*</span></label>
                                 <input type="number" step="0.1" required className="mt-1 block w-full input-field" value={formData.twelfthMark} onChange={e => setFormData({ ...formData, twelfthMark: e.target.value })} />
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Standing Arrears</label>
+                                <label className="block text-sm font-medium text-gray-700">Standing Arrears <span className="text-red-500">*</span></label>
                                 <input type="number" required className="mt-1 block w-full input-field" value={formData.standingArreas} onChange={e => setFormData({ ...formData, standingArreas: e.target.value })} />
                             </div>
 
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">History of Arrears</label>
+                                <label className="block text-sm font-medium text-gray-700">History of Arrears <span className="text-red-500">*</span></label>
                                 <input type="number" required className="mt-1 block w-full input-field" value={formData.historyOfArreas} onChange={e => setFormData({ ...formData, historyOfArreas: e.target.value })} />
                             </div>
 
@@ -182,7 +183,12 @@ const CompleteProfile: React.FC = () => {
                             disabled={submitting}
                             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
-                            {submitting ? 'Saving...' : (userProfile?.profileCompleted ? 'Update Profile' : 'Complete Profile')}
+                            {submitting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    Saving...
+                                </>
+                            ) : (userProfile?.profileCompleted ? 'Update Profile' : 'Complete Profile')}
                         </button>
                     </form>
                 </div>

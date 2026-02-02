@@ -311,11 +311,11 @@ const PlacementCompanies: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto px-2 py-2">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
                             <input required className="input-field w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Company Type</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Company Type <span className="text-red-500">*</span></label>
                             <select required className="input-field w-full" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}>
                                 <option value="">Select Type</option>
                                 {COMPANY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -362,7 +362,7 @@ const PlacementCompanies: React.FC = () => {
                             )}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Target Batch</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Target Batch <span className="text-red-500">*</span></label>
                             <select
                                 required
                                 className="input-field w-full"
@@ -376,7 +376,7 @@ const PlacementCompanies: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Salary / Package</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Salary / Package <span className="text-red-500">*</span></label>
                         <div className="flex rounded-md shadow-sm">
                             <input
                                 required
@@ -395,7 +395,7 @@ const PlacementCompanies: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
                         <textarea required rows={3} placeholder="Job description and details..." className="input-field w-full" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                     </div>
 
@@ -469,23 +469,23 @@ const PlacementCompanies: React.FC = () => {
                         <label className="text-md font-bold text-gray-800 block border-b pb-2">Eligibility Criteria</label>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Min CGPA</label>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">Min CGPA <span className="text-red-500">*</span></label>
                                 <input required type="number" step="0.1" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0.0" className="input-field w-full" value={formData.minCGPA} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, minCGPA: e.target.value })} />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">10th Mark (%)</label>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">10th Mark (%) <span className="text-red-500">*</span></label>
                                 <input required type="number" step="1" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.sslc} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, sslc: e.target.value })} />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">12th Mark (%)</label>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">12th Mark (%) <span className="text-red-500">*</span></label>
                                 <input required type="number" step="1" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.hsc} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, hsc: e.target.value })} />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Standing Arrears</label>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">Standing Arrears <span className="text-red-500">*</span></label>
                                 <input required type="number" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.standingArrears} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, standingArrears: e.target.value })} />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">History of Arrears</label>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">History of Arrears <span className="text-red-500">*</span></label>
                                 <input required type="number" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.historyOfArrears} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, historyOfArrears: e.target.value })} />
                             </div>
                             <div>
@@ -518,11 +518,11 @@ const PlacementCompanies: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Application Deadline <span className="text-red-500">*</span></label>
                             <input required type="date" className="input-field w-full" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Drive Date</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Drive Date <span className="text-red-500">*</span></label>
                             <input
                                 required
                                 type="date"

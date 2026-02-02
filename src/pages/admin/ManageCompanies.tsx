@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAlert } from '../../contexts/AlertContext';
-import { Building2, Plus, Calendar, Trash2 } from 'lucide-react';
+import { Building2, Plus, Calendar, Trash2, Loader2 } from 'lucide-react';
 import { CompanyService } from '../../services/companyService';
 import type { Company } from '../../types';
 import Modal from '../../components/ui/Modal';
@@ -11,6 +11,7 @@ const ManageCompanies: React.FC = () => {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -52,6 +53,13 @@ const ManageCompanies: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (new Date(formData.driveDate) < new Date(formData.deadline)) {
+            await showAlert("Drive Date cannot be before Application Deadline", "warning", "Invalid Dates");
+            return;
+        }
+
+        setSubmitting(true);
         try {
             await CompanyService.addCompany({
                 name: formData.name,
@@ -82,6 +90,8 @@ const ManageCompanies: React.FC = () => {
             await showAlert('Company drive created successfully!', 'success', 'Success');
         } catch (error) {
             await showAlert('Failed to add company.', 'error', 'Error');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -155,18 +165,36 @@ const ManageCompanies: React.FC = () => {
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Company Drive">
                 <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
-                    <input required placeholder="Company Name" className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                    <input required placeholder="Role (e.g. SDE)" className="input-field" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} />
-                    <textarea required placeholder="Description" className="input-field" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-                    <input required placeholder="Salary/Package (e.g. 10 LPA)" className="input-field" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Company Name" className="input-field w-full" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Role (e.g. SDE) <span className="text-red-500">*</span></label>
+                        <input required placeholder="Role (e.g. SDE)" className="input-field w-full" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
+                        <textarea required placeholder="Description" className="input-field w-full" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Salary/Package <span className="text-red-500">*</span></label>
+                        <input required placeholder="Salary/Package (e.g. 10 LPA)" className="input-field w-full" value={formData.salary} onChange={e => setFormData({ ...formData, salary: e.target.value })} />
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <input required type="number" step="0.1" placeholder="Min CGPA" className="input-field" value={formData.minCGPA} onChange={e => setFormData({ ...formData, minCGPA: Number(e.target.value) })} />
-                        <input required type="number" placeholder="Backlogs Allowed" className="input-field" value={formData.backlogs} onChange={e => setFormData({ ...formData, backlogs: Number(e.target.value) })} />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Min CGPA <span className="text-red-500">*</span></label>
+                            <input required type="number" step="0.1" placeholder="Min CGPA" className="input-field w-full" value={formData.minCGPA} onChange={e => setFormData({ ...formData, minCGPA: Number(e.target.value) })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Backlogs Allowed <span className="text-red-500">*</span></label>
+                            <input required type="number" placeholder="Backlogs Allowed" className="input-field w-full" value={formData.backlogs} onChange={e => setFormData({ ...formData, backlogs: Number(e.target.value) })} />
+                        </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Eligible Branches</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Eligible Branches <span className="text-red-500">*</span></label>
                         <div className="grid grid-cols-3 gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
                             {DEPARTMENTS.map(dept => {
                                 const isChecked = formData.branches.split(',').map(s => s.trim()).includes(dept);
@@ -187,16 +215,23 @@ const ManageCompanies: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs text-gray-500">Application Deadline</label>
-                            <input required type="date" className="input-field" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} />
+                            <label className="text-xs text-gray-500 block mb-1">Application Deadline <span className="text-red-500">*</span></label>
+                            <input required type="date" className="input-field w-full" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-500">Drive Date</label>
-                            <input required type="date" className="input-field" value={formData.driveDate} onChange={e => setFormData({ ...formData, driveDate: e.target.value })} />
+                            <label className="text-xs text-gray-500 block mb-1">Drive Date <span className="text-red-500">*</span></label>
+                            <input required type="date" className="input-field w-full" value={formData.driveDate} onChange={e => setFormData({ ...formData, driveDate: e.target.value })} />
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full btn-primary mt-4">Create Drive</button>
+                    <button disabled={submitting} type="submit" className="w-full btn-primary mt-4 flex justify-center items-center">
+                        {submitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Creating...
+                            </>
+                        ) : 'Create Drive'}
+                    </button>
                 </form>
             </Modal>
         </div>
