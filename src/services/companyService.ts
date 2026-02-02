@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Company } from '../types';
+import { AnnouncementService } from './announcementService';
 
 const COLLECTION_NAME = 'companies';
 
@@ -19,8 +20,29 @@ export const CompanyService = {
         try {
             const docRef = await addDoc(collection(db, COLLECTION_NAME), {
                 ...companyData,
-                applicants: []
+                applicants: [],
+                id: '' // Will be ignored by addDoc but needed for type
             });
+
+            // Automated Announcement
+            try {
+                const targetDepts = (companyData.eligibilityCriteria?.branches && companyData.eligibilityCriteria.branches.length > 0)
+                    ? companyData.eligibilityCriteria.branches
+                    : ['all'];
+
+                await AnnouncementService.createAnnouncement({
+                    title: `New Drive: ${companyData.name}`,
+                    content: `A new placement drive for ${companyData.name} has been scheduled.\n\nType: ${companyData.type}\nRole(s): ${companyData.roles.join(', ')}\nDeadline: ${new Date(companyData.deadline).toLocaleDateString()}\n\nCheck 'Company Drives' for more details and to apply!`,
+                    authorId: 'SYSTEM',
+                    authorRole: 'PLACEMENT_HEAD', // Impersonating system/head
+                    authorName: 'System (Auto)',
+                    targetDepts
+                });
+            } catch (annError) {
+                console.warn("Failed to create automated announcement:", annError);
+                // Don't fail the whole operation if announcement fails
+            }
+
             return docRef.id;
         } catch (error) {
             console.error("Error adding company:", error);

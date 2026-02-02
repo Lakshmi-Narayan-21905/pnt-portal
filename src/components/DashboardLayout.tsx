@@ -24,6 +24,34 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [hasUnread, setHasUnread] = useState(false);
+
+    const checkUnread = async () => {
+        if (!userProfile) return;
+        try {
+            const data: number = await import('../services/announcementService').then(m => m.AnnouncementService.getLatestAnnouncementDate(userProfile.department));
+            const lastRead = localStorage.getItem('lastReadAnnouncementTime');
+            if (!lastRead || data > parseInt(lastRead)) {
+                setHasUnread(true);
+            } else {
+                setHasUnread(false);
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    React.useEffect(() => {
+        if (userProfile) {
+            checkUnread();
+        }
+
+        const handleReadEvents = () => {
+            setHasUnread(false);
+        };
+
+        window.addEventListener('announcementsRead', handleReadEvents);
+        return () => window.removeEventListener('announcementsRead', handleReadEvents);
+    }, [userProfile, location.pathname]); // Re-check on nav change too
+
 
     const handleLogout = async () => {
         try {
@@ -179,6 +207,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
 
                     {navItems.map((item) => {
                         const active = isActive(item.path);
+                        const isAnnouncements = item.label === 'Announcements';
+
                         return (
                             <Link
                                 key={item.path}
@@ -201,9 +231,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                                 />
 
                                 {isSidebarOpen && (
-                                    <span className="ml-3 font-medium text-sm truncate">
+                                    <span className="ml-3 font-medium text-sm truncate flex-1 flex items-center justify-between">
                                         {item.label}
+                                        {isAnnouncements && hasUnread && (
+                                            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-sm shadow-red-200"></span>
+                                        )}
                                     </span>
+                                )}
+
+                                {/* Collapsed Unread Dot */}
+                                {!isSidebarOpen && isAnnouncements && hasUnread && (
+                                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
                                 )}
 
                                 {/* Hover Tooltip for Collapsed */}

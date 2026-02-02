@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Eye, EyeOff, Download } from 'lucide-react';
+import { Users, Plus, Eye, EyeOff, Download, Search } from 'lucide-react';
 import type { UserProfile } from '../../types';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
@@ -12,6 +12,7 @@ const ManageCoordinators: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Form State
     const [formData, setFormData] = useState({
@@ -71,7 +72,18 @@ const ManageCoordinators: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
 
                 <h1 className="text-2xl font-bold text-gray-800">Placement Coordinators</h1>
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-3">
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search coordinators..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none w-64 transition"
+                        />
+                    </div>
                     <button
                         onClick={() => {
                             const exportData = coordinators.map(c => ({
@@ -104,10 +116,20 @@ const ManageCoordinators: React.FC = () => {
                 <div className="text-center py-12">Loading...</div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {coordinators.length === 0 && <p className="text-gray-500 col-span-full text-center">No coordinators found.</p>}
-                    {coordinators.map((coord) => (
-                        <div key={coord.uid} className="bg-white border border-gray-100 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex flex-col items-center hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:border-emerald-200 transition-all duration-300 group">
-                            <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mb-4 relative shadow-inner group-hover:bg-emerald-100 transition-colors">
+
+                    {coordinators.filter(coord =>
+                        coord.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        coord.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        coord.department?.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).length === 0 && <p className="text-gray-500 col-span-full text-center">No coordinators found.</p>}
+                    {coordinators.filter(coord =>
+                        coord.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        coord.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        coord.department?.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).map((coord) => (
+                        <div key={coord.uid} className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex flex-col items-center hover:shadow-lg hover:shadow-brand-green-emerald/10 transition group">
+                            <div className="w-20 h-20 rounded-full bg-brand-green-ice flex items-center justify-center mb-4 relative shadow-inner">
+
                                 {coord.photoURL ? (
                                     <img src={coord.photoURL} alt={coord.displayName} className="w-full h-full rounded-full object-cover" />
                                 ) : (

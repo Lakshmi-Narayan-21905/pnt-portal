@@ -1,3 +1,4 @@
+
 import {
     collection,
     addDoc,
@@ -5,11 +6,11 @@ import {
     deleteDoc,
     doc,
     getDocs,
-    getDoc,
     arrayUnion
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Training } from '../types';
+import { AnnouncementService } from './announcementService';
 
 const COLLECTION_NAME = 'trainings';
 
@@ -21,6 +22,25 @@ export const TrainingService = {
                 ...trainingData,
                 participants: []
             });
+
+            // Automated Announcement
+            try {
+                const targetDepts = (trainingData.eligibility?.branches && trainingData.eligibility.branches.length > 0)
+                    ? trainingData.eligibility.branches
+                    : ['all'];
+
+                await AnnouncementService.createAnnouncement({
+                    title: `New Training: ${trainingData.title} `,
+                    content: `A new training program "${trainingData.title}" by ${trainingData.trainer} has been announced.\n\nDuration: ${new Date(trainingData.startDate).toLocaleDateString()} - ${new Date(trainingData.endDate).toLocaleDateString()} \n\nCheck 'My Trainings' to register!`,
+                    authorId: 'SYSTEM',
+                    authorRole: 'TRAINING_HEAD',
+                    authorName: 'System (Auto)',
+                    targetDepts
+                });
+            } catch (annError) {
+                console.warn("Failed to create automated announcement:", annError);
+            }
+
             return docRef.id;
         } catch (error) {
             console.error("Error adding training:", error);

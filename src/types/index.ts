@@ -9,6 +9,7 @@ export type UserRole =
 export interface UserProfile {
     uid: string;
     email: string;
+    photoURL?: string;
     role: UserRole;
     displayName: string;
     rollNo?: string;
@@ -82,4 +83,15 @@ export interface PlacementRecord {
     package?: string; // Optional (LPA)
     academicYear: string; // e.g. "2023-2027" or just "2026"
     createdAt?: number;
+}
+
+export interface Announcement {
+    id: string;
+    title: string;
+    content: string;
+    date: number; // Stored as timestamp
+    authorId: string;
+    authorRole: UserRole;
+    authorName: string;
+    targetDepts: string[]; // Changed from targetDept string to array
 }

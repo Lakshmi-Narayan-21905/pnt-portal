@@ -13,7 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Import images from assets folder
 import logo from '../assets/logo.png';
-import loginBg from '../assets/login-bg.jpg';
+import loginBg from '../assets/pnt5.png';
 import AnimatedBackground from '../components/AnimatedBackground'; // Import Custom Background
 
 const LoginPage: React.FC = () => {
@@ -105,11 +105,13 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+
+        <div className="fixed inset-0 flex items-center justify-center overflow-hidden p-4">
             <AnimatedBackground />
 
-            <div className={`flex w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative z-10 transition-all duration-700 ease-out transform ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
-                <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white relative overflow-y-auto custom-scrollbar">
+            <div className="flex w-full max-w-5xl h-[85vh] max-h-[600px] bg-white rounded-2xl overflow-hidden relative z-10">
+                <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white relative overflow-y-auto">
+
                     {/* Background pattern for form side only */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
                     <div className="w-full max-w-sm relative z-10">
@@ -181,13 +183,16 @@ const LoginPage: React.FC = () => {
                             /* Login Form */
                             <form onSubmit={handleLogin} className="space-y-4">
                                 <div className="group">
-                                    <label className="block text-xs font-medium text-slate-700 mb-1 transition-colors group-focus-within:text-primary-600">
+                                    <label className="block text-xs font-medium text-slate-700 mb-1 transition-colors group-focus-within:text-black">
                                         Email
                                     </label>
                                     <input
                                         type="email"
                                         required
-                                        className="w-full px-3 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white hover:border-primary-300 hover:bg-white transition-all duration-200"
+                                        className="w-full px-3 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 
+        focus:outline-none focus:ring-4 focus:ring-black/20 focus:border-black focus:bg-white 
+        hover:border-black hover:bg-white 
+        transition-all duration-200"
                                         placeholder="mail@example.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -195,14 +200,17 @@ const LoginPage: React.FC = () => {
                                 </div>
 
                                 <div className="group">
-                                    <label className="block text-xs font-medium text-slate-700 mb-1 transition-colors group-focus-within:text-primary-600">
+                                    <label className="block text-xs font-medium text-slate-700 mb-1 transition-colors group-focus-within:text-black">
                                         Password
                                     </label>
                                     <div className="relative">
                                         <input
                                             type={showPassword ? "text" : "password"}
                                             required
-                                            className="w-full px-3 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white hover:border-primary-300 hover:bg-white transition-all duration-200 pr-10"
+                                            className="w-full px-3 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 
+            focus:outline-none focus:ring-4 focus:ring-black/20 focus:border-black focus:bg-white 
+            hover:border-black hover:bg-white 
+            transition-all duration-200 pr-10"
                                             placeholder="••••••••"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
@@ -212,28 +220,47 @@ const LoginPage: React.FC = () => {
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                                         >
-                                            {showPassword ? (
-                                                <EyeOff className="w-5 h-5" />
-                                            ) : (
-                                                <Eye className="w-5 h-5" />
-                                            )}
+                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
                                     </div>
                                 </div>
 
+
+
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 hover:shadow-lg hover:shadow-primary-500/30 focus:outline-none focus:ring-4 focus:ring-primary-500/30 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                                    className="w-full flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-semibold text-white 
+    bg-black hover:bg-gray-900  
+    focus:outline-none focus:ring-4 focus:ring-black/30 
+    disabled:opacity-70 disabled:cursor-not-allowed 
+    transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
                                 >
                                     {loading ? (
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <svg
+                                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
                                         </svg>
                                     ) : null}
                                     {loading ? 'Signing in...' : 'Sign in'}
                                 </button>
+
 
                                 {/* Forgot Password Link */}
                                 <div className="text-left pt-1">
@@ -244,7 +271,7 @@ const LoginPage: React.FC = () => {
                                             setLocalError('');
                                             setResetEmail(email); // Pre-fill if they started typing
                                         }}
-                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium underline underline-offset-4 decoration-primary-300 hover:decoration-primary-500 transition-all duration-200"
+                                        className="text-xs text-black hover:text-black font-medium underline underline-offset-4 decoration-black hover:decoration-black transition-all duration-200"
                                     >
                                         Forgot your password?
                                     </button>
@@ -255,11 +282,13 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 {/* Right Side - Image */}
-                <div className="hidden md:block md:w-1/2 relative rounded-r-2xl overflow-hidden">
+
+                <div className="hidden lg:block lg:w-1/2 relative rounded-r-2xl overflow-hidden bg-black">
+
                     <img
                         src={loginBg}
                         alt="College Library"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-contain object-center"
                     />
                     {/* Green overlay for branding */}
 

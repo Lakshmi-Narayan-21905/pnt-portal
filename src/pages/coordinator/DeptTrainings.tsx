@@ -2,18 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Calendar } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
+import { useAuth } from '../../contexts/AuthContext';
 import type { Training } from '../../types';
 
 const DeptTrainings: React.FC = () => {
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { userProfile } = useAuth();
 
     const fetchTrainings = async () => {
         setLoading(true);
         try {
             const data = await TrainingService.getAllTrainings();
-            setTrainings(data);
+            // Filter trainings to only show those with coordinator's department in eligible branches
+            const filteredData = data.filter(training => {
+                const branches = training.eligibility?.branches || [];
+                // Show if no branches specified (open to all) or if coordinator's dept is in branches
+                return branches.length === 0 || (userProfile?.department && branches.includes(userProfile.department));
+            });
+            setTrainings(filteredData);
         } catch (error) {
             console.error(error);
         } finally {

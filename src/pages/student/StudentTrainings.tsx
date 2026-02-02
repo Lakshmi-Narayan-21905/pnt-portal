@@ -3,7 +3,7 @@ import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
-import { GraduationCap, Calendar, CheckCircle, Info } from 'lucide-react';
+import { Calendar, CheckCircle, Info } from 'lucide-react';
 import Modal from '../../components/Modal';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import {
     Users,
@@ -14,6 +15,7 @@ import {
     CheckCircle2,
     Clock
 } from 'lucide-react';
+
 import { TrainingService } from '../../services/trainingService';
 import { UserService } from '../../services/userService';
 import type { Training, UserProfile } from '../../types';

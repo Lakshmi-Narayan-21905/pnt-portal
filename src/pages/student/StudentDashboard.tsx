@@ -31,9 +31,9 @@ const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon,
             <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors">
                 <Icon className="w-6 h-6 text-indigo-600" />
             </div>
-            <span className="flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">
-                +12% <span className="ml-1 text-emerald-600/70 font-normal">vs last month</span>
-            </span>
+
+
+
         </div>
         <div className="relative z-10">
             <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">{title}</h3>
@@ -87,12 +87,12 @@ const StudentDashboard: React.FC = () => {
                 const now = Date.now();
                 const activeDrives = relevantCompanies.filter(c => c.deadline && c.deadline > now).length;
                 const myApplications = relevantCompanies.filter(c => c.applicants && c.applicants.includes(userProfile.uid)).length;
-                const myTrainings = relevantTrainings.filter(t => t.participants && t.participants.includes(userProfile.uid) && t.startDate > now).length;
+                const upcomingTrainingsCount = relevantTrainings.filter(t => t.startDate > now).length;
 
                 setStats({
                     activeDrives,
                     myApplications,
-                    upcomingTrainings: myTrainings
+                    upcomingTrainings: upcomingTrainingsCount
                 });
 
                 // Transform for Calendar with Filters
@@ -173,7 +173,7 @@ const StudentDashboard: React.FC = () => {
                 <StatCard
                     title="Upcoming Trainings"
                     count={stats.upcomingTrainings}
-                    subtitle="Scheduled sessions"
+                    subtitle="Programs available"
                     icon={GraduationCap}
                     delay={0.3}
                 />
