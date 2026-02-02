@@ -3,7 +3,6 @@ import {
     Users,
     Activity,
     Database,
-    Server,
     Download,
     RefreshCw
 } from 'lucide-react';
@@ -26,7 +25,7 @@ import { useTheme } from '../../hooks/useTheme'; // Added import
 
 const AdminDashboard: React.FC = () => {
     const theme = useTheme(); // Init hook
-    const { userProfile } = useAuth();
+    const { } = useAuth();
     const [loading, setLoading] = useState(true);
     const [lastRefresh, setLastRefresh] = useState(new Date());
 
@@ -232,7 +231,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* 3. User Analytics & DB Growth */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6">
+                <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">User Distribution</h3>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
@@ -266,7 +265,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6">
+                <div className={`lg:col-span-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">Database Growth (Writes)</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -292,7 +291,7 @@ const AdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
 
                 {/* Collection Overview */}
-                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+                <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} overflow-hidden`}>
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Collection Overview</h3>
                         <Database className="w-4 h-4 text-gray-400" />
@@ -333,7 +332,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Logs (Now full width since Insights are gone) */}
-                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+                <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} overflow-hidden`}>
                     <div className="p-4 border-b border-gray-100 bg-gray-50">
                         <h3 className="font-bold text-gray-800">Recent System Events</h3>
                     </div>

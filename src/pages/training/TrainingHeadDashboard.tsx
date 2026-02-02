@@ -248,7 +248,7 @@ const TrainingHeadDashboard: React.FC = () => {
             </div>
 
             {/* KPI Cards Row 2: Coordinators (Smaller / Concise) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/50 p-4 rounded-xl border border-white/60">
+            <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/50 p-4 rounded-xl border ${theme.border}`}>
                 <div className="flex items-center gap-4">
                     <div className="p-3 rounded-full bg-indigo-50 text-indigo-600">
                         <Users className="w-6 h-6" />
@@ -272,7 +272,7 @@ const TrainingHeadDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* 1. Status Distribution (Donut) */}
-                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Program Status</h3>
                         <PieIcon className="w-5 h-5 text-gray-400" />
@@ -301,7 +301,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 2. Timeline (Area/Line) - Spans 2 Cols */}
-                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Training Frequency (Monthly)</h3>
                         <TrendingUp className="w-5 h-5 text-gray-400" />
@@ -326,7 +326,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 3. Top Programs by Participation */}
-                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Highest Participation Programs</h3>
                         <Users className="w-5 h-5 text-gray-400" />
@@ -349,7 +349,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 4. Dept Coordinators */}
-                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Coordinators by Dept</h3>
                         <BarChart3 className="w-5 h-5 text-gray-400" />
@@ -369,7 +369,7 @@ const TrainingHeadDashboard: React.FC = () => {
             </div>
 
             {/* Active Programs Report Table */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className={`bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border ${theme.border} overflow-hidden`}>
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-green-100 text-green-700 rounded-lg">

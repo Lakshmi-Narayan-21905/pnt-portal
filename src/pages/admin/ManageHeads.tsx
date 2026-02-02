@@ -6,7 +6,10 @@ import { ExcelParser } from '../../utils/excelParser';
 import Modal from '../../components/ui/Modal';
 import { Plus, Upload, Eye, EyeOff } from 'lucide-react';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const ManageHeads: React.FC = () => {
+    const theme = useTheme();
     const [activeTab, setActiveTab] = useState<'PLACEMENT' | 'TRAINING'>('PLACEMENT');
     const [heads, setHeads] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(false);
@@ -154,7 +157,7 @@ const ManageHeads: React.FC = () => {
             {loading ? (
                 <div className="text-center py-10">Loading...</div>
             ) : (
-                <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                     <table className="min-w-full divide-y divide-gray-100">
                         <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
                             <tr>

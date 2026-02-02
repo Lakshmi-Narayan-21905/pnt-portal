@@ -7,8 +7,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
+import { useTheme } from '../../hooks/useTheme';
 
 const ClassStudents: React.FC = () => {
+    const theme = useTheme();
     const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [students, setStudents] = useState<UserProfile[]>([]);
@@ -195,7 +197,7 @@ const ClassStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-orange-50/50 backdrop-blur-sm border-b border-orange-100">
                         <tr>

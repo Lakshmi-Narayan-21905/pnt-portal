@@ -6,8 +6,10 @@ import { AdminAuthService } from '../../services/adminAuthService';
 import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
 import { useAlert } from '../../contexts/AlertContext';
+import { useTheme } from '../../hooks/useTheme';
 
 const ManageCoordinators: React.FC = () => {
+    const theme = useTheme();
     const [coordinators, setCoordinators] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -178,7 +180,7 @@ const ManageCoordinators: React.FC = () => {
                         coord.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         coord.department?.toLowerCase().includes(searchQuery.toLowerCase())
                     ).map((coord) => (
-                        <div key={coord.uid} className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex flex-col items-center hover:shadow-lg hover:shadow-brand-green-emerald/10 transition group relative">
+                        <div key={coord.uid} className={`bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border ${theme.border} flex flex-col items-center hover:shadow-lg hover:shadow-brand-green-emerald/10 transition group relative`}>
                             {/* Action Buttons */}
                             <div className="absolute top-4 right-4 flex space-x-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button

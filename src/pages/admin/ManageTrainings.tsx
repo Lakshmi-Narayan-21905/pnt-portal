@@ -6,7 +6,10 @@ import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const ManageTrainings: React.FC = () => {
+    const theme = useTheme();
     const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,195 +52,196 @@ const ManageTrainings: React.FC = () => {
         fetchTrainings();
     }, []);
 
-    e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    if (new Date(formData.endDate) < new Date(formData.startDate)) {
-        await showAlert("End Date cannot be before Start Date", "warning", "Invalid Date Range");
-        return;
-    }
+        if (new Date(formData.endDate) < new Date(formData.startDate)) {
+            await showAlert("End Date cannot be before Start Date", "warning", "Invalid Date Range");
+            return;
+        }
 
-    setSubmitting(true);
-    try {
-        await TrainingService.addTraining({
-            title: formData.title,
-            description: formData.description,
-            trainer: formData.trainer,
-            eligibility: {
-                branches: formData.branches.split(',').map(b => b.trim()),
-                year: Number(formData.year)
-            },
-            startDate: new Date(formData.startDate).getTime(),
-            endDate: new Date(formData.endDate).getTime()
-        });
-        setIsModalOpen(false);
-        fetchTrainings();
-        setFormData({
-            title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
-        });
-        await showAlert('Training program created successfully!', 'success', 'Success');
-    } catch (error) {
-        await showAlert('Failed to add training.', 'error', 'Error');
-    } finally {
-        setSubmitting(false);
-    }
-};
+        setSubmitting(true);
+        try {
+            await TrainingService.addTraining({
+                title: formData.title,
+                description: formData.description,
+                trainer: formData.trainer,
+                eligibility: {
+                    branches: formData.branches.split(',').map(b => b.trim()),
+                    year: Number(formData.year)
+                },
+                startDate: new Date(formData.startDate).getTime(),
+                endDate: new Date(formData.endDate).getTime()
+            });
+            setIsModalOpen(false);
+            fetchTrainings();
+            setFormData({
+                title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
+            });
+            await showAlert('Training program created successfully!', 'success', 'Success');
+        } catch (error) {
+            await showAlert('Failed to add training.', 'error', 'Error');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
-const handleDelete = async (id: string) => {
-    if (await showConfirm('Are you sure you want to delete this training program?', 'Confirm Delete', 'Yes, Delete', 'delete')) {
-        await TrainingService.deleteTraining(id);
-        await showAlert('Training deleted successfully.', 'success', 'Deleted');
-        fetchTrainings();
-    }
-};
+    const handleDelete = async (id: string) => {
+        if (await showConfirm('Are you sure you want to delete this training program?', 'Confirm Delete', 'Yes, Delete', 'delete')) {
+            await TrainingService.deleteTraining(id);
+            await showAlert('Training deleted successfully.', 'success', 'Deleted');
+            fetchTrainings();
+        }
+    };
 
-return (
-    <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Training Programs</h1>
-            <div className="flex space-x-2">
-                <button
-                    onClick={() => {
-                        const exportData = trainings.map(t => ({
-                            Title: t.title,
-                            Trainer: t.trainer,
-                            Branches: t.eligibility?.branches?.join(', '),
-                            Year: t.eligibility?.year,
-                            StartDate: new Date(t.startDate).toLocaleDateString(),
-                            EndDate: new Date(t.endDate).toLocaleDateString()
-                        }));
-                        import('../../utils/excelParser').then(mod => {
-                            mod.ExcelParser.exportToExcel(exportData, 'Trainings_List');
-                        });
-                    }}
-                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                    title="Export Trainings"
-                >
-                    <Download className="w-5 h-5 mr-2" />
-                    Export
-                </button>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Add Training
-                </button>
+    return (
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Training Programs</h1>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => {
+                            const exportData = trainings.map(t => ({
+                                Title: t.title,
+                                Trainer: t.trainer,
+                                Branches: t.eligibility?.branches?.join(', '),
+                                Year: t.eligibility?.year,
+                                StartDate: new Date(t.startDate).toLocaleDateString(),
+                                EndDate: new Date(t.endDate).toLocaleDateString()
+                            }));
+                            import('../../utils/excelParser').then(mod => {
+                                mod.ExcelParser.exportToExcel(exportData, 'Trainings_List');
+                            });
+                        }}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        title="Export Trainings"
+                    >
+                        <Download className="w-5 h-5 mr-2" />
+                        Export
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Add Training
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
-                    <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Training Title</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Trainer</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Duration</th>
-                        <th className="px-6 py-4 text-right text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-50">
-                    {loading ? (
-                        <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
-                    ) : trainings.length === 0 ? (
-                        <tr><td colSpan={4} className="p-4 text-center">No trainings found.</td></tr>
-                    ) : (
-                        trainings.map((training) => (
-                            <tr key={training.id} className="hover:bg-indigo-50/30 transition-colors group">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0 h-10 w-10 bg-indigo-100/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                            <GraduationCap className="h-5 w-5 text-indigo-600" />
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
+                        <tr>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Training Title</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Trainer</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Duration</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-50">
+                        {loading ? (
+                            <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
+                        ) : trainings.length === 0 ? (
+                            <tr><td colSpan={4} className="p-4 text-center">No trainings found.</td></tr>
+                        ) : (
+                            trainings.map((training) => (
+                                <tr key={training.id} className="hover:bg-indigo-50/30 transition-colors group">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 h-10 w-10 bg-indigo-100/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <GraduationCap className="h-5 w-5 text-indigo-600" />
+                                            </div>
+                                            <div className="ml-4">
+                                                <div className="text-sm font-medium text-gray-900">{training.title}</div>
+                                                <div className="text-xs text-gray-500">{training.eligibility?.branches?.join(', ')}</div>
+                                            </div>
                                         </div>
-                                        <div className="ml-4">
-                                            <div className="text-sm font-medium text-gray-900">{training.title}</div>
-                                            <div className="text-xs text-gray-500">{training.eligibility?.branches?.join(', ')}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{training.trainer}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {new Date(training.startDate).toLocaleDateString()} - {new Date(training.endDate).toLocaleDateString()}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button onClick={() => handleDelete(training.id)} className="text-red-600 hover:text-red-900">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{training.trainer}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {new Date(training.startDate).toLocaleDateString()} - {new Date(training.endDate).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button onClick={() => handleDelete(training.id)} className="text-red-600 hover:text-red-900">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Training Program">
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Training Title <span className="text-red-500">*</span></label>
-                    <input required placeholder="Training Title" className="input-field w-full" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Trainer / Organization <span className="text-red-500">*</span></label>
-                    <input required placeholder="Trainer / Organization" className="input-field w-full" value={formData.trainer} onChange={e => setFormData({ ...formData, trainer: e.target.value })} />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
-                    <textarea required placeholder="Description" className="input-field w-full" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Target Branches</label>
-                    <div className="grid grid-cols-3 gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
-                        {DEPARTMENTS.map(dept => {
-                            const isChecked = formData.branches.split(',').map(s => s.trim()).includes(dept);
-                            return (
-                                <label key={dept} className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => handleBranchToggle(dept)}
-                                        className="rounded text-primary-600 focus:ring-primary-500"
-                                    />
-                                    <span className="text-sm text-gray-700">{dept}</span>
-                                </label>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <label className="text-sm text-gray-700">Target Year:</label>
-                    <select className="input-field w-20" value={formData.year} onChange={e => setFormData({ ...formData, year: Number(e.target.value) })}>
-                        <option value={1}>1</option>
-                        <option value={2}>2</option>
-                        <option value={3}>3</option>
-                        <option value={4}>4</option>
-                    </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Training Program">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="text-xs text-gray-500 block mb-1">Start Date <span className="text-red-500">*</span></label>
-                        <input required type="date" className="input-field w-full" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Training Title <span className="text-red-500">*</span></label>
+                        <input required placeholder="Training Title" className="input-field w-full" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
                     </div>
                     <div>
-                        <label className="text-xs text-gray-500 block mb-1">End Date <span className="text-red-500">*</span></label>
-                        <input required type="date" className="input-field w-full" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Trainer / Organization <span className="text-red-500">*</span></label>
+                        <input required placeholder="Trainer / Organization" className="input-field w-full" value={formData.trainer} onChange={e => setFormData({ ...formData, trainer: e.target.value })} />
                     </div>
-                </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
+                        <textarea required placeholder="Description" className="input-field w-full" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                    </div>
 
-                <button disabled={submitting} type="submit" className="w-full btn-primary mt-4 flex justify-center items-center">
-                    {submitting ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            Creating...
-                        </>
-                    ) : 'Create Training'}
-                </button>
-            </form>
-        </Modal>
-    </div>
-);
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Target Branches</label>
+                        <div className="grid grid-cols-3 gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
+                            {DEPARTMENTS.map(dept => {
+                                const isChecked = formData.branches.split(',').map(s => s.trim()).includes(dept);
+                                return (
+                                    <label key={dept} className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => handleBranchToggle(dept)}
+                                            className="rounded text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm text-gray-700">{dept}</span>
+                                    </label>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <label className="text-sm text-gray-700">Target Year:</label>
+                        <select className="input-field w-20" value={formData.year} onChange={e => setFormData({ ...formData, year: Number(e.target.value) })}>
+                            <option value={1}>1</option>
+                            <option value={2}>2</option>
+                            <option value={3}>3</option>
+                            <option value={4}>4</option>
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs text-gray-500 block mb-1">Start Date <span className="text-red-500">*</span></label>
+                            <input required type="date" className="input-field w-full" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-500 block mb-1">End Date <span className="text-red-500">*</span></label>
+                            <input required type="date" className="input-field w-full" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                        </div>
+                    </div>
+
+                    <button disabled={submitting} type="submit" className="w-full btn-primary mt-4 flex justify-center items-center">
+                        {submitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Creating...
+                            </>
+                        ) : 'Create Training'}
+                    </button>
+                </form>
+            </Modal>
+        </div>
+    );
 };
 
 export default ManageTrainings;

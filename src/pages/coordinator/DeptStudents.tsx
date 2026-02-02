@@ -19,7 +19,10 @@ interface PreviewData {
     message?: string;
 }
 
+import { useTheme } from '../../hooks/useTheme';
+
 const DeptStudents: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [students, setStudents] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -332,7 +335,7 @@ const DeptStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-purple-50/50 backdrop-blur-sm border-b border-purple-100">
                         <tr>

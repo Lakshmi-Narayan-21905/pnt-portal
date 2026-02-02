@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Upload, Search, Download, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Upload, Download, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import type { UserProfile, UserRole } from '../../types';
@@ -16,7 +16,10 @@ const ROLES: { id: UserRole; label: string }[] = [
     { id: 'STUDENT', label: 'Students' },
 ];
 
+import { useTheme } from '../../hooks/useTheme';
+
 const ManageUsers: React.FC = () => {
+    const theme = useTheme();
     const [activeTab, setActiveTab] = useState<UserRole>('PLACEMENT_HEAD');
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -240,7 +243,7 @@ const ManageUsers: React.FC = () => {
             </div>
 
             {/* User List */}
-            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-100">
                         <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">

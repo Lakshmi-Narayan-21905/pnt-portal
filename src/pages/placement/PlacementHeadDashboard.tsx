@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard,
     Users,
     Building2,
     Briefcase,
@@ -353,7 +352,7 @@ const PlacementHeadDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* 3. Alerts & Notifications (Top Priority) */}
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-bold text-gray-800 flex items-center gap-2">
                             <AlertCircle className="w-5 h-5 text-gray-400" /> Action Required
@@ -378,7 +377,7 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 4. Drive Status & Funnel */}
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">Recruitment Drive Status</h3>
                     <div className="h-48">
                         <ResponsiveContainer width="100%" height="100%">
@@ -404,7 +403,7 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 5. Placement Status */}
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">Student Placement Status</h3>
                     <div className="h-64 relative">
                         <ResponsiveContainer width="100%" height="100%">
@@ -438,7 +437,7 @@ const PlacementHeadDashboard: React.FC = () => {
 
             {/* 6. Recruitment Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-gray-800">Top Recruiters (Offers)</h3>
                         <BarChart3 className="w-5 h-5 text-gray-400" />
@@ -460,7 +459,7 @@ const PlacementHeadDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-gray-800">Highest Registration Drives</h3>
                         <Users className="w-5 h-5 text-gray-400" />
@@ -481,7 +480,7 @@ const PlacementHeadDashboard: React.FC = () => {
             {/* 7. Department & Salary  */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <div className="lg:col-span-2 bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`lg:col-span-2 bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-gray-800">Students Placed by Department</h3>
                         <Users className="w-5 h-5 text-gray-400" />
@@ -502,7 +501,7 @@ const PlacementHeadDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">Package Distribution</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -531,7 +530,7 @@ const PlacementHeadDashboard: React.FC = () => {
             {/* 8. Recent Tables */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Active Drives List */}
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} overflow-hidden`}>
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Live & Upcoming Drives</h3>
                         <button onClick={() => navigate('../companies')} className="text-xs text-blue-600 font-medium hover:underline">View All</button>
@@ -578,7 +577,7 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Placements List */}
-                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <div className={`bg-white/70 backdrop-blur-md rounded-xl shadow-md border ${theme.border} overflow-hidden`}>
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Recent Placements</h3>
                         <button onClick={() => navigate('../records')} className="text-xs text-blue-600 font-medium hover:underline">View All</button>

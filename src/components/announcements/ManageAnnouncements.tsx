@@ -3,8 +3,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { AnnouncementService } from '../../services/announcementService';
 import type { Announcement } from '../../types';
 import { Send, Trash2, AlertCircle, Calendar, User, Pencil, X } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 const ManageAnnouncements: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -116,7 +118,7 @@ const ManageAnnouncements: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className={`bg-white rounded-xl shadow-sm border ${theme.border} p-6`}>
                 <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <Send className="w-5 h-5 text-indigo-600" />
                     {editingId ? 'Edit Announcement' : 'Create Announcement'}
@@ -184,7 +186,7 @@ const ManageAnnouncements: React.FC = () => {
                 </form>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className={`bg-white rounded-xl shadow-sm border ${theme.border} p-6`}>
                 <h3 className="text-lg font-bold text-gray-800 mb-4">You Recently Posted</h3>
 
                 {fetching ? (

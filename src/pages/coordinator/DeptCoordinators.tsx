@@ -5,8 +5,10 @@ import { UserService } from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
+import { useTheme } from '../../hooks/useTheme';
 
 const DeptCoordinators: React.FC = () => {
+    const theme = useTheme();
     const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [coordinators, setCoordinators] = useState<UserProfile[]>([]);
@@ -109,7 +111,7 @@ const DeptCoordinators: React.FC = () => {
                 {/* Removed Export/Add buttons to match simplified "Section View" request */}
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+            <div className={`bg-white/70 backdrop-blur-md shadow-sm border ${theme.border} rounded-xl overflow-hidden`}>
                 <table className="min-w-full divide-y divide-brand-lavender-light/30">
                     <thead className="bg-brand-lavender-ice/50">
                         <tr>
@@ -206,3 +208,4 @@ const DeptCoordinators: React.FC = () => {
 };
 
 export default DeptCoordinators;
+// Force refresh

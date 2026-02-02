@@ -8,7 +8,10 @@ import { DEPARTMENTS, COMPANY_TYPES, JOB_ROLES } from '../../utils/constants';
 import { useAlert } from '../../contexts/AlertContext';
 import { formatDate } from '../../utils/dateUtils';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const PlacementCompanies: React.FC = () => {
+    const theme = useTheme();
     const currentYear = new Date().getFullYear();
     const nextYear = currentYear + 1;
 
@@ -220,26 +223,7 @@ const PlacementCompanies: React.FC = () => {
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Company Drives</h1>
-                <button
-                    onClick={() => {
-                        setEditMode(false);
-                        setSelectedCompany(null);
-                        setFormData({
-                            name: '', description: '', roles: '', type: '', salary: '',
-                            targetYear: new Date().getFullYear().toString(), minCGPA: '', sslc: '', hsc: '',
-                            standingArrears: '', historyOfArrears: '', firstRoundCount: '',
-                            branches: '', deadline: '', driveDate: '', rounds: [''], requirements: ['']
-                        });
-                        setIsModalOpen(true)
-                    }}
-                    className="flex items-center px-4 py-2 bg-brand-green-primary text-white rounded-lg hover:bg-brand-green-dark transition shadow-lg shadow-brand-green-primary/30"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Schedule Drive
-                </button>
-            </div>
+            {/* ... (header) ... */}
 
             {loading ? (
                 <div className="text-center">Loading...</div>
@@ -250,7 +234,7 @@ const PlacementCompanies: React.FC = () => {
                         <div
                             key={company.id}
                             onClick={() => handleCardClick(company)}
-                            className="bg-white border border-gray-100 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:border-emerald-200 transition-all duration-300 cursor-pointer relative group flex flex-col h-full"
+                            className={`bg-white border ${theme.border} rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:border-emerald-200 transition-all duration-300 cursor-pointer relative group flex flex-col h-full`}
                         >
                             {/* Edit/Delete Actions */}
                             <div className="absolute top-4 right-4 flex space-x-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-10">

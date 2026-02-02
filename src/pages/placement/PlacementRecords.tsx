@@ -18,7 +18,10 @@ interface PreviewRecord {
     message?: string;
 }
 
+import { useTheme } from '../../hooks/useTheme';
+
 const PlacementRecords: React.FC = () => {
+    const theme = useTheme();
     const { showAlert, showConfirm } = useAlert();
     const [records, setRecords] = useState<PlacementRecord[]>([]);
     const [loading, setLoading] = useState(true);
@@ -300,7 +303,7 @@ const PlacementRecords: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-emerald-50/50 backdrop-blur-sm border-b border-emerald-100">
                         <tr>

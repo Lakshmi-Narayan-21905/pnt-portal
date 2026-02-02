@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import type { UserProfile } from '../../types';
 import { DEPARTMENTS } from '../../utils/constants';
@@ -8,6 +8,7 @@ import { PlacementRecordService } from '../../services/placementRecordService';
 import type { PlacementRecord } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { Briefcase } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 const PlacementDetailsSection: React.FC<{ rollNo?: string }> = ({ rollNo }) => {
     const [records, setRecords] = useState<PlacementRecord[]>([]);
@@ -74,6 +75,8 @@ const PlacementStudents: React.FC = () => {
     const [verificationFilter, setVerificationFilter] = useState('');
     const [selectedStudent, setSelectedStudent] = useState<UserProfile | null>(null);
     const [placementStatusFilter, setPlacementStatusFilter] = useState('');
+
+    const theme = useTheme();
 
     useEffect(() => {
         const load = async () => {
@@ -184,7 +187,7 @@ const PlacementStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-emerald-50/50 backdrop-blur-sm border-b border-emerald-100">
                         <tr>
