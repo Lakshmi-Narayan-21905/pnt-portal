@@ -251,7 +251,6 @@ const ManageUsers: React.FC = () => {
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Name</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Email</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Department</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Role</th>
                                 {canAdd && <th className="px-6 py-4 text-right text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Actions</th>}
                             </tr>
                         </thead>
@@ -275,11 +274,6 @@ const ManageUsers: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.department || '-'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                {activeTab.replace('_', ' ')}
-                                            </span>
-                                        </td>
                                         {canAdd && (
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <button
