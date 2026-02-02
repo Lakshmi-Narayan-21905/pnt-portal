@@ -40,6 +40,7 @@ import CompleteProfile from './pages/student/CompleteProfile';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentDrives from './pages/student/StudentDrives';
 import StudentTrainings from './pages/student/StudentTrainings';
+import StudentAnnouncements from './components/announcements/StudentAnnouncements';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 
 const App: React.FC = () => {
@@ -103,6 +104,12 @@ const App: React.FC = () => {
           <Route path="/class-coordinator" element={<ClassCoordinatorLayout />}>
             <Route path="dashboard" element={<ClassCoordinatorDashboard />} />
             <Route path="students" element={<ClassStudents />} />
+
+            {/* Student Features for Coordinator */}
+            <Route path="profile" element={<StudentProfile />} />
+            <Route path="drives" element={<StudentDrives />} />
+            <Route path="trainings" element={<StudentTrainings />} />
+            <Route path="announcements" element={<StudentAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>

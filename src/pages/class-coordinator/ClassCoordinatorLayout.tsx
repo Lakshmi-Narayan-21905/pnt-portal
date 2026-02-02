@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, LogOut, Menu, X, UserCircle, Briefcase, Award, Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ClassCoordinatorLayout: React.FC = () => {
@@ -23,6 +23,11 @@ const ClassCoordinatorLayout: React.FC = () => {
     const navItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/class-coordinator/dashboard' },
         { icon: Users, label: 'My Students', path: '/class-coordinator/students' },
+        // Student Features
+        { icon: UserCircle, label: 'My Profile', path: '/class-coordinator/profile' },
+        { icon: Briefcase, label: 'Drives', path: '/class-coordinator/drives' },
+        { icon: Award, label: 'Trainings', path: '/class-coordinator/trainings' },
+        { icon: Bell, label: 'Announcements', path: '/class-coordinator/announcements' },
     ];
 
     return (
