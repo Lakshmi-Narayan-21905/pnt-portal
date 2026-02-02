@@ -274,7 +274,7 @@ const TrainingPrograms: React.FC = () => {
                         </div>
                         <div>
                             <label className="text-sm font-medium text-gray-700 mb-1">End Date</label>
-                            <input required type="date" className="input-field w-full" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                            <input required type="date" min={formData.startDate} className="input-field w-full" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
                         </div>
                     </div>
 
