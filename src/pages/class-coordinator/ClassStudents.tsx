@@ -145,7 +145,7 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
-                await showAlert('Student approved successfully', 'success', 'Approved');
+                await showAlert('Student approved successfully', 'success', 'Approved', { hideButton: true });
             } catch (e) {
                 await showAlert('Failed to approve', 'error', 'Error');
             }
@@ -163,7 +163,7 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
-                await showAlert('Student declined and profile reset', 'info', 'Declined');
+                await showAlert('Student declined and profile reset', 'info', 'Declined', { hideButton: true });
             } catch (e) {
                 await showAlert('Failed to decline', 'error', 'Error');
             }
