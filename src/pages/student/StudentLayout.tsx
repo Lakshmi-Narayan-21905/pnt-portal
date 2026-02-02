@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, User, Briefcase, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, User, Briefcase, GraduationCap, Bell } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 
 const StudentLayout: React.FC = () => {
@@ -8,7 +8,7 @@ const StudentLayout: React.FC = () => {
         { icon: User, label: 'My Profile', path: '/student/profile' },
         { icon: Briefcase, label: 'Company Drives', path: '/student/drives' }, // Placeholder for now
         { icon: GraduationCap, label: 'My Trainings', path: '/student/trainings' },
-        { icon: LayoutDashboard, label: 'Announcements', path: '/student/announcements' },
+        { icon: Bell, label: 'Announcements', path: '/student/announcements' },
     ];
 
     return (

@@ -12,6 +12,9 @@ const StudentAnnouncements: React.FC = () => {
     useEffect(() => {
         if (userProfile && userProfile.department) {
             fetchAnnouncements();
+            // Mark as read
+            localStorage.setItem('lastReadAnnouncementTime', Date.now().toString());
+            window.dispatchEvent(new Event('announcementsRead'));
         }
     }, [userProfile]);
 
@@ -58,8 +61,8 @@ const StudentAnnouncements: React.FC = () => {
                             <div className="flex justify-between items-start mb-3">
                                 <h3 className="text-lg font-bold text-gray-900">{ann.title}</h3>
                                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${ann.authorRole.includes('HEAD')
-                                        ? 'bg-purple-100 text-purple-700'
-                                        : 'bg-blue-100 text-blue-700'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : 'bg-blue-100 text-blue-700'
                                     }`}>
                                     {ann.authorRole === 'TRAINING_HEAD' ? 'Training Cell' :
                                         ann.authorRole === 'PLACEMENT_HEAD' ? 'Placement Cell' : 'Dept Coordinator'}
@@ -79,7 +82,7 @@ const StudentAnnouncements: React.FC = () => {
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <User className="w-3 h-3" />
-                                    Posted by {ann.authorName}
+                                    To: {ann.targetDepts?.includes('all') ? 'All Depts' : (ann.targetDepts?.join(', ') || 'Me')}
                                 </span>
                             </div>
                         </div>

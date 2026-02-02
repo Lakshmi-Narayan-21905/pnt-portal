@@ -4,23 +4,22 @@ import {
     query,
     where,
     getDocs,
-    orderBy,
     deleteDoc,
-    doc,
-    serverTimestamp
+    doc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Announcement } from '../types';
 
 const COLLECTION_NAME = 'announcements';
+const collectionRef = collection(db, COLLECTION_NAME);
 
 export const AnnouncementService = {
     // Create new announcement
     createAnnouncement: async (announcement: Omit<Announcement, 'id' | 'date'>) => {
         try {
-            await addDoc(collection(db, COLLECTION_NAME), {
+            await addDoc(collectionRef, {
                 ...announcement,
-                date: Date.now() // Use client timestamp for simplicity in sorting, or serverTimestamp if needed
+                date: Date.now()
             });
         } catch (error) {
             console.error("Error creating announcement:", error);
@@ -28,22 +27,89 @@ export const AnnouncementService = {
         }
     },
 
+    // Get latest announcement date (for unread Badge)
+    getLatestAnnouncementDate: async (studentDept?: string): Promise<number> => {
+        try {
+            let maxDate = 0;
+            const queries = [
+                query(collectionRef, where('targetDepts', 'array-contains', 'all')),
+                query(collectionRef, where('targetDept', '==', 'all'))
+            ];
+
+            if (studentDept) {
+                queries.push(query(collectionRef, where('targetDepts', 'array-contains', studentDept)));
+                queries.push(query(collectionRef, where('targetDept', '==', studentDept)));
+            }
+
+            for (const q of queries) {
+                try {
+                    const snap = await getDocs(q);
+                    snap.forEach(doc => {
+                        const d = doc.data().date;
+                        if (d && d > maxDate) maxDate = d;
+                    });
+                } catch (ignore) { }
+            }
+
+            return maxDate;
+        } catch (error) {
+            console.error("Error fetching latest announcement date:", error);
+            return 0;
+        }
+    },
+
     // Get announcements relevant to a student
     getAnnouncementsForStudent: async (studentDept?: string): Promise<Announcement[]> => {
         try {
             const announcements: Announcement[] = [];
-            const collectionRef = collection(db, COLLECTION_NAME);
 
-            // 1. Fetch 'all' target announcements (HEADS)
-            const qAll = query(collectionRef, where('targetDept', '==', 'all'));
+            // Query: targetDepts contains 'all' OR 'studentDept'
+            // Firestore 'array-contains' only allows one value per query if we want to be simple (no OR).
+            // Actually, we can just fetch where targetDepts contains 'all' AND where targetDepts contains 'studentDept' separately and merge.
+
+            // 1. Fetch 'all' target announcements (New Schema)
+            const qAll = query(collectionRef, where('targetDepts', 'array-contains', 'all'));
             const snapAll = await getDocs(qAll);
             snapAll.forEach(doc => announcements.push({ id: doc.id, ...doc.data() } as Announcement));
 
-            // 2. Fetch specific dept announcements (DEPT COORDINATORS)
+            // 1.1 Fetch 'all' target announcements (Legacy Schema)
+            try {
+                const qAllOld = query(collectionRef, where('targetDept', '==', 'all'));
+                const snapAllOld = await getDocs(qAllOld);
+                snapAllOld.forEach(doc => {
+                    const id = doc.id;
+                    if (!announcements.find(a => a.id === id)) {
+                        announcements.push({ id: doc.id, ...doc.data() } as Announcement);
+                    }
+                });
+            } catch (ignore) {
+                // Field might not exist on all docs, or index issue. 
+                // But simple equality check often works without composite index if other filters absent.
+            }
+
+            // 2. Fetch specific dept announcements
             if (studentDept) {
-                const qDept = query(collectionRef, where('targetDept', '==', studentDept));
+                // New Schema
+                const qDept = query(collectionRef, where('targetDepts', 'array-contains', studentDept));
                 const snapDept = await getDocs(qDept);
-                snapDept.forEach(doc => announcements.push({ id: doc.id, ...doc.data() } as Announcement));
+                snapDept.forEach(doc => {
+                    const id = doc.id;
+                    if (!announcements.find(a => a.id === id)) {
+                        announcements.push({ id: doc.id, ...doc.data() } as Announcement);
+                    }
+                });
+
+                // Legacy Schema
+                try {
+                    const qDeptOld = query(collectionRef, where('targetDept', '==', studentDept));
+                    const snapDeptOld = await getDocs(qDeptOld);
+                    snapDeptOld.forEach(doc => {
+                        const id = doc.id;
+                        if (!announcements.find(a => a.id === id)) {
+                            announcements.push({ id: doc.id, ...doc.data() } as Announcement);
+                        }
+                    });
+                } catch (ignore) { }
             }
 
             // Client-side sort by date (newest first)
@@ -57,8 +123,6 @@ export const AnnouncementService = {
     // Get announcements created by a specific user (for Manage view)
     getAnnouncementsByAuthor: async (authorId: string): Promise<Announcement[]> => {
         try {
-            // Firestore requires composite index for 'where' + 'orderBy'. 
-            // We'll fetch by author and sort client-side to avoid index requirement initially.
             const q = query(collectionRef, where('authorId', '==', authorId));
             const querySnapshot = await getDocs(q);
 
@@ -83,6 +147,3 @@ export const AnnouncementService = {
         }
     }
 };
-
-// Helper for getAnnouncementsByAuthor
-const collectionRef = collection(db, COLLECTION_NAME);

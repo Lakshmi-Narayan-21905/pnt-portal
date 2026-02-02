@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Training } from '../../types';
-import { GraduationCap, Calendar, CheckCircle, Info } from 'lucide-react';
+import { Calendar, CheckCircle, Info } from 'lucide-react';
 import Modal from '../../components/Modal';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
 

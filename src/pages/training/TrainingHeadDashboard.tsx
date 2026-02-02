@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+
 import { Users, GraduationCap, Calendar } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import { UserService } from '../../services/userService';

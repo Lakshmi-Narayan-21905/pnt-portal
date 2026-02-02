@@ -9,6 +9,7 @@ export type UserRole =
 export interface UserProfile {
     uid: string;
     email: string;
+    photoURL?: string;
     role: UserRole;
     displayName: string;
     rollNo?: string;
@@ -90,5 +91,5 @@ export interface Announcement {
     authorId: string;
     authorRole: UserRole;
     authorName: string;
-    targetDept: string; // 'all' or specific Dept like 'CSE'
+    targetDepts: string[]; // Changed from targetDept string to array
 }

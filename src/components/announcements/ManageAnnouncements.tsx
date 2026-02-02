@@ -17,6 +17,9 @@ const ManageAnnouncements: React.FC = () => {
     useEffect(() => {
         if (userProfile) {
             fetchMyAnnouncements();
+            // Mark as read (Managers also see valid unread badge if they are target)
+            localStorage.setItem('lastReadAnnouncementTime', Date.now().toString());
+            window.dispatchEvent(new Event('announcementsRead'));
         }
     }, [userProfile]);
 
@@ -42,14 +45,17 @@ const ManageAnnouncements: React.FC = () => {
         setSuccess('');
 
         try {
-            // Determine targetDept based on role
-            let targetDept = 'all';
+            // Determine targetDepts based on role
+            let targetDepts: string[] = ['all'];
+
             if (userProfile.role === 'DEPT_COORDINATOR') {
                 if (!userProfile.department) {
                     throw new Error("Your profile does not have a department assigned.");
                 }
-                targetDept = userProfile.department;
+                targetDepts = [userProfile.department];
             }
+            // HEAD roles default to ['all'], but could implement selecting specific depts later if requested.
+            // For now, adhere to requirement: Heads -> All, Coord -> Dept.
 
             await AnnouncementService.createAnnouncement({
                 title,
@@ -57,7 +63,7 @@ const ManageAnnouncements: React.FC = () => {
                 authorId: userProfile.uid,
                 authorRole: userProfile.role,
                 authorName: userProfile.displayName || 'Staff',
-                targetDept
+                targetDepts
             });
 
             setSuccess('Announcement published successfully.');
@@ -169,7 +175,7 @@ const ManageAnnouncements: React.FC = () => {
                                     </span>
                                     <span className="flex items-center gap-1">
                                         <User className="w-3 h-3" />
-                                        To: {ann.targetDept === 'all' ? 'All Depts' : ann.targetDept}
+                                        To: {ann.targetDepts?.includes('all') ? 'All Depts' : ann.targetDepts?.join(', ')}
                                     </span>
                                 </div>
                             </div>
