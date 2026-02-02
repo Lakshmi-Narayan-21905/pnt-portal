@@ -148,7 +148,7 @@ const PlacementStudents: React.FC = () => {
                             placeholder="Search students..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                            className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none w-64 shadow-sm"
                         />
                     </div>
 
@@ -166,16 +166,17 @@ const PlacementStudents: React.FC = () => {
                                 mod.ExcelParser.exportToExcel(exportData, 'Student_List');
                             });
                         }}
-                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        className="flex items-center px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md hover:shadow-lg font-medium"
                         title="Export Filtered Data"
                     >
-                        <Download className="w-4 h-4" />
+                        <Download className="w-4 h-4 mr-2" />
+                        Export
                     </button>
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
+            <div className="card overflow-x-auto !p-0">
+                <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>

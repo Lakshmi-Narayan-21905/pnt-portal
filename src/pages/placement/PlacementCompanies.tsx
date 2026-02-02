@@ -130,7 +130,7 @@ const PlacementCompanies: React.FC = () => {
                 <h1 className="text-2xl font-bold text-gray-800">Company Drives</h1>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                    className="flex items-center px-4 py-2 bg-brand-green-primary text-white rounded-lg hover:bg-brand-green-dark transition shadow-lg shadow-brand-green-primary/30"
                 >
                     <Plus className="w-5 h-5 mr-2" />
                     Schedule Drive
@@ -146,31 +146,36 @@ const PlacementCompanies: React.FC = () => {
                         <div
                             key={company.id}
                             onClick={() => handleCardClick(company)}
-                            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer relative group"
+                            className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 hover:shadow-lg hover:shadow-brand-green-emerald/10 transition cursor-pointer relative group flex flex-col h-full"
                         >
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-gray-100 px-2 py-1 rounded">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-white/50 backdrop-blur-md px-2 py-1 rounded text-gray-600">
                                 Click for details
                             </div>
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-blue-50 rounded-lg">
-                                    <Building2 className="w-6 h-6 text-blue-600" />
+                                <div className="p-3 bg-brand-green-ice rounded-lg">
+                                    <Building2 className="w-6 h-6 text-brand-green-primary" />
                                 </div>
-                                <span className={`px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-700`}>
+                                <span className={`px-2 py-1 text-xs rounded-full font-medium bg-brand-green-light text-brand-green-dark border border-brand-green-mint/20`}>
                                     Open
                                 </span>
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 mb-1">{company.name}</h3>
                             <p className="text-gray-500 text-sm mb-1">{company.type}</p>
-                            <p className="text-gray-500 text-sm mb-4">{company.roles.join(', ')}</p>
-                            <p className="text-sm font-semibold text-gray-700 mb-2">Package: {company.salary}</p>
+                            <p className="text-gray-500 text-sm mb-4 line-clamp-2">{company.roles.join(', ')}</p>
 
-                            <div className="flex justify-between items-center border-t pt-4">
-                                <div className="flex items-center text-sm text-gray-500">
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    {new Date(company.driveDate).toLocaleDateString()}
-                                </div>
-                                <div className="text-sm font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
-                                    {company.applicants?.length || 0} Reg.
+                            <div className="mt-auto">
+                                <p className="text-sm font-bold text-brand-green-dark mb-4 bg-brand-green-ice/50 inline-block px-2 py-1 rounded">
+                                    Package: {company.salary}
+                                </p>
+
+                                <div className="flex justify-between items-center border-t border-brand-green-mint/20 pt-4">
+                                    <div className="flex items-center text-sm text-gray-500">
+                                        <Calendar className="w-4 h-4 mr-2 text-brand-green-emerald" />
+                                        {new Date(company.driveDate).toLocaleDateString()}
+                                    </div>
+                                    <div className="text-sm font-medium text-brand-green-dark bg-brand-green-ice px-3 py-1 rounded-full border border-brand-green-mint/30">
+                                        {company.applicants?.length || 0} Reg.
+                                    </div>
                                 </div>
                             </div>
                         </div>

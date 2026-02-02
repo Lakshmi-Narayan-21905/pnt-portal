@@ -1,0 +1,112 @@
+/* 3D Flip Counter Styles */
+.flip-clock-container {
+    perspective: 400px;
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.flip-digit {
+    display: inline-block;
+    width: 60px;
+    /* Increased size */
+    height: 80px;
+    /* Increased size */
+    background-color: #333;
+    border-radius: 8px;
+    font-size: 48px;
+    /* Increased font size */
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    line-height: 80px;
+    /* Match height */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Common Card Styles */
+.flip-card {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    backface-visibility: hidden;
+    background-color: #333;
+    /* Default dark bg */
+    color: #e5e5e5;
+}
+
+.flip-card.top {
+    top: 0;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    transform-origin: 50% 100%;
+}
+
+.flip-card.bottom {
+    bottom: 0;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    transform-origin: 50% 0;
+    line-height: 0;
+    /* Adjust to align text for bottom half */
+}
+
+/* Text alignment adjustments for split cards */
+.flip-card.top span {
+    display: block;
+    margin-top: 0;
+    /* Align top half text */
+}
+
+.flip-card.bottom span {
+    display: block;
+    margin-top: -40px;
+    /* Pull text up for bottom half */
+}
+
+/* Animation Classes */
+.flip-card.top.flip-animate {
+    animation: flipTop 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+}
+
+.flip-card.bottom.flip-animate {
+    animation: flipBottom 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+}
+
+@keyframes flipTop {
+    0% {
+        transform: rotateX(0deg);
+    }
+
+    100% {
+        transform: rotateX(-90deg);
+    }
+}
+
+@keyframes flipBottom {
+    0% {
+        transform: rotateX(90deg);
+    }
+
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+/* Theme adaptation classes (can be overridden by Tailwind utilities) */
+.flip-theme-amber .flip-digit,
+.flip-theme-amber .flip-card {
+    background-color: #1c1917;
+    /* stone-900 */
+    color: #f59e0b;
+    /* amber-500 */
+}
+
+.flip-theme-light .flip-digit,
+.flip-theme-light .flip-card {
+    background-color: #ffffff;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+}

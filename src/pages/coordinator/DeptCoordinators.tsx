@@ -169,7 +169,7 @@ const DeptCoordinators: React.FC = () => {
                     <p className="text-sm text-gray-500">Department: {userProfile?.department}</p>
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex space-x-3">
                     <button
                         onClick={() => {
                             const exportData = coordinators.map(c => ({
@@ -190,14 +190,14 @@ const DeptCoordinators: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setIsUploadModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        className="flex items-center px-4 py-2 bg-brand-lavender-light text-brand-lavender-dark font-medium rounded-lg hover:bg-brand-lavender-lilac/50 transition border border-brand-lavender-lilac/30"
                     >
                         <Upload className="w-4 h-4 mr-2" />
                         Upload Excel
                     </button>
                     <button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                        className="flex items-center px-4 py-2 bg-brand-lavender-primary text-white font-bold rounded-lg hover:bg-brand-lavender-dark transition shadow-lg shadow-brand-lavender-primary/30"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Coordinator
@@ -205,32 +205,37 @@ const DeptCoordinators: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+                <table className="min-w-full divide-y divide-brand-lavender-light/30">
+                    <thead className="bg-brand-lavender-ice/50">
                         <tr>
+
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-brand-lavender-light/30">
                         {loading ? (
-                            <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
+
+                            <tr><td colSpan={3} className="p-8 text-center text-gray-500">Loading...</td></tr>
                         ) : coordinators.length === 0 ? (
-                            <tr><td colSpan={4} className="p-4 text-center">No coordinators found.</td></tr>
+                            <tr><td colSpan={3} className="p-8 text-center text-gray-500">No coordinators found.</td></tr>
+
                         ) : (
                             coordinators.map((coord) => (
-                                <tr key={coord.uid}>
+                                <tr key={coord.uid} className="hover:bg-brand-lavender-ice/30 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                            <div className="h-10 w-10 rounded-full bg-brand-lavender-light flex items-center justify-center text-brand-lavender-primary font-bold shadow-sm border border-brand-lavender-lilac/30">
                                                 {coord.displayName?.charAt(0)}
                                             </div>
                                             <div className="ml-4 text-sm font-medium text-gray-900">{coord.displayName}</div>
                                         </div>
                                     </td>
+
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coord.department} {coord.section ? `(${coord.section})` : ''}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -248,6 +253,7 @@ const DeptCoordinators: React.FC = () => {
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
+
                                     </td>
                                 </tr>
                             ))
@@ -284,19 +290,21 @@ const DeptCoordinators: React.FC = () => {
                         </>
                     )}
 
+
                     <button disabled={creating} type="submit" className="w-full btn-primary mt-4">
                         {creating ? 'Processing...' : (editMode ? 'Update Coordinator' : 'Create Coordinator')}
+
                     </button>
                 </form>
             </Modal>
             <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} title="Bulk Upload Class Coordinators">
                 <div className="space-y-4 text-center">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-1 text-sm text-gray-500">Upload Excel file with columns: email, password, displayName, section</p>
-                        <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
+                    <div className="border-2 border-dashed border-brand-lavender-lilac/50 rounded-xl p-8 bg-brand-lavender-ice/30">
+                        <Upload className="mx-auto h-12 w-12 text-brand-lavender-lilac" />
+                        <p className="mt-2 text-sm text-gray-600">Upload Excel file with columns: email, password, displayName, section</p>
+                        <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-lavender-light file:text-brand-lavender-dark hover:file:bg-brand-lavender-lilac transition cursor-pointer" />
                     </div>
-                    {creating && <p className="text-blue-600">Processing file... Please wait...</p>}
+                    {creating && <p className="text-brand-lavender-primary font-medium">Processing file... Please wait...</p>}
                 </div>
             </Modal>
         </div>
