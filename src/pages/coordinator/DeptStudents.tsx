@@ -257,24 +257,24 @@ const DeptStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
-                <table className="min-w-full divide-y divide-brand-lavender-light/30">
-                    <thead className="bg-brand-lavender-ice/50">
+            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-purple-50/50 backdrop-blur-sm border-b border-purple-100">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-lavender-deep uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-lavender-deep uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-lavender-deep uppercase tracking-wider">Section</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-lavender-deep uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Section</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-brand-lavender-light/30">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={4} className="p-8 text-center text-gray-500">Loading...</td></tr>
                         ) : students.length === 0 ? (
                             <tr><td colSpan={4} className="p-8 text-center text-gray-500">No students found.</td></tr>
                         ) : (
                             students.map((student) => (
-                                <tr key={student.uid} className="hover:bg-brand-lavender-ice/30 transition-colors">
+                                <tr key={student.uid} className="hover:bg-purple-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap">
 
                                         <div

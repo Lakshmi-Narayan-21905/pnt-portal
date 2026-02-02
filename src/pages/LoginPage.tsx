@@ -27,6 +27,13 @@ const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { userProfile, error: authError } = useAuth();
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        // Small delay to ensure the animation plays after mount
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Show either local login error or global auth error (like missing profile)
     const displayError = localError || authError;
@@ -98,20 +105,22 @@ const LoginPage: React.FC = () => {
     };
 
     return (
+
         <div className="fixed inset-0 flex items-center justify-center overflow-hidden p-4">
             <AnimatedBackground />
 
             <div className="flex w-full max-w-5xl h-[85vh] max-h-[600px] bg-white rounded-2xl overflow-hidden relative z-10">
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white relative overflow-y-auto">
+
                     {/* Background pattern for form side only */}
-                    <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
                     <div className="w-full max-w-sm relative z-10">
                         {/* Logo */}
-                        <div className="flex justify-center mb-6 -mt-12">
+                        <div className="flex justify-center mb-6">
                             <img
                                 src={logo}
                                 alt="Kongu Engineering College"
-                                className="h-28 object-contain"
+                                className="h-20 object-contain drop-shadow-sm"
                             />
                         </div>
 
@@ -273,7 +282,9 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 {/* Right Side - Image */}
+
                 <div className="hidden lg:block lg:w-1/2 relative rounded-r-2xl overflow-hidden bg-black">
+
                     <img
                         src={loginBg}
                         alt="College Library"

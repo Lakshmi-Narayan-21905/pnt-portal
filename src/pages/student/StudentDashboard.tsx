@@ -3,15 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { CompanyService } from '../../services/companyService';
 import { TrainingService } from '../../services/trainingService';
-import { Briefcase, Building2, GraduationCap, ChevronRight, Filter } from 'lucide-react';
+import { Briefcase, Building2, GraduationCap, Filter } from 'lucide-react';
 
 import { checkEligibility } from '../../utils/eligibility';
 import DashboardCalendar, { type CalendarEvent } from '../../components/DashboardCalendar';
 
 import AnimatedCounter from '../../components/AnimatedCounter';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
-
-import { Trophy } from 'lucide-react';
 
 
 // StatCard Component
@@ -25,23 +23,26 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon, delay }) => (
     <div
-        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+        className="bg-white p-6 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_8px_24px_rgba(99,102,241,0.15)] hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group min-w-[280px]"
         style={{ animation: `fadeInUp 0.5s ease-out ${delay}s backwards` }}
     >
-        <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-indigo-50 rounded-xl">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none opacity-50"></div>
+        <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors">
                 <Icon className="w-6 h-6 text-indigo-600" />
             </div>
 
+
+
         </div>
-        <div>
-            <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
+        <div className="relative z-10">
+            <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">{title}</h3>
             <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-gray-800">
+                <span className="text-3xl font-extrabold text-gray-900 drop-shadow-sm">
                     <AnimatedCounter value={count} />
                 </span>
             </div>
-            <p className="text-xs text-gray-400 mt-2 font-medium">{subtitle}</p>
+            <p className="text-xs text-gray-500 mt-2 font-medium bg-gray-50 inline-block px-2 py-0.5 rounded-lg border border-gray-100">{subtitle}</p>
         </div>
     </div>
 );
@@ -178,13 +179,16 @@ const StudentDashboard: React.FC = () => {
                 />
             </div>
 
-            {/* Calendars Section with Blue Glassmorphism */}
+            {/* Calendars Section with Soft Light Theme */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Drives Calendar */}
-                <div className="h-[600px] flex flex-col bg-white/70 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-blue-900/5 overflow-hidden">
+                <div
+                    className="h-[600px] flex flex-col bg-white rounded-3xl p-4 md:p-6 shadow-md shadow-gray-200 border border-gray-100 transition-all hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden"
+                    style={{ animation: 'fadeInUp 0.6s ease-out 0.4s backwards' }}
+                >
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-1.5 h-6 bg-blue-600 rounded-full shadow-sm shadow-blue-200"></div>
+                            <div className="w-1.5 h-6 bg-blue-500 rounded-full shadow-sm shadow-blue-200"></div>
                             <h3 className="font-bold text-gray-800 tracking-tight text-lg">Placement Schedule</h3>
                         </div>
 
@@ -193,7 +197,7 @@ const StudentDashboard: React.FC = () => {
                             <select
                                 value={placementFilter}
                                 onChange={(e) => setPlacementFilter(e.target.value as any)}
-                                className="w-full sm:w-auto pl-9 pr-4 py-2 text-xs font-semibold bg-white border border-gray-200 rounded-full shadow-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none appearance-none cursor-pointer hover:border-gray-300 transition-all text-gray-600"
+                                className="w-full sm:w-auto pl-9 pr-4 py-2 text-xs font-semibold bg-gray-50 border border-gray-200 rounded-full shadow-inner focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none appearance-none cursor-pointer hover:bg-white transition-all text-gray-700"
                             >
                                 <option value="all">All Drives</option>
                                 <option value="eligible">Eligible</option>
@@ -203,7 +207,7 @@ const StudentDashboard: React.FC = () => {
                             </select>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white/40">
+                    <div className="flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50">
                         <DashboardCalendar
                             title=""
                             events={companyEvents}
@@ -214,7 +218,10 @@ const StudentDashboard: React.FC = () => {
                 </div>
 
                 {/* Trainings Calendar */}
-                <div className="h-[600px] flex flex-col bg-white/70 backdrop-blur-xl rounded-3xl p-4 md:p-6 shadow-xl shadow-gray-200/50 border border-white/80 transition-all hover:shadow-2xl hover:shadow-indigo-900/5 overflow-hidden">
+                <div
+                    className="h-[600px] flex flex-col bg-white rounded-3xl p-4 md:p-6 shadow-md shadow-gray-200 border border-gray-100 transition-all hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden"
+                    style={{ animation: 'fadeInUp 0.6s ease-out 0.5s backwards' }}
+                >
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <div className="flex items-center gap-3">
                             <div className="w-1.5 h-6 bg-indigo-500 rounded-full shadow-sm shadow-indigo-200"></div>
@@ -226,7 +233,7 @@ const StudentDashboard: React.FC = () => {
                             <select
                                 value={trainingFilter}
                                 onChange={(e) => setTrainingFilter(e.target.value as any)}
-                                className="w-full sm:w-auto pl-9 pr-4 py-2 text-xs font-semibold bg-white border border-gray-200 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none appearance-none cursor-pointer hover:border-gray-300 transition-all text-gray-600"
+                                className="w-full sm:w-auto pl-9 pr-4 py-2 text-xs font-semibold bg-gray-50 border border-gray-200 rounded-full shadow-inner focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 outline-none appearance-none cursor-pointer hover:bg-white transition-all text-gray-700"
                             >
                                 <option value="all">All Trainings</option>
                                 <option value="registered">Registered</option>
@@ -234,7 +241,7 @@ const StudentDashboard: React.FC = () => {
                             </select>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white/40">
+                    <div className="flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50">
                         <DashboardCalendar
                             title=""
                             events={trainingEvents}

@@ -22,12 +22,13 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 const allStudents = await UserService.getUsersByRole('STUDENT');
                 const deptStudents = allStudents.filter(u => u.department === userProfile.department);
                 const companies = await CompanyService.getAllCompanies();
+                const placed = deptStudents.filter(s => s.placementStatus === 'PLACED').length;
 
                 setStats({
-                    totalStudents: students.length,
+                    totalStudents: deptStudents.length,
                     placedStudents: placed,
                     totalDrives: companies.length,
-                    inTraining: 0 // Placeholder as per previous fix pattern
+                    inTraining: 0
                 });
 
             } catch (error) {
@@ -46,33 +47,33 @@ const DeptCoordinatorDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
-                    <div className="p-4 bg-brand-lavender-ice rounded-lg mr-4">
-                        <Users className="w-8 h-8 text-brand-lavender-primary" />
+                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group">
+                    <div className="p-4 bg-purple-50 rounded-xl shadow-sm mr-4 group-hover:bg-purple-100 transition-colors">
+                        <Users className="w-8 h-8 text-purple-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium">Total Students</h3>
-                        <p className="text-2xl font-bold text-gray-900">{stats.totalStudents}</p>
+                        <h3 className="text-purple-900/70 text-sm font-bold uppercase tracking-wider">Total Students</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalStudents}</p>
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
-                    <div className="p-4 bg-brand-lavender-ice rounded-lg mr-4">
-                        <Building2 className="w-8 h-8 text-brand-lavender-deep" />
+                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group">
+                    <div className="p-4 bg-purple-50 rounded-xl shadow-sm mr-4 group-hover:bg-purple-100 transition-colors">
+                        <Building2 className="w-8 h-8 text-purple-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium">Placements</h3>
-                        <p className="text-2xl font-bold text-gray-900">{stats.placedStudents}</p>
+                        <h3 className="text-purple-900/70 text-sm font-bold uppercase tracking-wider">Placed</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.placedStudents}</p>
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
-                    <div className="p-4 bg-brand-lavender-ice rounded-lg mr-4">
-                        <GraduationCap className="w-8 h-8 text-brand-lavender-purple" />
+                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(168,85,247,0.15)] hover:border-purple-200 transition-all duration-300 group">
+                    <div className="p-4 bg-purple-50 rounded-xl shadow-sm mr-4 group-hover:bg-purple-100 transition-colors">
+                        <GraduationCap className="w-8 h-8 text-purple-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium">In Training</h3>
-                        <p className="text-2xl font-bold text-gray-900">{stats.inTraining}</p>
+                        <h3 className="text-purple-900/70 text-sm font-bold uppercase tracking-wider">In Training</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.inTraining}</p>
                     </div>
                 </div>
             </div>

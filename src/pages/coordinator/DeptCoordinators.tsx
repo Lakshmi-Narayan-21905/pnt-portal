@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { Plus, Upload, Eye, EyeOff, Pencil, Trash2, Download } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
@@ -8,6 +9,7 @@ import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
 
 const DeptCoordinators: React.FC = () => {
+    const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [coordinators, setCoordinators] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -56,15 +58,15 @@ const DeptCoordinators: React.FC = () => {
     };
 
     const handleDelete = async (uid: string, name: string) => {
-        if (!confirm(`Are you sure you want to delete coordinator ${name}? This cannot be undone.`)) return;
+        if (!await showConfirm(`Are you sure you want to delete coordinator ${name}? This cannot be undone.`, 'Delete Coordinator', 'Yes, Delete', 'delete')) return;
 
         try {
             await UserService.deleteUserProfile(uid);
-            alert('Coordinator deleted successfully');
+            await showAlert('Coordinator deleted successfully', 'success', 'Deleted');
             fetchCoordinators();
         } catch (error: any) {
             console.error(error);
-            alert('Failed to delete: ' + error.message);
+            await showAlert('Failed to delete: ' + error.message, 'error', 'Error');
         }
     };
 
@@ -81,7 +83,7 @@ const DeptCoordinators: React.FC = () => {
                 });
                 // Note: Not updating email/password here as it requires Admin auth specialized calls usually
                 // or re-authentication. For now assuming simple profile update.
-                alert('Coordinator updated successfully');
+                await showAlert('Coordinator updated successfully', 'success', 'Success');
             } else {
                 // Create new
                 const newUser = await AdminAuthService.createUser(
@@ -99,7 +101,7 @@ const DeptCoordinators: React.FC = () => {
                     profileCompleted: true,
                     createdAt: Date.now()
                 });
-                alert('Class Coordinator created successfully');
+                await showAlert('Class Coordinator created successfully', 'success', 'Success');
             }
 
             setIsAddModalOpen(false);
@@ -109,7 +111,7 @@ const DeptCoordinators: React.FC = () => {
             fetchCoordinators();
         } catch (error: any) {
             console.error(error);
-            alert('Operation failed: ' + error.message);
+            await showAlert('Operation failed: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
         }
@@ -127,7 +129,7 @@ const DeptCoordinators: React.FC = () => {
             const ws = wb.Sheets[wsname];
             const data: any[] = XLSX.utils.sheet_to_json(ws);
 
-            if (confirm(`Found ${data.length} records. Create Class Coordinators for ${userProfile.department}?`)) {
+            if (await showConfirm(`Found ${data.length} records. Create Class Coordinators for ${userProfile.department}?`, 'Confirm Upload', 'Yes, Create')) {
                 setCreating(true);
                 let successCount = 0;
                 for (const row of data) {
@@ -155,7 +157,7 @@ const DeptCoordinators: React.FC = () => {
                 setCreating(false);
                 setIsUploadModalOpen(false);
                 fetchCoordinators();
-                alert(`Successfully created ${successCount} coordinators.`);
+                await showAlert(`Successfully created ${successCount} coordinators.`, 'success', 'Success');
             }
         };
         reader.readAsBinaryString(file);

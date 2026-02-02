@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { GraduationCap, Plus, Trash2, Download } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import type { Training } from '../../types';
@@ -6,6 +7,7 @@ import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
 
 const ManageTrainings: React.FC = () => {
+    const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,14 +67,16 @@ const ManageTrainings: React.FC = () => {
             setFormData({
                 title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
             });
+            await showAlert('Training program created successfully!', 'success', 'Success');
         } catch (error) {
-            alert('Failed to add training');
+            await showAlert('Failed to add training.', 'error', 'Error');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Delete this training?')) {
+        if (await showConfirm('Are you sure you want to delete this training program?', 'Confirm Delete', 'Yes, Delete', 'delete')) {
             await TrainingService.deleteTraining(id);
+            await showAlert('Training deleted successfully.', 'success', 'Deleted');
             fetchTrainings();
         }
     };
@@ -112,28 +116,28 @@ const ManageTrainings: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Training Title</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trainer</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Training Title</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Trainer</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Duration</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
                         ) : trainings.length === 0 ? (
                             <tr><td colSpan={4} className="p-4 text-center">No trainings found.</td></tr>
                         ) : (
                             trainings.map((training) => (
-                                <tr key={training.id}>
+                                <tr key={training.id} className="hover:bg-indigo-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
-                                                <GraduationCap className="h-5 w-5 text-green-600" />
+                                            <div className="flex-shrink-0 h-10 w-10 bg-indigo-100/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <GraduationCap className="h-5 w-5 text-indigo-600" />
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{training.title}</div>

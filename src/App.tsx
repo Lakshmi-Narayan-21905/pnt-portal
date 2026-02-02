@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import { AlertProvider } from './contexts/AlertContext';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageCompanies from './pages/admin/ManageCompanies';
@@ -46,19 +47,21 @@ import StudentAnnouncements from './components/announcements/StudentAnnouncement
 const App: React.FC = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
+      <AlertProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Admin Routers */}
-        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<ManageUsers />} />
-            <Route path="manage-companies" element={<ManageCompanies />} />
-            <Route path="manage-trainings" element={<ManageTrainings />} />
-            <Route index element={<Navigate to="dashboard" replace />} />
+          {/* Admin Routers */}
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<ManageUsers />} />
+              <Route path="manage-companies" element={<ManageCompanies />} />
+              <Route path="manage-trainings" element={<ManageTrainings />} />
+              <Route index element={<Navigate to="dashboard" replace />} />
+            </Route>
           </Route>
-        </Route>
+
 
 
 
@@ -85,8 +88,9 @@ const App: React.FC = () => {
             <Route path="students" element={<TrainingStudents />} />
             <Route path="announcements" element={<ManageAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
+
           </Route>
-        </Route>
+
 
         {/* Dept Coordinator Routes */}
         <Route element={<ProtectedRoute allowedRoles={['DEPT_COORDINATOR']} />}>
@@ -100,17 +104,18 @@ const App: React.FC = () => {
             <Route path="trainings/:trainingId" element={<TrainingDetails />} />
             <Route path="announcements" element={<ManageAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
-          </Route>
-        </Route>
 
-        {/* Class Coordinator Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['CLASS_COORDINATOR']} />}>
-          <Route path="/class-coordinator" element={<ClassCoordinatorLayout />}>
-            <Route path="dashboard" element={<ClassCoordinatorDashboard />} />
-            <Route path="students" element={<ClassStudents />} />
-            <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
-        </Route>
+
+          {/* Class Coordinator Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['CLASS_COORDINATOR']} />}>
+            <Route path="/class-coordinator" element={<ClassCoordinatorLayout />}>
+              <Route path="dashboard" element={<ClassCoordinatorDashboard />} />
+              <Route path="students" element={<ClassStudents />} />
+              <Route index element={<Navigate to="dashboard" replace />} />
+            </Route>
+          </Route>
+
 
         {/* Student Routes */}
         <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
@@ -122,13 +127,14 @@ const App: React.FC = () => {
             <Route path="trainings" element={<StudentTrainings />} />
             <Route path="announcements" element={<StudentAnnouncements />} />
             <Route index element={<Navigate to="dashboard" replace />} />
-          </Route>
-        </Route>
 
-        {/* Default Redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+          </Route>
+
+          {/* Default Redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AlertProvider>
     </Router>
   );
 };

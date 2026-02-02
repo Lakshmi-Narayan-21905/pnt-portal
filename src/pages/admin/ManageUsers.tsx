@@ -4,6 +4,7 @@ import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import type { UserProfile, UserRole } from '../../types';
 import Modal from '../../components/ui/Modal';
+import { useAlert } from '../../contexts/AlertContext';
 import * as XLSX from 'xlsx';
 import { DEPARTMENTS } from '../../utils/constants';
 
@@ -23,6 +24,7 @@ const ManageUsers: React.FC = () => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const { showAlert, showConfirm } = useAlert();
 
     // Form State
     const [formData, setFormData] = useState({
@@ -65,16 +67,20 @@ const ManageUsers: React.FC = () => {
                 displayName: formData.displayName,
                 role: activeTab, // Use activeTab for role
                 department: formData.department || '',
-                profileCompleted: true // Heads are pre-verified
+                profileCompleted: true, // Heads are pre-verified
+                createdAt: Date.now()
             });
 
             setIsAddModalOpen(false);
             setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
             fetchUsers();
-            alert('User created successfully');
+            setIsAddModalOpen(false);
+            setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
+            fetchUsers();
+            await showAlert('User created successfully', 'success', 'Success');
         } catch (error: any) {
             console.error(error);
-            alert('Failed to create user: ' + error.message);
+            await showAlert('Failed to create user: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
         }
@@ -93,24 +99,25 @@ const ManageUsers: React.FC = () => {
             const ws = wb.Sheets[wsname];
             const data = XLSX.utils.sheet_to_json(ws);
 
-            if (confirm(`Found ${data.length} records. Create users?`)) {
+            if (await showConfirm(`Found ${data.length} records. Create users?`, 'Confirm Upload', 'Yes, Create')) {
                 setCreating(true);
                 let successCount = 0;
-                for (const row: any of data) {
+                for (const row of data as any[]) {
                     try {
                         const email = row.email || row.username;
                         const pwd = row.password || 'password123';
                         const name = row.displayName || row.name || 'User';
                         const dept = row.department;
 
-                        const uid = await AdminAuthService.createUser(email, pwd);
+                        const userCredential = await AdminAuthService.createUser(email, pwd);
                         await UserService.createUserProfile({
-                            uid,
+                            uid: userCredential.uid,
                             email,
                             role: activeTab,
                             displayName: name,
                             department: dept,
-                            profileCompleted: true
+                            profileCompleted: true,
+                            createdAt: Date.now()
                         });
                         successCount++;
                     } catch (err) {
@@ -120,7 +127,7 @@ const ManageUsers: React.FC = () => {
                 setCreating(false);
                 setIsUploadModalOpen(false);
                 fetchUsers();
-                alert(`Successfully created ${successCount} users.`);
+                await showAlert(`Successfully created ${successCount} users.`, 'success', 'Batch Complete');
             }
         };
         reader.readAsBinaryString(file);
@@ -192,29 +199,29 @@ const ManageUsers: React.FC = () => {
             </div>
 
             {/* User List */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-gray-100">
+                        <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Department</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Role</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-50">
                             {loading ? (
                                 <tr><td colSpan={4} className="p-4 text-center">Loading users...</td></tr>
                             ) : users.length === 0 ? (
                                 <tr><td colSpan={4} className="p-4 text-center">No users found for this role.</td></tr>
                             ) : (
                                 users.map((user) => (
-                                    <tr key={user.uid}>
+                                    <tr key={user.uid} className="hover:bg-indigo-50/30 transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                                    <span className="text-gray-600 font-bold">{user.displayName?.charAt(0)}</span>
+                                                <div className="flex-shrink-0 h-8 w-8 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                                                    <span className="font-bold">{user.displayName?.charAt(0)}</span>
                                                 </div>
                                                 <div className="ml-4">
                                                     <div className="text-sm font-medium text-gray-900">{user.displayName}</div>

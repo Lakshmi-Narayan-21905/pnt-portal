@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
 import { Calendar, CheckCircle, Info } from 'lucide-react';
 import Modal from '../../components/Modal';
@@ -8,6 +9,7 @@ import StudentPageContainer from '../../components/student/StudentPageContainer'
 
 const StudentTrainings: React.FC = () => {
     const { userProfile } = useAuth();
+    const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState<string | null>(null);
@@ -39,7 +41,7 @@ const StudentTrainings: React.FC = () => {
 
     const handleRegister = async (trainingId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to register for this training?")) return;
+        if (!await showConfirm("Are you sure you want to register for this training?", "Confirm Registration", "Yes, Register")) return;
 
         setRegistering(trainingId);
         try {
@@ -49,10 +51,10 @@ const StudentTrainings: React.FC = () => {
                     ? { ...t, participants: [...(t.participants || []), userProfile.uid] }
                     : t
             ));
-            alert("Registered successfully!");
+            await showAlert("Registered successfully!", "success", "Success");
         } catch (error) {
             console.error("Error registering:", error);
-            alert("Failed to register. Please try again.");
+            await showAlert("Failed to register. Please try again.", "error", "Error");
         } finally {
             setRegistering(null);
         }
@@ -68,7 +70,7 @@ const StudentTrainings: React.FC = () => {
                     const isCompleted = training.endDate < Date.now();
 
                     return (
-                        <div key={training.id} className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/60 p-6 flex flex-col h-full hover:shadow-lg hover:shadow-blue-900/5 transition-all duration-300">
+                        <div key={training.id} className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6 flex flex-col h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300">
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{training.title}</h3>
                                 <p className="text-sm text-gray-600 mb-4 bg-blue-50/50 inline-block px-2 py-1 rounded">Trainer: {training.trainer}</p>
