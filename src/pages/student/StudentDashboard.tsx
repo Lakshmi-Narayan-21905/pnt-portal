@@ -7,8 +7,12 @@ import { Briefcase, Building2, GraduationCap, ChevronRight, Filter } from 'lucid
 
 import { checkEligibility } from '../../utils/eligibility';
 import DashboardCalendar, { type CalendarEvent } from '../../components/DashboardCalendar';
+
 import AnimatedCounter from '../../components/AnimatedCounter';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
+
+import { Trophy } from 'lucide-react';
+
 
 const StudentDashboard: React.FC = () => {
     const { userProfile } = useAuth();
@@ -38,10 +42,19 @@ const StudentDashboard: React.FC = () => {
                     TrainingService.getAllTrainings()
                 ]);
 
+                // Filter by Department
+                const dept = userProfile.department;
+                const relevantCompanies = companies.filter(c =>
+                    !dept || (c.eligibilityCriteria?.branches?.length === 0) || c.eligibilityCriteria?.branches?.includes(dept)
+                );
+                const relevantTrainings = trainings.filter(t =>
+                    !dept || (t.eligibility?.branches?.length === 0) || t.eligibility?.branches?.includes(dept)
+                );
+
                 const now = Date.now();
-                const activeDrives = companies.filter(c => c.deadline && c.deadline > now).length;
-                const myApplications = companies.filter(c => c.applicants && c.applicants.includes(userProfile.uid)).length;
-                const myTrainings = trainings.filter(t => t.participants && t.participants.includes(userProfile.uid) && t.startDate > now).length;
+                const activeDrives = relevantCompanies.filter(c => c.deadline && c.deadline > now).length;
+                const myApplications = relevantCompanies.filter(c => c.applicants && c.applicants.includes(userProfile.uid)).length;
+                const myTrainings = relevantTrainings.filter(t => t.participants && t.participants.includes(userProfile.uid) && t.startDate > now).length;
 
                 setStats({
                     activeDrives,
@@ -50,7 +63,7 @@ const StudentDashboard: React.FC = () => {
                 });
 
                 // Transform for Calendar with Filters
-                let filteredCompanies = companies;
+                let filteredCompanies = relevantCompanies;
 
                 if (placementFilter !== 'all') {
                     filteredCompanies = companies.filter(c => {
@@ -76,9 +89,9 @@ const StudentDashboard: React.FC = () => {
                     }));
                 setCompanyEvents(cEvents);
 
-                let filteredTrainings = trainings;
+                let filteredTrainings = relevantTrainings;
                 if (trainingFilter !== 'all') {
-                    filteredTrainings = trainings.filter(t => {
+                    filteredTrainings = relevantTrainings.filter(t => {
                         const isRegistered = t.participants?.includes(userProfile.uid);
                         return trainingFilter === 'registered' ? isRegistered : !isRegistered;
                     });
@@ -103,27 +116,37 @@ const StudentDashboard: React.FC = () => {
         fetchStats();
     }, [userProfile, placementFilter, trainingFilter]);
 
-    // Card Component
-    const StatCard = ({ title, count, subtitle, icon: Icon, delay = 0 }: any) => (
-        <div
-            className="relative overflow-hidden rounded-2xl p-6 group transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-            style={{
-                background: 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.5)',
-                animation: `fadeInUp 0.6s ease-out forwards ${delay}s`,
-                opacity: 0
-            }}
-        >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-blue-500/10"></div>
 
-            <div className="relative z-10 flex flex-col h-full justify-between">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-gray-500 text-xs font-bold uppercase tracking-widest">{title}</h3>
-                    <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
-                        <Icon className="w-5 h-5" />
+    return (
+        <div className="">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800">Welcome Back, {userProfile?.displayName?.split(' ')[0]}!</h1>
+                <p className="text-gray-600 mt-2">Here's an overview of your placement journey.</p>
+            </div>
+
+            {userProfile?.placementStatus === 'PLACED' && (
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-8 rounded-r shadow-sm flex items-center">
+                    <div className="bg-green-200 rounded-full p-2 mr-4">
+                        <Trophy className="w-6 h-6 text-green-600" />
                     </div>
+                    <div>
+                        <h3 className="font-bold text-lg">Congratulations! You are Placed!</h3>
+                        <p className="text-sm">Great job on securing a placement. We are proud of your achievement!</p>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 className="text-gray-500 text-sm font-medium uppercase">Active Drives</h3>
+                    <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.activeDrives}</p>
+                    <p className="text-xs text-gray-400 mt-1">Companies hiring now</p>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 className="text-gray-500 text-sm font-medium uppercase">My Applications</h3>
+                    <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.myApplications}</p>
+                    <p className="text-xs text-gray-400 mt-1">Applied so far</p>
+
                 </div>
 
                 <div className="flex items-center gap-3 my-4">

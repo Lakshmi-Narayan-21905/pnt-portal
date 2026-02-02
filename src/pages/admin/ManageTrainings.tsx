@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Plus, Trash2 } from 'lucide-react';
+import { GraduationCap, Plus, Trash2, Download } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
@@ -81,13 +81,35 @@ const ManageTrainings: React.FC = () => {
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Training Programs</h1>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Add Training
-                </button>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => {
+                            const exportData = trainings.map(t => ({
+                                Title: t.title,
+                                Trainer: t.trainer,
+                                Branches: t.eligibility?.branches?.join(', '),
+                                Year: t.eligibility?.year,
+                                StartDate: new Date(t.startDate).toLocaleDateString(),
+                                EndDate: new Date(t.endDate).toLocaleDateString()
+                            }));
+                            import('../../utils/excelParser').then(mod => {
+                                mod.ExcelParser.exportToExcel(exportData, 'Trainings_List');
+                            });
+                        }}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        title="Export Trainings"
+                    >
+                        <Download className="w-5 h-5 mr-2" />
+                        Export
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Add Training
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white shadow rounded-lg overflow-hidden">

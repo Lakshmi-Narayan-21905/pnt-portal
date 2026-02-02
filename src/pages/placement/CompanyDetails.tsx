@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { CompanyService } from '../../services/companyService';
 import { UserService } from '../../services/userService';
 import type { Company, UserProfile } from '../../types';
@@ -9,6 +10,7 @@ import { ArrowLeft, Building2, Calendar } from 'lucide-react';
 const CompanyDetails: React.FC = () => {
     const { companyId } = useParams();
     const navigate = useNavigate();
+    const { userProfile } = useAuth();
     const [company, setCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(true);
     const [allStudents, setAllStudents] = useState<UserProfile[]>([]);
@@ -52,9 +54,16 @@ const CompanyDetails: React.FC = () => {
         setLoadingStudents(true);
         try {
             const students = await UserService.getUsersByRole('STUDENT');
-            setAllStudents(students);
+
+            // Filter strictly for Dept Coordinator
+            let relevantStudents = students;
+            if (userProfile?.role === 'DEPT_COORDINATOR' && userProfile.department) {
+                relevantStudents = students.filter(s => s.department === userProfile.department);
+            }
+
+            setAllStudents(relevantStudents);
             // Apply initial filters
-            applyFilters(students, targetCompany, 'eligible', 'all', '');
+            applyFilters(relevantStudents, targetCompany, 'eligible', 'all', '');
         } catch (error) {
             console.error("Error fetching students:", error);
         } finally {
@@ -267,17 +276,19 @@ const CompanyDetails: React.FC = () => {
                             <option value="not_registered">Not Registered</option>
                         </select>
                     </div>
-                    <div className="flex-1">
-                        <label className="text-xs font-semibold text-gray-500 uppercase">Department</label>
-                        <select
-                            className="input-field w-full mt-1"
-                            value={filterDept}
-                            onChange={(e) => setFilterDept(e.target.value)}
-                        >
-                            <option value="">All Departments</option>
-                            {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-                    </div>
+                    {userProfile?.role !== 'DEPT_COORDINATOR' && (
+                        <div className="flex-1">
+                            <label className="text-xs font-semibold text-gray-500 uppercase">Department</label>
+                            <select
+                                className="input-field w-full mt-1"
+                                value={filterDept}
+                                onChange={(e) => setFilterDept(e.target.value)}
+                            >
+                                <option value="">All Departments</option>
+                                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -285,7 +296,27 @@ const CompanyDetails: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h2 className="font-bold text-gray-800">Student List ({filteredStudents.length})</h2>
-                    {loadingStudents && <span className="text-sm text-gray-500">Updating...</span>}
+                    <div className="flex items-center space-x-4">
+                        {loadingStudents && <span className="text-sm text-gray-500">Updating...</span>}
+                        <button
+                            onClick={() => {
+                                const exportData = filteredStudents.map(s => ({
+                                    Name: s.displayName,
+                                    Email: s.email,
+                                    Department: s.department,
+                                    CGPA: s.cgpa || 0,
+                                    Status: company.applicants?.includes(s.uid) ? 'Opted In' : (company.optedOut?.includes(s.uid) ? 'Opted Out' : 'Not Registered')
+                                }));
+                                import('../../utils/excelParser').then(mod => {
+                                    mod.ExcelParser.exportToExcel(exportData, `${company.name}_Students`);
+                                });
+                            }}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center"
+                        >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Export List
+                        </button>
+                    </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">

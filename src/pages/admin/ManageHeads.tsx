@@ -4,7 +4,7 @@ import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import { ExcelParser } from '../../utils/excelParser';
 import Modal from '../../components/ui/Modal';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, Upload, Eye, EyeOff } from 'lucide-react';
 
 const ManageHeads: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'PLACEMENT' | 'TRAINING'>('PLACEMENT');
@@ -16,6 +16,7 @@ const ManageHeads: React.FC = () => {
     // Form State
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [displayName, setDisplayName] = useState('');
     const [department, setDepartment] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -243,13 +244,22 @@ const ManageHeads: React.FC = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    className="input-field"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        className="input-field pr-10"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Department (Optional)</label>

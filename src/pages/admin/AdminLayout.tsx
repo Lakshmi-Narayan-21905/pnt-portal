@@ -3,7 +3,8 @@ import {
     LayoutDashboard,
     Users,
     Building2,
-    GraduationCap
+    GraduationCap,
+    Menu
 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 
@@ -15,13 +16,18 @@ const AdminLayout: React.FC = () => {
         { path: '/admin/manage-trainings', label: 'Trainings', icon: GraduationCap },
     ];
 
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
     return (
+
         <DashboardLayout
             title="Admin Portal"
             navItems={navItems}
             userRoleLabel="Administrator"
             theme="indigo"
         />
+
     );
 };
 

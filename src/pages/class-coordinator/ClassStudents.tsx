@@ -262,7 +262,7 @@ const ClassStudents: React.FC = () => {
             </Modal>
 
             {/* Student Details Modal */}
-            <Modal isOpen={!!selectedStudent} onClose={() => setSelectedStudent(null)} title="Student Details">
+            <Modal isOpen={!!selectedStudent} onClose={() => setSelectedStudent(null)} title="Student Details" size="2xl">
                 {selectedStudent && (
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -281,10 +281,11 @@ const ClassStudents: React.FC = () => {
                         <div className="border-t pt-4">
                             <h3 className="font-bold text-gray-700 mb-2">Personal Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label className="text-xs text-gray-500">Name</label><p className="font-medium">{selectedStudent.displayName}</p></div>
-                                <div><label className="text-xs text-gray-500">Email</label><p className="font-medium">{selectedStudent.email}</p></div>
+                                <div><label className="text-xs text-gray-500">Roll No</label><p className="font-medium">{selectedStudent.rollNo}</p></div>
+                                <div><label className="text-xs text-gray-500">Name</label><p className="font-medium break-words">{selectedStudent.displayName}</p></div>
+                                <div><label className="text-xs text-gray-500">Email</label><p className="font-medium break-all">{selectedStudent.email}</p></div>
                                 <div><label className="text-xs text-gray-500">Phone</label><p className="font-medium">{selectedStudent.phone || '-'}</p></div>
-                                <div className="col-span-2"><label className="text-xs text-gray-500">Address</label><p className="font-medium">{selectedStudent.address || '-'}</p></div>
+                                <div className="col-span-2"><label className="text-xs text-gray-500">Address</label><p className="font-medium break-words">{selectedStudent.address || '-'}</p></div>
                             </div>
                         </div>
 
