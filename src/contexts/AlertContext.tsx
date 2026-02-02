@@ -15,10 +15,11 @@ interface AlertOptions {
     cancelText?: string;
     onConfirm?: () => void;
     onCancel?: () => void;
+    hideButton?: boolean;
 }
 
 interface AlertContextType {
-    showAlert: (message: string, type?: AlertType, title?: string) => Promise<boolean>; // Returns true if confirmed (for confirm type)
+    showAlert: (message: string, type?: AlertType, title?: string, options?: { hideButton?: boolean }) => Promise<boolean>; // Returns true if confirmed (for confirm type)
     showConfirm: (message: string, title?: string, confirmText?: string, type?: 'confirm' | 'delete' | 'approve') => Promise<boolean>;
 }
 
@@ -116,15 +117,17 @@ const AlertModal: React.FC<{
                                 {cancelText}
                             </button>
                         )}
-                        <button
-                            onClick={onConfirm}
-                            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium text-white shadow-md hover:opacity-90 transition-all transform active:scale-95 focus:ring-2 focus:ring-offset-1 focus:ring-opacity-50 ${type === 'delete' ? 'bg-red-600 shadow-red-500/30' :
-                                type === 'approve' ? 'bg-green-600 shadow-green-500/30' :
-                                    themeColor.replace('text-', 'bg-')
-                                }`}
-                        >
-                            {confirmText || 'OK'}
-                        </button>
+                        {!options.hideButton && (
+                            <button
+                                onClick={onConfirm}
+                                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium text-white shadow-md hover:opacity-90 transition-all transform active:scale-95 focus:ring-2 focus:ring-offset-1 focus:ring-opacity-50 ${type === 'delete' ? 'bg-red-600 shadow-red-500/30' :
+                                    type === 'approve' ? 'bg-green-600 shadow-green-500/30' :
+                                        themeColor.replace('text-', 'bg-')
+                                    }`}
+                            >
+                                {confirmText || 'OK'}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -159,7 +162,7 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const themeColors = getThemeColors();
 
-    const showAlert = useCallback((message: string, type: AlertType = 'info', title?: string) => {
+    const showAlert = useCallback((message: string, type: AlertType = 'info', title?: string, options?: { hideButton?: boolean }) => {
         return new Promise<boolean>((resolve) => {
             setAlertState({
                 isOpen: true,
@@ -168,6 +171,7 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                     type,
                     title,
                     confirmText: 'OK',
+                    hideButton: options?.hideButton,
                     onConfirm: () => {
                         setAlertState(prev => ({ ...prev, isOpen: false }));
                         resolve(true);
