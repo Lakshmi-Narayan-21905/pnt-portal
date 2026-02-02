@@ -2,20 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Calendar } from 'lucide-react';
 import { CompanyService } from '../../services/companyService';
+import { useAuth } from '../../contexts/AuthContext';
 import type { Company } from '../../types';
 
 const DeptPlacements: React.FC = () => {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { userProfile } = useAuth();
 
     const fetchCompanies = async () => {
         setLoading(true);
         try {
             const data = await CompanyService.getAllCompanies();
+            // Filter companies to only show those with coordinator's department in eligible branches
+            const filteredData = data.filter(company => {
+                const branches = company.eligibilityCriteria?.branches || [];
+                // Show if no branches specified (open to all) or if coordinator's dept is in branches
+                return branches.length === 0 || (userProfile?.department && branches.includes(userProfile.department));
+            });
             // Sort by drive date descending (newest first)
-            data.sort((a, b) => b.driveDate - a.driveDate);
-            setCompanies(data);
+            filteredData.sort((a, b) => b.driveDate - a.driveDate);
+            setCompanies(filteredData);
         } catch (error) {
             console.error(error);
         } finally {

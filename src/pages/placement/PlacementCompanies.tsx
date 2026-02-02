@@ -16,7 +16,7 @@ const PlacementCompanies: React.FC = () => {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        role: '',
+        roles: '', // comma separated
         type: '',
         salary: '',
         targetYear: new Date().getFullYear().toString(),
@@ -39,6 +39,15 @@ const PlacementCompanies: React.FC = () => {
             setFormData({ ...formData, branches: currentBranches.filter(b => b !== dept).join(', ') });
         } else {
             setFormData({ ...formData, branches: [...currentBranches, dept].join(', ') });
+        }
+    };
+
+    const handleRoleToggle = (role: string) => {
+        const currentRoles = formData.roles ? formData.roles.split(',').map(s => s.trim()).filter(Boolean) : [];
+        if (currentRoles.includes(role)) {
+            setFormData({ ...formData, roles: currentRoles.filter(r => r !== role).join(', ') });
+        } else {
+            setFormData({ ...formData, roles: [...currentRoles, role].join(', ') });
         }
     };
 
@@ -88,7 +97,7 @@ const PlacementCompanies: React.FC = () => {
             await CompanyService.addCompany({
                 name: formData.name,
                 description: formData.description,
-                roles: [formData.role],
+                roles: formData.roles.split(',').map(r => r.trim()).filter(Boolean),
                 type: formData.type,
                 targetYear: Number(formData.targetYear),
                 salary: `${formData.salary} PA`,
@@ -110,7 +119,7 @@ const PlacementCompanies: React.FC = () => {
             setIsModalOpen(false);
             fetchCompanies();
             setFormData({
-                name: '', description: '', role: '', type: '', salary: '',
+                name: '', description: '', roles: '', type: '', salary: '',
                 targetYear: new Date().getFullYear().toString(), minCGPA: '', sslc: '', hsc: '',
                 standingArrears: '', historyOfArrears: '', firstRoundCount: '',
                 branches: '', deadline: '', driveDate: '', rounds: [''], requirements: ['']
@@ -201,11 +210,41 @@ const PlacementCompanies: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                            <select required className="input-field w-full" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                                <option value="">Select Role</option>
-                                {JOB_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Job Roles</label>
+                            <select
+                                className="input-field w-full"
+                                value=""
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        handleRoleToggle(e.target.value);
+                                    }
+                                }}
+                            >
+                                <option value="">Select Role to Add</option>
+                                {JOB_ROLES.filter(role => !formData.roles.split(',').map(s => s.trim()).includes(role)).map(r => (
+                                    <option key={r} value={r}>{r}</option>
+                                ))}
                             </select>
+                            {/* Selected Roles Tags */}
+                            {formData.roles && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {formData.roles.split(',').map(s => s.trim()).filter(Boolean).map(role => (
+                                        <span
+                                            key={role}
+                                            className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full"
+                                        >
+                                            {role}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRoleToggle(role)}
+                                                className="ml-1 text-purple-600 hover:text-purple-900"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Target Batch</label>
