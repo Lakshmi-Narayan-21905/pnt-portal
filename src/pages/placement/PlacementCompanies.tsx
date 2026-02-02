@@ -223,7 +223,26 @@ const PlacementCompanies: React.FC = () => {
 
     return (
         <div className="p-6">
-            {/* ... (header) ... */}
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Company Drives</h1>
+                <button
+                    onClick={() => {
+                        setEditMode(false);
+                        setSelectedCompany(null);
+                        setFormData({
+                            name: '', description: '', roles: '', type: '', salary: '',
+                            targetYear: new Date().getFullYear().toString(), minCGPA: '', sslc: '', hsc: '',
+                            standingArrears: '', historyOfArrears: '', firstRoundCount: '',
+                            branches: '', deadline: '', driveDate: '', rounds: [''], requirements: ['']
+                        });
+                        setIsModalOpen(true);
+                    }}
+                    className="flex items-center px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/30"
+                >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Schedule Drive
+                </button>
+            </div>
 
             {loading ? (
                 <div className="text-center">Loading...</div>

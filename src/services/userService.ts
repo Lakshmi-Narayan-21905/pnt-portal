@@ -96,17 +96,31 @@ export const UserService = {
     // Get all users with a specific role (Only new collection)
     getUsersByRole: async (role: UserRole): Promise<UserProfile[]> => {
         try {
-            const users: UserProfile[] = [];
-            const newCollection = ROLE_COLLECTIONS[role];
+            const q = query(collection(db, role === 'STUDENT' ? 'students' :
+                role === 'ADMIN' ? 'admins' :
+                    role === 'PLACEMENT_HEAD' ? 'placement_heads' :
+                        role === 'TRAINING_HEAD' ? 'training_heads' :
+                            role === 'DEPT_COORDINATOR' ? 'dept_coordinators' :
+                                'class_coordinators'));
 
-            if (newCollection) {
-                const newSnapshot = await getDocs(collection(db, newCollection));
-                newSnapshot.forEach((doc) => users.push(doc.data() as UserProfile));
-            }
-
-            return users;
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
         } catch (error) {
-            console.error("Error fetching users by role:", error);
+            console.error(`Error fetching users for role ${role}:`, error);
+            throw error;
+        }
+    },
+
+    // Helper to fetch all "student-like" users (Students + Class Coordinators)
+    getAllStudents: async (): Promise<UserProfile[]> => {
+        try {
+            const [students, coordinators] = await Promise.all([
+                UserService.getUsersByRole('STUDENT'),
+                UserService.getUsersByRole('CLASS_COORDINATOR')
+            ]);
+            return [...students, ...coordinators];
+        } catch (error) {
+            console.error("Error fetching all students:", error);
             throw error;
         }
     },
@@ -133,16 +147,20 @@ export const UserService = {
     updateUserStatusByRollNo: async (rollNo: string, status: 'PLACED' | 'UNPLACED' | 'OFFERED') => {
         try {
             const normalizedRoll = rollNo.toLowerCase().trim();
-            // Students are in 'students' collection
-            const q = query(collection(db, 'students'), where('rollNo', '==', normalizedRoll));
-            const snapshot = await getDocs(q);
+            // Check 'students', 'class_coordinators', and 'dept_coordinators'
+            const collectionsToCheck = ['students', 'class_coordinators', 'dept_coordinators'];
 
-            if (!snapshot.empty) {
-                const docRef = snapshot.docs[0].ref;
-                await updateDoc(docRef, { placementStatus: status });
-                return true;
+            for (const colName of collectionsToCheck) {
+                const q = query(collection(db, colName), where('rollNo', '==', normalizedRoll));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const docRef = snapshot.docs[0].ref;
+                    await updateDoc(docRef, { placementStatus: status });
+                    return true;
+                }
             }
-            return false; // User not found
+            return false; // User not found in any collection
         } catch (error) {
             console.error(`Error updating status for rollNo ${rollNo}:`, error);
             // Don't throw, just log, so bulk upload continues

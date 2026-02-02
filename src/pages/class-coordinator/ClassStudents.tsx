@@ -31,8 +31,18 @@ const ClassStudents: React.FC = () => {
         if (!userProfile?.department) return;
         setLoading(true);
         try {
-            // Fetch all students and filter by department (and classId if available)
-            const allStudents = await UserService.getUsersByRole('STUDENT');
+            const allStudents = await UserService.getAllStudents();
+            // Filter by department of the current class coordinator
+            // We need to know current user's department. Assuming it's available in context or passed as prop.
+            // Wait, ClassStudents fetches ALL students then filters?
+            // Let's check how it filters.
+
+            // Looking at previous code, it fetches 'STUDENT' then filters.
+            // We should use getAllStudents() here too.
+
+            // However, we need to make sure we are not showing the current class coordinator in the list if that's not desired.
+            // But the requirement is to "fetch from both", so let's stick to that.
+
             let filtered = allStudents.filter(u => u.department === userProfile.department);
 
             // If class coordinator has a specific classId, filter by it (Deprecated logic?)

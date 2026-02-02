@@ -46,7 +46,10 @@ const TrainingDetails: React.FC = () => {
     const fetchTrainingStudents = async (targetTraining: Training) => {
         setLoadingStudents(true);
         try {
-            const students = await UserService.getUsersByRole('STUDENT');
+            const [trainingData, students] = await Promise.all([
+                TrainingService.getTrainingById(trainingId!),
+                UserService.getAllStudents()
+            ]);
             setAllStudents(students);
             applyFilters(students, targetTraining, 'applied', '');
         } catch (error) {

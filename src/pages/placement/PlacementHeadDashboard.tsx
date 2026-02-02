@@ -89,7 +89,7 @@ const PlacementHeadDashboard: React.FC = () => {
             setLoading(true);
             const [allCompanies, allStudents, allRecords, allDeptCoords] = await Promise.all([
                 CompanyService.getAllCompanies(),
-                UserService.getUsersByRole('STUDENT'),
+                UserService.getAllStudents(),
                 PlacementRecordService.getAllRecords(),
                 UserService.getUsersByRole('DEPT_COORDINATOR')
             ]);

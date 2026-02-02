@@ -67,11 +67,11 @@ const AdminDashboard: React.FC = () => {
         setLoading(true);
         try {
             const [allUsers, allCompanies, allTrainings, allPlacements] = await Promise.all([
-                UserService.getUsersByRole('STUDENT').then(s =>
+                UserService.getAllStudents().then(students =>
                     UserService.getUsersByRole('PLACEMENT_HEAD').then(ph =>
                         UserService.getUsersByRole('TRAINING_HEAD').then(th =>
                             UserService.getUsersByRole('DEPT_COORDINATOR').then(dc =>
-                                [...s, ...ph, ...th, ...dc]
+                                [...students, ...ph, ...th, ...dc]
                             )
                         )
                     )
