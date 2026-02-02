@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 // Import images from assets folder
 import logo from '../assets/logo.png';
 import loginBg from '../assets/login-bg.jpg';
+import AnimatedBackground from '../components/AnimatedBackground'; // Import Custom Background
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -97,9 +98,12 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-300 overflow-hidden p-4">
-            <div className="flex w-full max-w-5xl h-[85vh] max-h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 flex items-center justify-center overflow-hidden p-4 relative">
+            <AnimatedBackground />
+
+            <div className="flex w-full max-w-5xl h-[85vh] max-h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden relative z-10">
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white relative overflow-y-auto">
+                    {/* Background pattern for form side only */}
                     <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
                     <div className="w-full max-w-sm relative z-10">
                         {/* Logo */}

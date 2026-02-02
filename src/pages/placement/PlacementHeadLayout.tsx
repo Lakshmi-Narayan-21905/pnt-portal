@@ -1,22 +1,16 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import {
     LayoutDashboard,
     Users,
-    LogOut,
     Building2,
     Briefcase,
+
     ClipboardList,
     Menu
 } from 'lucide-react';
+import DashboardLayout from '../../components/DashboardLayout';
 
 const PlacementHeadLayout: React.FC = () => {
-    const { logout, userProfile } = useAuth();
-    const location = useLocation();
-
-    const isActive = (path: string) => location.pathname === path;
-
     const navItems = [
         { path: '/placement-head/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/placement-head/coordinators', label: 'Coordinators', icon: Users },
@@ -29,6 +23,7 @@ const PlacementHeadLayout: React.FC = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     return (
+
         <div className="flex h-screen bg-transparent overflow-hidden">
             {/* Mobile Overlay */}
             {isSidebarOpen && (
@@ -97,6 +92,7 @@ const PlacementHeadLayout: React.FC = () => {
                 </main>
             </div>
         </div>
+
     );
 };
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Users, Building2, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserService } from '../../services/userService';
 import { CompanyService } from '../../services/companyService';
@@ -46,17 +47,34 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Total Students</h3>
-                    <p className="text-3xl font-bold text-primary-600 mt-2">{stats.totalStudents}</p>
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-indigo-primary/5 transition flex items-center">
+                    <div className="p-4 bg-brand-indigo-ice rounded-lg mr-4 border border-brand-indigo-light/20">
+                        <Users className="w-8 h-8 text-brand-indigo-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-gray-500 text-sm font-medium uppercase">Total Students</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalStudents}</p>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Active Drives</h3>
-                    <p className="text-3xl font-bold text-primary-600 mt-2">{stats.activeDrives}</p>
+
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-indigo-primary/5 transition flex items-center">
+                    <div className="p-4 bg-brand-indigo-ice rounded-lg mr-4 border border-brand-indigo-light/20">
+                        <Building2 className="w-8 h-8 text-brand-indigo-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-gray-500 text-sm font-medium uppercase">Active Drives</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.activeDrives}</p>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-gray-500 text-sm font-medium uppercase">Total Trainings</h3>
-                    <p className="text-3xl font-bold text-primary-600 mt-2">{stats.totalTrainings}</p>
+
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-indigo-primary/5 transition flex items-center">
+                    <div className="p-4 bg-brand-indigo-ice rounded-lg mr-4 border border-brand-indigo-light/20">
+                        <GraduationCap className="w-8 h-8 text-brand-indigo-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-gray-500 text-sm font-medium uppercase">Total Trainings</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalTrainings}</p>
+                    </div>
                 </div>
             </div>
         </div>

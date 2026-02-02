@@ -54,7 +54,7 @@ const PlacementHeadDashboard: React.FC = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
                     <div className="p-4 bg-blue-50 rounded-lg mr-4">
                         <Building2 className="w-8 h-8 text-blue-500" />
                     </div>
@@ -64,9 +64,9 @@ const PlacementHeadDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
-                    <div className="p-4 bg-purple-50 rounded-lg mr-4">
-                        <Users className="w-8 h-8 text-purple-500" />
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
+                    <div className="p-4 bg-teal-50 rounded-lg mr-4">
+                        <Users className="w-8 h-8 text-teal-600" />
                     </div>
                     <div>
                         <h3 className="text-gray-500 text-sm font-medium">Coordinators</h3>
@@ -74,7 +74,7 @@ const PlacementHeadDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 flex items-center hover:shadow-md transition-shadow">
                     <div className="p-4 bg-green-50 rounded-lg mr-4">
                         <Calendar className="w-8 h-8 text-green-500" />
                     </div>
@@ -86,7 +86,7 @@ const PlacementHeadDashboard: React.FC = () => {
             </div>
 
             {/* Recent Activity Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-800">Recent Company Drives</h2>
                 </div>
