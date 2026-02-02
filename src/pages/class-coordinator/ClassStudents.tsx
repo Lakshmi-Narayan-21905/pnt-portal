@@ -55,14 +55,30 @@ const ClassStudents: React.FC = () => {
                 filtered = filtered.filter(u => u.section === userProfile.section);
             }
 
-            // Include the coordinator's own profile in the list
-            const coordinatorAsStudent: UserProfile = {
-                ...userProfile,
-                // Mark as coordinator for display purposes
-            };
+            // Deduplicate filtered list in case user is in both collections or coordinator is added twice
+            const uniqueStudentsMap = new Map();
+            filtered.forEach(u => uniqueStudentsMap.set(u.uid, u));
 
-            // Combine students with coordinator (coordinator at the top)
-            setStudents([coordinatorAsStudent, ...filtered]);
+            // Ensure current coordinator is in the list (if not already)
+            // Note: If coordinator fetches themselves via getAllStudents, they might already be in 'filtered'.
+            // If we want to pin them to top or ensure they are present:
+
+            // Mark coordinator for display or just rely on role
+            // Let's just merge and dedupe.
+            if (!uniqueStudentsMap.has(userProfile.uid)) {
+                uniqueStudentsMap.set(userProfile.uid, { ...userProfile });
+            }
+
+            // Convert back to array
+            const uniqueStudents = Array.from(uniqueStudentsMap.values());
+
+            // Optional: Sort so coordinator is at top or just alphabetical?
+            // User requested duplicates removal.
+            // Let's sort alphabetically or keep coordinator first if needed.
+            // Sorting by name is usually best.
+            uniqueStudents.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+
+            setStudents(uniqueStudents);
         } catch (error) {
             console.error(error);
         } finally {

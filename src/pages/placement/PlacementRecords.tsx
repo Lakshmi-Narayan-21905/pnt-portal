@@ -152,43 +152,73 @@ const PlacementRecords: React.FC = () => {
             const data: any[] = XLSX.utils.sheet_to_json(ws);
 
             if (data.length === 0) {
-                // Must handle async inside non-async callback carefully, or just ignore await here since it's fire-and-forget UI
                 showAlert("File is empty", "error", "Empty File");
                 return;
             }
 
-            // Simple validation logic
-            // Allow sloppy headers: "Name" or "Student Name", "Roll No" or "Roll Number", "Dept" or "Department"
-            // We map them manually
-
             const mappedData: PreviewRecord[] = data.map(row => {
-                // Try to find fields case-insensitively
                 const getField = (keys: string[]) => {
                     const rowKeys = Object.keys(row);
                     const found = rowKeys.find(k => keys.includes(k.toLowerCase().replace(/[\s_.]/g, '')));
                     return found ? row[found] : undefined;
                 };
 
-                const name = getField(['name', 'studentname', 'fullname']);
-                const rollNo = getField(['rollno', 'regno', 'rollnumber', 'register number']);
-                const dept = getField(['dept', 'department', 'branch']);
-                const company = getField(['company', 'companyname', 'placedin']);
-                const pkg = getField(['package', 'ctc', 'salary']);
+                // Mandatory fields in Excel (at least Roll No and Company)
+                const rollNoRaw = getField(['rollno', 'regno', 'rollnumber', 'register number']);
+                const companyRaw = getField(['company', 'companyname', 'placedin']);
+                const pkgRaw = getField(['package', 'ctc', 'salary']);
+
+                // Optional overrides from Excel, otherwise auto-fill
+                const nameOverride = getField(['name', 'studentname', 'fullname']);
+                const deptOverride = getField(['dept', 'department', 'branch']);
 
                 let status: 'PENDING' | 'VALID' | 'ERROR' = 'VALID';
                 let message = '';
+                let finalName = nameOverride || '';
+                let finalDept = deptOverride || '';
+                let finalRollNo = rollNoRaw || '';
+                let finalCompanyName = companyRaw || '';
 
-                if (!name || !rollNo || !dept || !company) {
+                if (!rollNoRaw) {
                     status = 'ERROR';
-                    message = 'Missing required fields';
+                    message = 'Roll No is missing';
+                } else {
+                    const student = students.find(s => s.rollNo?.toLowerCase() === rollNoRaw.toString().toLowerCase().trim());
+                    if (!student) {
+                        status = 'ERROR';
+                        message = 'Doesnt exist in student/coordinator database';
+                    } else {
+                        finalName = nameOverride || student.displayName || '';
+                        finalDept = deptOverride || student.department || '';
+                        finalRollNo = student.rollNo || rollNoRaw; // Use canonical Roll No from DB if found
+                    }
                 }
 
+                if (status !== 'ERROR') {
+                    if (!companyRaw) {
+                        status = 'ERROR';
+                        message = 'Company Name is missing';
+                    } else {
+                        // Check exact or case-insensitive match
+                        const company = companies.find(c => c.name.toLowerCase() === companyRaw.toString().toLowerCase().trim());
+                        if (!company) {
+                            status = 'ERROR';
+                            message = 'Not there in company database';
+                        } else {
+                            finalCompanyName = company.name; // Use canonical name
+                        }
+                    }
+                }
+
+                // If still no error, check if already placed (optional warning? or just overwrite? logic says update status, so maybe okay)
+                // Existing record check could be added here if needed to avoid duplicates, but currently just validating existence of entities.
+
                 return {
-                    name: name || '',
-                    rollNo: rollNo || '',
-                    department: dept || '',
-                    companyName: company || '',
-                    package: pkg ? pkg.toString() : '',
+                    name: finalName,
+                    rollNo: finalRollNo,
+                    department: finalDept,
+                    companyName: finalCompanyName,
+                    package: pkgRaw ? pkgRaw.toString() : '',
                     status,
                     message
                 };
@@ -444,7 +474,8 @@ const PlacementRecords: React.FC = () => {
                     <div className="space-y-4 text-center">
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
                             <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                            <p className="mt-1 text-sm text-gray-500">Upload Excel with headers: Name, Roll No, Dept, Company, Package</p>
+                            <p className="mt-1 text-sm text-gray-500">Upload Excel with headers: Roll No, Company, Package (Optional)</p>
+                            <p className="text-xs text-gray-400 mt-1">Student details will be auto-filled.</p>
                             <input type="file" onChange={handleFileUpload} className="mt-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
                         </div>
                     </div>

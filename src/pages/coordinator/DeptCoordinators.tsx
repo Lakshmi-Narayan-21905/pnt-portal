@@ -175,10 +175,11 @@ const DeptCoordinators: React.FC = () => {
                         )}
 
                         {/* List All Students of Dept */}
-                        {students.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">No students found in this department.</p>
+                        {/* List Students of THIS Section */}
+                        {students.filter(s => s.section === targetSection).length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">No unassigned students found in Section {targetSection}.</p>
                         ) : (
-                            students.sort((a, b) => (a.section || '').localeCompare(b.section || '')).map(student => (
+                            students.filter(s => s.section === targetSection).sort((a, b) => a.displayName.localeCompare(b.displayName)).map(student => (
                                 <button
                                     key={student.uid}
                                     disabled={assigning}
