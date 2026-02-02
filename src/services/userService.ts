@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { UserProfile, UserRole } from '../types';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
 
 const ROLE_COLLECTIONS: Record<UserRole, string> = {
     'ADMIN': 'admin',
@@ -55,8 +56,14 @@ export const UserService = {
     // Get a user profile by UID (searching only new collections)
     getUserProfile: async (uid: string): Promise<UserProfile | null> => {
         try {
-            const result = await UserService.findUserDoc(uid);
-            return result ? result.data : null;
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.USERS.SINGLE(uid),
+                async () => {
+                    const result = await UserService.findUserDoc(uid);
+                    return result ? result.data : null;
+                },
+                CACHE_TTL.MEDIUM
+            );
         } catch (error) {
             console.error("Error getting user profile:", error);
             throw error;
@@ -69,6 +76,11 @@ export const UserService = {
             const result = await UserService.findUserDoc(uid);
             if (result) {
                 await updateDoc(result.ref, data);
+                // Invalidate cache for this user and their role
+                cacheService.delete(CACHE_KEYS.USERS.SINGLE(uid));
+                if (result.data.role) {
+                    cacheService.delete(CACHE_KEYS.USERS.ALL(result.data.role));
+                }
             } else {
                 throw new Error("User not found for update (New Collection)");
             }
@@ -84,6 +96,11 @@ export const UserService = {
             const result = await UserService.findUserDoc(uid);
             if (result) {
                 await deleteDoc(result.ref);
+                // Invalidate cache for this user and all users of their role
+                cacheService.delete(CACHE_KEYS.USERS.SINGLE(uid));
+                if (result.data.role) {
+                    cacheService.delete(CACHE_KEYS.USERS.ALL(result.data.role));
+                }
             } else {
                 throw new Error("User not found for deletion");
             }
@@ -96,15 +113,21 @@ export const UserService = {
     // Get all users with a specific role (Only new collection)
     getUsersByRole: async (role: UserRole): Promise<UserProfile[]> => {
         try {
-            const q = query(collection(db, role === 'STUDENT' ? 'students' :
-                role === 'ADMIN' ? 'admins' :
-                    role === 'PLACEMENT_HEAD' ? 'placement_heads' :
-                        role === 'TRAINING_HEAD' ? 'training_heads' :
-                            role === 'DEPT_COORDINATOR' ? 'dept_coordinators' :
-                                'class_coordinators'));
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.USERS.ALL(role),
+                async () => {
+                    const q = query(collection(db, role === 'STUDENT' ? 'students' :
+                        role === 'ADMIN' ? 'admins' :
+                            role === 'PLACEMENT_HEAD' ? 'placement_heads' :
+                                role === 'TRAINING_HEAD' ? 'training_heads' :
+                                    role === 'DEPT_COORDINATOR' ? 'dept_coordinators' :
+                                        'class_coordinators'));
 
-            const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+                    const snapshot = await getDocs(q);
+                    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+                },
+                CACHE_TTL.MEDIUM
+            );
         } catch (error) {
             console.error(`Error fetching users for role ${role}:`, error);
             throw error;

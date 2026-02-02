@@ -11,6 +11,7 @@ import {
 import { db } from '../config/firebase';
 import type { Company } from '../types';
 import { AnnouncementService } from './announcementService';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
 
 const COLLECTION_NAME = 'companies';
 
@@ -43,6 +44,9 @@ export const CompanyService = {
                 // Don't fail the whole operation if announcement fails
             }
 
+            // Invalidate companies cache
+            cacheService.invalidatePattern(CACHE_KEYS.COMPANIES.PATTERN);
+
             return docRef.id;
         } catch (error) {
             console.error("Error adding company:", error);
@@ -53,11 +57,17 @@ export const CompanyService = {
     // Get all companies
     getAllCompanies: async (): Promise<Company[]> => {
         try {
-            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-            return querySnapshot.docs.map(doc => ({
-                ...doc.data(),
-                id: doc.id
-            } as Company));
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.COMPANIES.ALL,
+                async () => {
+                    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+                    return querySnapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        id: doc.id
+                    } as Company));
+                },
+                CACHE_TTL.SHORT // Companies change frequently
+            );
         } catch (error) {
             console.error("Error fetching companies:", error);
             throw error;
@@ -67,12 +77,18 @@ export const CompanyService = {
     // Get a single company by ID
     getCompanyById: async (id: string): Promise<Company | null> => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                return { ...docSnap.data(), id: docSnap.id } as Company;
-            }
-            return null;
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.COMPANIES.SINGLE(id),
+                async () => {
+                    const docRef = doc(db, COLLECTION_NAME, id);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        return { ...docSnap.data(), id: docSnap.id } as Company;
+                    }
+                    return null;
+                },
+                CACHE_TTL.SHORT
+            );
         } catch (error) {
             console.error("Error fetching company:", error);
             throw error;
@@ -84,6 +100,8 @@ export const CompanyService = {
         try {
             const docRef = doc(db, COLLECTION_NAME, id);
             await updateDoc(docRef, updates);
+            // Invalidate cache
+            cacheService.invalidatePattern(CACHE_KEYS.COMPANIES.PATTERN);
         } catch (error) {
             console.error("Error updating company:", error);
             throw error;
@@ -94,6 +112,8 @@ export const CompanyService = {
     deleteCompany: async (id: string) => {
         try {
             await deleteDoc(doc(db, COLLECTION_NAME, id));
+            // Invalidate cache
+            cacheService.invalidatePattern(CACHE_KEYS.COMPANIES.PATTERN);
         } catch (error) {
             console.error("Error deleting company:", error);
             throw error;
