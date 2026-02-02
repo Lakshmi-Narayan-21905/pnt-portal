@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAlert } from '../../contexts/AlertContext';
-import { Plus, Upload, Trash2, Search, FileText } from 'lucide-react';
+import { Plus, Upload, Trash2, Search, FileText, Pencil } from 'lucide-react';
 import { PlacementRecordService } from '../../services/placementRecordService';
 import { UserService } from '../../services/userService';
 import type { PlacementRecord } from '../../types';
@@ -27,6 +27,9 @@ const PlacementRecords: React.FC = () => {
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+    const [selectedRecord, setSelectedRecord] = useState<PlacementRecord | null>(null);
+    const [editMode, setEditMode] = useState(false);
 
     // Manual Form
     const [formData, setFormData] = useState({
@@ -58,26 +61,57 @@ const PlacementRecords: React.FC = () => {
         fetchRecords();
     }, []);
 
-    // Manual Add
-    const handleAddRecord = async (e: React.FormEvent) => {
+    const handleEdit = (record: PlacementRecord) => {
+        setSelectedRecord(record);
+        setFormData({
+            name: record.name,
+            rollNo: record.rollNo,
+            department: record.department,
+            companyName: record.companyName,
+            package: record.package || '',
+            academicYear: record.academicYear || new Date().getFullYear().toString()
+        });
+        setEditMode(true);
+        setIsAddModalOpen(true);
+    };
+
+    // Auto-save (Create or Update)
+    const handleSaveRecord = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
         try {
-            await PlacementRecordService.addRecord({
-                name: formData.name,
-                rollNo: formData.rollNo,
-                department: formData.department,
-                companyName: formData.companyName,
-                package: formData.package,
-                academicYear: formData.academicYear
-            });
-            await showAlert('Record added successfully', 'success', 'Success');
+            if (editMode && selectedRecord) {
+                // Update
+                await PlacementRecordService.updateRecord(selectedRecord.id, {
+                    name: formData.name,
+                    rollNo: formData.rollNo,
+                    department: formData.department,
+                    companyName: formData.companyName,
+                    package: formData.package,
+                    academicYear: formData.academicYear
+                });
+                await showAlert('Record updated successfully', 'success', 'Success');
+            } else {
+                // Create
+                await PlacementRecordService.addRecord({
+                    name: formData.name,
+                    rollNo: formData.rollNo,
+                    department: formData.department,
+                    companyName: formData.companyName,
+                    package: formData.package,
+                    academicYear: formData.academicYear
+                });
+                await showAlert('Record added successfully', 'success', 'Success');
+            }
+
             setIsAddModalOpen(false);
+            setEditMode(false);
+            setSelectedRecord(null);
             setFormData({ name: '', rollNo: '', department: '', companyName: '', package: '', academicYear: new Date().getFullYear().toString() });
             fetchRecords();
         } catch (error: any) {
             console.error(error);
-            await showAlert('Failed to add record: ' + error.message, 'error', 'Error');
+            await showAlert('Failed to save record: ' + error.message, 'error', 'Error');
         } finally {
             setProcessing(false);
         }
@@ -291,7 +325,10 @@ const PlacementRecords: React.FC = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.department}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.companyName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.package || '-'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end space-x-2">
+                                        <button onClick={() => handleEdit(record)} className="text-indigo-600 hover:text-indigo-900" title="Edit">
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
                                         <button onClick={() => handleDelete(record.id)} className="text-red-600 hover:text-red-900">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -303,9 +340,9 @@ const PlacementRecords: React.FC = () => {
                 </table>
             </div>
 
-            {/* Add Modal */}
-            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Placement Record">
-                <form onSubmit={handleAddRecord} className="space-y-4">
+            {/* Add/Edit Modal */}
+            <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditMode(false); }} title={`${editMode ? 'Edit' : 'Add'} Placement Record`}>
+                <form onSubmit={handleSaveRecord} className="space-y-4">
                     <input required placeholder="Student Name" className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                     <input required placeholder="Roll Number" className="input-field" value={formData.rollNo} onChange={e => setFormData({ ...formData, rollNo: e.target.value })} />
                     <select required className="input-field" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })}>
@@ -316,7 +353,7 @@ const PlacementRecords: React.FC = () => {
                     <input placeholder="Package (LPA) - Optional" className="input-field" value={formData.package} onChange={e => setFormData({ ...formData, package: e.target.value })} />
 
                     <button disabled={processing} type="submit" className="w-full btn-primary mt-4">
-                        {processing ? 'Saving...' : 'Save Record'}
+                        {processing ? 'Saving...' : (editMode ? 'Update Record' : 'Save Record')}
                     </button>
                 </form>
             </Modal>

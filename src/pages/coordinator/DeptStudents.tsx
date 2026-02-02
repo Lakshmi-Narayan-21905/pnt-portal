@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Upload, Download } from 'lucide-react';
+import { Plus, Upload, Download, Pencil, Trash2 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
+
+// ... types
+import { useAlert } from '../../contexts/AlertContext';
 
 interface PreviewData {
     displayName: string;
@@ -24,6 +27,8 @@ const DeptStudents: React.FC = () => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<UserProfile | null>(null);
+    const [editingStudent, setEditingStudent] = useState<UserProfile | null>(null);
+    const { showConfirm, showAlert } = useAlert();
 
     // Form State
     const [formData, setFormData] = useState({
@@ -72,31 +77,69 @@ const DeptStudents: React.FC = () => {
 
         setCreating(true);
         try {
-            const newUser = await AdminAuthService.createUser(
-                formData.email,
-                formData.password
-            );
+            if (editingStudent) {
+                // UPDATE logic
+                await UserService.updateUserProfile(editingStudent.uid, {
+                    displayName: formData.displayName,
+                    section: formData.section.toUpperCase(),
+                    // Role and Email update restricted here for simplicity
+                });
+                await showAlert('Student updated successfully', 'success', 'Updated');
+            } else {
+                // CREATE logic
+                const newUser = await AdminAuthService.createUser(
+                    formData.email,
+                    formData.password
+                );
 
-            await UserService.createUserProfile({
-                uid: newUser.uid,
-                email: formData.email,
-                displayName: formData.displayName,
-                role: 'STUDENT',
-                department: userProfile.department, // Auto-assign Coordinator's Dept
-                section: formData.section.toUpperCase(),
-                profileCompleted: false,
-                createdAt: Date.now()
-            });
+                await UserService.createUserProfile({
+                    uid: newUser.uid,
+                    email: formData.email,
+                    displayName: formData.displayName,
+                    role: 'STUDENT',
+                    department: userProfile.department,
+                    section: formData.section.toUpperCase(),
+                    profileCompleted: false,
+                    createdAt: Date.now()
+                });
+                await showAlert('Student created successfully', 'success', 'Created');
+            }
 
             setIsAddModalOpen(false);
+            setEditingStudent(null);
             setFormData({ email: '', password: '', displayName: '', section: '' });
             fetchStudents();
-            alert('Student created successfully');
         } catch (error: any) {
             console.error(error);
-            alert('Failed to create student: ' + error.message);
+            await showAlert('Operation failed: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
+        }
+    };
+
+    const handleEdit = (student: UserProfile) => {
+        setEditingStudent(student);
+        setFormData({
+            email: student.email,
+            password: '', // Password not required for edit
+            displayName: student.displayName,
+            section: student.section || ''
+        });
+        setIsAddModalOpen(true);
+    };
+
+    const handleDelete = async (student: UserProfile) => {
+        if (await showConfirm(`Are you sure you want to delete ${student.displayName}?`, 'Delete Student', 'Yes, Delete', 'delete')) {
+            try {
+                // Note: This only deletes the profile from Firestore. Auth user remains. 
+                // AdminAuthService logic would be needed to delete from Auth, but that might be restricted.
+                // For now assuming we just remove from the list logic. 
+                await UserService.deleteUserProfile(student.uid);
+                await showAlert('Student profile deleted', 'success', 'Deleted');
+                fetchStudents();
+            } catch (error: any) {
+                await showAlert('Failed to delete: ' + error.message, 'error', 'Error');
+            }
         }
     };
 
@@ -264,6 +307,16 @@ const DeptStudents: React.FC = () => {
                         <Plus className="w-4 h-4 mr-2" />
                         Add Student
                     </button>
+                    {/* Reset form when opening modal for specific 'Add' action */}
+                    <button
+                        className="hidden" // Helper to clear valid form if needed
+                        onClick={() => {
+                            setEditingStudent(null);
+                            setFormData({ email: '', password: '', displayName: '', section: '' });
+                            setIsAddModalOpen(true);
+                        }}
+                        id="add-student-clean"
+                    />
                 </div>
             </div>
 
@@ -275,6 +328,7 @@ const DeptStudents: React.FC = () => {
                             <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Email</th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Section</th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-purple-900/70 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-50">
@@ -291,8 +345,8 @@ const DeptStudents: React.FC = () => {
                                             onClick={() => setSelectedStudent(student)}
                                         >
                                             <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${student.role === 'CLASS_COORDINATOR'
-                                                    ? 'bg-indigo-100 text-indigo-600 ring-2 ring-indigo-200'
-                                                    : 'bg-purple-100 text-purple-600'
+                                                ? 'bg-indigo-100 text-indigo-600 ring-2 ring-indigo-200'
+                                                : 'bg-purple-100 text-purple-600'
                                                 }`}>
                                                 {student.displayName?.charAt(0)}
                                             </div>
@@ -322,6 +376,24 @@ const DeptStudents: React.FC = () => {
                                             {student.profileCompleted ? 'Verified' : 'Pending'}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex justify-end space-x-2">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleEdit(student); }}
+                                                className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition"
+                                                title="Edit"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(student); }}
+                                                className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))
                         )}
@@ -329,16 +401,26 @@ const DeptStudents: React.FC = () => {
                 </table>
             </div>
 
-            {/* Add Student Modal */}
-            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Student">
+            {/* Add/Edit Student Modal */}
+            <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingStudent(null); setFormData({ email: '', password: '', displayName: '', section: '' }); }} title={editingStudent ? "Edit Student" : "Add Student"}>
                 <form onSubmit={handleCreateStudent} className="space-y-4">
                     <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
                     <input placeholder="Section " className="input-field" value={formData.section} onChange={e => setFormData({ ...formData, section: e.target.value })} />
-                    <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                    <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    <input
+                        required
+                        type="email"
+                        placeholder="Email"
+                        className={`input-field ${editingStudent ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        disabled={!!editingStudent}
+                    />
+                    {!editingStudent && (
+                        <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    )}
 
                     <button disabled={creating} type="submit" className="w-full py-2.5 bg-brand-lavender-primary text-white font-bold rounded-lg hover:bg-brand-lavender-dark transition shadow-lg shadow-brand-lavender-primary/30 mt-4 disabled:opacity-70">
-                        {creating ? 'Creating...' : 'Create Student'}
+                        {creating ? 'Processing...' : (editingStudent ? 'Update Student' : 'Create Student')}
                     </button>
                 </form>
             </Modal>
@@ -489,7 +571,7 @@ const DeptStudents: React.FC = () => {
                 )}
 
             </Modal>
-        </div>
+        </div >
     );
 };
 

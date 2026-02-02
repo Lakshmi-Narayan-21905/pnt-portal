@@ -5,6 +5,7 @@ import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
 import { Calendar, CheckCircle, Info } from 'lucide-react';
 import Modal from '../../components/Modal';
+import { formatDate } from '../../utils/dateUtils';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
 
 const StudentTrainings: React.FC = () => {
@@ -78,7 +79,7 @@ const StudentTrainings: React.FC = () => {
 
                                 <div className="flex items-center text-sm text-gray-500 mb-2">
                                     <Calendar className="w-4 h-4 mr-2 text-blue-500" />
-                                    <span>{new Date(training.startDate).toLocaleDateString()} - {new Date(training.endDate).toLocaleDateString()}</span>
+                                    <span>{formatDate(training.startDate)} - {formatDate(training.endDate)}</span>
                                 </div>
                             </div>
 
@@ -146,11 +147,11 @@ const StudentTrainings: React.FC = () => {
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">Start Date</span>
-                                <span className="font-medium text-gray-900">{new Date(selectedTraining.startDate).toLocaleDateString()}</span>
+                                <span className="font-medium text-gray-900">{formatDate(selectedTraining.startDate)}</span>
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">End Date</span>
-                                <span className="font-medium text-gray-900">{new Date(selectedTraining.endDate).toLocaleDateString()}</span>
+                                <span className="font-medium text-gray-900">{formatDate(selectedTraining.endDate)}</span>
                             </div>
                         </div>
 

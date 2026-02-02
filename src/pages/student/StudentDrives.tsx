@@ -5,6 +5,7 @@ import { useAlert } from '../../contexts/AlertContext';
 import type { Company } from '../../types';
 import { CheckCircle, XCircle, AlertCircle, Search, RotateCcw, MapPin } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
+import { formatDate } from '../../utils/dateUtils';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
@@ -356,11 +357,11 @@ const StudentDrives: React.FC = () => {
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">Drive Date</span>
-                                <span className="font-medium text-gray-900">{new Date(selectedCompany.driveDate).toLocaleDateString()}</span>
+                                <span className="font-medium text-gray-900">{formatDate(selectedCompany.driveDate)}</span>
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <span className="block text-gray-500 text-xs uppercase mb-1">Deadline</span>
-                                <span className="font-medium text-red-700">{new Date(selectedCompany.deadline).toLocaleDateString()}</span>
+                                <span className="font-medium text-red-700">{formatDate(selectedCompany.deadline)}</span>
                             </div>
                         </div>
 

@@ -77,17 +77,26 @@ const PlacementStudents: React.FC = () => {
 
     useEffect(() => {
         const load = async () => {
-            const data = await UserService.getUsersByRole('STUDENT');
-            setStudents(data);
+            const [studentsData, coordinatorsData] = await Promise.all([
+                UserService.getUsersByRole('STUDENT'),
+                UserService.getUsersByRole('CLASS_COORDINATOR')
+            ]);
+            // Combine and sort by name
+            const combined = [...studentsData, ...coordinatorsData].sort((a, b) =>
+                (a.displayName || '').localeCompare(b.displayName || '')
+            );
+            setStudents(combined);
             setLoading(false);
         };
         load();
     }, []);
 
     const filteredStudents = students.filter(student => {
+        const query = searchQuery.toLowerCase();
         const matchesSearch =
-            student.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.email?.toLowerCase().includes(searchQuery.toLowerCase());
+            student.displayName?.toLowerCase().startsWith(query) ||
+            student.email?.toLowerCase().startsWith(query);
+
         const matchesDept = departmentFilter ? student.department === departmentFilter : true;
 
         // Fix: logic for 'All Status' (Verification)

@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, Calendar } from 'lucide-react';
+import { Building2, Plus, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { CompanyService } from '../../services/companyService';
 import type { Company } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS, COMPANY_TYPES, JOB_ROLES } from '../../utils/constants';
+import { useAlert } from '../../contexts/AlertContext';
+import { formatDate } from '../../utils/dateUtils';
 
 const PlacementCompanies: React.FC = () => {
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { showConfirm, showAlert } = useAlert();
+
+    const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+    const [editMode, setEditMode] = useState(false);
 
     // Dynamic Form State
     const [formData, setFormData] = useState({
@@ -70,10 +79,6 @@ const PlacementCompanies: React.FC = () => {
         setLoading(true);
         try {
             const data = await CompanyService.getAllCompanies();
-            // Ensure rounds is an array if coming from legacy data where it might be a string
-            // This is a temporary fix for display, but ideally we migrate data.
-            // Since we just changed the type locally, we might need a transform if fetching from DB returns strict types
-            // But Firestore returns raw JSON, so we can cast.
             const sanitizedData = data.map(d => ({
                 ...d,
                 rounds: Array.isArray(d.rounds) ? d.rounds : (d.rounds ? [d.rounds] : []),
@@ -91,10 +96,65 @@ const PlacementCompanies: React.FC = () => {
         fetchCompanies();
     }, []);
 
+    const handleEdit = (company: Company) => {
+        try {
+            // Need to parse date numbers back to YYYY-MM-DD
+            const deadlineDate = new Date(company.deadline).toISOString().split('T')[0];
+            const driveDate = new Date(company.driveDate).toISOString().split('T')[0];
+
+            setFormData({
+                name: company.name,
+                description: company.description,
+                roles: company.roles.join(', '),
+                type: company.type,
+                salary: company.salary.replace(' PA', '').replace('LPA', '').trim(),
+                targetYear: company.targetYear.toString(),
+                minCGPA: company.eligibilityCriteria.minCGPA.toString(),
+                sslc: company.eligibilityCriteria.sslc.toString(),
+                hsc: company.eligibilityCriteria.hsc.toString(),
+                standingArrears: company.eligibilityCriteria.standingArrears.toString(),
+                historyOfArrears: company.eligibilityCriteria.historyOfArrears.toString(),
+                firstRoundCount: company.firstRoundCount?.toString() || '',
+                branches: company.eligibilityCriteria.branches.join(', '),
+                deadline: deadlineDate,
+                driveDate: driveDate,
+                rounds: Array.isArray(company.rounds) ? company.rounds : [],
+                requirements: Array.isArray(company.requirements) ? company.requirements : []
+            });
+            setSelectedCompany(company);
+            setEditMode(true);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error(error);
+            // Fallback if date parsing fails
+        }
+    };
+
+    const handleDelete = async (e: React.MouseEvent, id: string, name: string) => {
+        e.stopPropagation(); // Prevent card click
+        if (await showConfirm(`Are you sure you want to delete the drive for ${name}?`, 'Delete Drive', 'Yes, Delete', 'delete')) {
+            try {
+                await CompanyService.deleteCompany(id);
+                await showAlert('Drive deleted successfully', 'success', 'Deleted');
+                fetchCompanies();
+            } catch (error: any) {
+                await showAlert('Failed to delete: ' + error.message, 'error', 'Error');
+            }
+        }
+    }
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Date Validation
+        if (new Date(formData.driveDate) < new Date(formData.deadline)) {
+            await showAlert('Drive Date cannot be before the Application Deadline.', 'error', 'Invalid Date');
+            return;
+        }
+
         try {
-            await CompanyService.addCompany({
+            const companyData: any = {
                 name: formData.name,
                 description: formData.description,
                 roles: formData.roles.split(',').map(r => r.trim()).filter(Boolean),
@@ -115,9 +175,21 @@ const PlacementCompanies: React.FC = () => {
                 driveDate: new Date(formData.driveDate).getTime(),
                 rounds: formData.rounds.filter(r => r.trim() !== ''),
                 requirements: formData.requirements.filter(r => r.trim() !== '')
-            });
+            };
+
+            if (editMode && selectedCompany) {
+                await CompanyService.updateCompany(selectedCompany.id, companyData);
+                await showAlert('Drive updated successfully', 'success', 'Success');
+            } else {
+                await CompanyService.addCompany(companyData);
+                await showAlert('Drive created successfully', 'success', 'Success');
+            }
+
             setIsModalOpen(false);
             fetchCompanies();
+            // Reset Form (simpler to just clear/reset state)
+            setEditMode(false);
+            setSelectedCompany(null);
             setFormData({
                 name: '', description: '', roles: '', type: '', salary: '',
                 targetYear: new Date().getFullYear().toString(), minCGPA: '', sslc: '', hsc: '',
@@ -125,7 +197,7 @@ const PlacementCompanies: React.FC = () => {
                 branches: '', deadline: '', driveDate: '', rounds: [''], requirements: ['']
             });
         } catch (error) {
-            alert('Failed to schedule drive');
+            alert('Failed to save drive');
         }
     };
 
@@ -133,12 +205,35 @@ const PlacementCompanies: React.FC = () => {
         navigate(`${company.id}`);
     };
 
+    // Reset modal on close
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditMode(false);
+        setSelectedCompany(null);
+        setFormData({
+            name: '', description: '', roles: '', type: '', salary: '',
+            targetYear: new Date().getFullYear().toString(), minCGPA: '', sslc: '', hsc: '',
+            standingArrears: '', historyOfArrears: '', firstRoundCount: '',
+            branches: '', deadline: '', driveDate: '', rounds: [''], requirements: ['']
+        });
+    }
+
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Company Drives</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => {
+                        setEditMode(false);
+                        setSelectedCompany(null);
+                        setFormData({
+                            name: '', description: '', roles: '', type: '', salary: '',
+                            targetYear: new Date().getFullYear().toString(), minCGPA: '', sslc: '', hsc: '',
+                            standingArrears: '', historyOfArrears: '', firstRoundCount: '',
+                            branches: '', deadline: '', driveDate: '', rounds: [''], requirements: ['']
+                        });
+                        setIsModalOpen(true)
+                    }}
                     className="flex items-center px-4 py-2 bg-brand-green-primary text-white rounded-lg hover:bg-brand-green-dark transition shadow-lg shadow-brand-green-primary/30"
                 >
                     <Plus className="w-5 h-5 mr-2" />
@@ -157,16 +252,33 @@ const PlacementCompanies: React.FC = () => {
                             onClick={() => handleCardClick(company)}
                             className="bg-white border border-gray-100 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:border-emerald-200 transition-all duration-300 cursor-pointer relative group flex flex-col h-full"
                         >
+                            {/* Edit/Delete Actions */}
+                            <div className="absolute top-4 right-4 flex space-x-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); handleEdit(company); }}
+                                    className="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition bg-white shadow-sm border border-gray-100"
+                                    title="Edit"
+                                >
+                                    <Pencil className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={(e) => handleDelete(e, company.id, company.name)}
+                                    className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition bg-white shadow-sm border border-gray-100"
+                                    title="Delete"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+
+
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-white/50 backdrop-blur-md px-2 py-1 rounded text-gray-600">
-                                Click for details
+                                {/* Click for details removed or moved to not conflict with buttons? Actually buttons are z-10 so it's fine */}
                             </div>
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors">
                                     <Building2 className="w-6 h-6 text-emerald-600" />
                                 </div>
-                                <span className={`px-2 py-1 text-xs rounded-full font-medium bg-brand-green-light text-brand-green-dark border border-brand-green-mint/20`}>
-                                    Open
-                                </span>
+
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 mb-1">{company.name}</h3>
                             <p className="text-gray-500 text-sm mb-1">{company.type}</p>
@@ -180,8 +292,11 @@ const PlacementCompanies: React.FC = () => {
                                 <div className="flex justify-between items-center border-t border-brand-green-mint/20 pt-4">
                                     <div className="flex items-center text-sm text-gray-500">
                                         <Calendar className="w-4 h-4 mr-2 text-brand-green-emerald" />
-                                        {new Date(company.driveDate).toLocaleDateString()}
+                                        {formatDate(company.driveDate)}
                                     </div>
+                                    <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                        Batch {company.targetYear}
+                                    </span>
                                     <div className="text-sm font-medium text-brand-green-dark bg-brand-green-ice px-3 py-1 rounded-full border border-brand-green-mint/30">
                                         {company.applicants?.length || 0} Reg.
                                     </div>
@@ -192,7 +307,7 @@ const PlacementCompanies: React.FC = () => {
                 </div>
             )}
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Schedule New Drive">
+            <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editMode ? "Edit Company Drive" : "Schedule New Drive"}>
                 <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto px-2 py-2">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -248,7 +363,15 @@ const PlacementCompanies: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Target Batch</label>
-                            <input required type="number" placeholder="2026" className="input-field w-full" value={formData.targetYear} onChange={e => setFormData({ ...formData, targetYear: e.target.value })} />
+                            <select
+                                required
+                                className="input-field w-full"
+                                value={formData.targetYear}
+                                onChange={e => setFormData({ ...formData, targetYear: e.target.value })}
+                            >
+                                <option value={currentYear}>{currentYear}</option>
+                                <option value={nextYear}>{nextYear}</option>
+                            </select>
                         </div>
                     </div>
 
@@ -258,10 +381,12 @@ const PlacementCompanies: React.FC = () => {
                             <input
                                 required
                                 type="number"
+                                min="0"
+                                onKeyDown={e => e.key === '-' && e.preventDefault()}
                                 placeholder="10"
                                 className="input-field flex-1 rounded-r-none border-r-0"
                                 value={formData.salary}
-                                onChange={e => setFormData({ ...formData, salary: e.target.value })}
+                                onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, salary: e.target.value })}
                             />
                             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                                 LPA
@@ -345,27 +470,27 @@ const PlacementCompanies: React.FC = () => {
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">Min CGPA</label>
-                                <input required type="number" step="0.1" placeholder="0.0" className="input-field w-full" value={formData.minCGPA} onChange={e => setFormData({ ...formData, minCGPA: e.target.value })} />
+                                <input required type="number" step="0.1" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0.0" className="input-field w-full" value={formData.minCGPA} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, minCGPA: e.target.value })} />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">10th Mark (%)</label>
-                                <input required type="number" step="1" placeholder="0" className="input-field w-full" value={formData.sslc} onChange={e => setFormData({ ...formData, sslc: e.target.value })} />
+                                <input required type="number" step="1" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.sslc} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, sslc: e.target.value })} />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">12th Mark (%)</label>
-                                <input required type="number" step="1" placeholder="0" className="input-field w-full" value={formData.hsc} onChange={e => setFormData({ ...formData, hsc: e.target.value })} />
+                                <input required type="number" step="1" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.hsc} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, hsc: e.target.value })} />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">Standing Arrears</label>
-                                <input required type="number" placeholder="0" className="input-field w-full" value={formData.standingArrears} onChange={e => setFormData({ ...formData, standingArrears: e.target.value })} />
+                                <input required type="number" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.standingArrears} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, standingArrears: e.target.value })} />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">History of Arrears</label>
-                                <input required type="number" placeholder="0" className="input-field w-full" value={formData.historyOfArrears} onChange={e => setFormData({ ...formData, historyOfArrears: e.target.value })} />
+                                <input required type="number" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="0" className="input-field w-full" value={formData.historyOfArrears} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, historyOfArrears: e.target.value })} />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">Required Students</label>
-                                <input type="number" placeholder="(Optional)" className="input-field w-full" value={formData.firstRoundCount} onChange={e => setFormData({ ...formData, firstRoundCount: e.target.value })} />
+                                <input type="number" min="0" onKeyDown={e => e.key === '-' && e.preventDefault()} placeholder="(Optional)" className="input-field w-full" value={formData.firstRoundCount} onChange={e => Number(e.target.value) >= 0 && setFormData({ ...formData, firstRoundCount: e.target.value })} />
                             </div>
                         </div>
                     </div>
@@ -398,15 +523,22 @@ const PlacementCompanies: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Drive Date</label>
-                            <input required type="date" className="input-field w-full" value={formData.driveDate} onChange={e => setFormData({ ...formData, driveDate: e.target.value })} />
+                            <input
+                                required
+                                type="date"
+                                className="input-field w-full"
+                                min={formData.deadline}
+                                value={formData.driveDate}
+                                onChange={e => setFormData({ ...formData, driveDate: e.target.value })}
+                            />
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full btn-primary mt-6 py-2.5 text-lg shadow-sm">Create Drive</button>
+                    <button type="submit" className="w-full btn-primary mt-6 py-2.5 text-lg shadow-sm">
+                        {editMode ? 'Update Drive' : 'Create Drive'}
+                    </button>
                 </form>
             </Modal>
-
-
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Upload, Search, Download, Eye, EyeOff } from 'lucide-react';
+import { Users, Plus, Upload, Search, Download, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import type { UserProfile, UserRole } from '../../types';
@@ -24,6 +24,8 @@ const ManageUsers: React.FC = () => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
     const { showAlert, showConfirm } = useAlert();
 
     // Form State
@@ -50,37 +52,72 @@ const ManageUsers: React.FC = () => {
         fetchUsers();
     }, [activeTab]);
 
+    const handleEdit = (user: UserProfile) => {
+        setFormData({
+            email: user.email,
+            password: '', // Don't show password
+            displayName: user.displayName,
+            department: user.department || '',
+        });
+        setSelectedUser(user);
+        setEditMode(true);
+        setIsAddModalOpen(true);
+    };
+
+    const handleDelete = async (uid: string, name: string) => {
+        if (!await showConfirm(`Are you sure you want to delete ${name}? This cannot be undone.`, 'Delete User', 'Yes, Delete', 'delete')) return;
+
+        try {
+            await UserService.deleteUserProfile(uid);
+            await showAlert('User deleted successfully', 'success', 'Deleted');
+            fetchUsers();
+        } catch (error: any) {
+            console.error(error);
+            await showAlert('Failed to delete: ' + error.message, 'error', 'Error');
+        }
+    };
+
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setCreating(true);
         try {
-            // 1. Create Auth User
-            const user = await AdminAuthService.createUser(
-                formData.email,
-                formData.password
-            );
+            if (editMode && selectedUser) {
+                // Update Existing
+                await UserService.updateUserProfile(selectedUser.uid, {
+                    displayName: formData.displayName,
+                    department: formData.department || '',
+                });
+                await showAlert('User updated successfully', 'success', 'Success');
+            } else {
+                // Create New
+                // 1. Create Auth User
+                const user = await AdminAuthService.createUser(
+                    formData.email,
+                    formData.password
+                );
 
-            // 2. Create Firestore Profile
-            await UserService.createUserProfile({
-                uid: user.uid,
-                email: formData.email,
-                displayName: formData.displayName,
-                role: activeTab, // Use activeTab for role
-                department: formData.department || '',
-                profileCompleted: true, // Heads are pre-verified
-                createdAt: Date.now()
-            });
+                // 2. Create Firestore Profile
+                await UserService.createUserProfile({
+                    uid: user.uid,
+                    email: formData.email,
+                    displayName: formData.displayName,
+                    role: activeTab, // Use activeTab for role
+                    department: formData.department || '',
+                    profileCompleted: true, // Heads are pre-verified
+                    createdAt: Date.now()
+                });
+                await showAlert('User created successfully', 'success', 'Success');
+            }
 
             setIsAddModalOpen(false);
             setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
+            setEditMode(false);
+            setSelectedUser(null);
             fetchUsers();
-            setIsAddModalOpen(false);
-            setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
-            fetchUsers();
-            await showAlert('User created successfully', 'success', 'Success');
+
         } catch (error: any) {
             console.error(error);
-            await showAlert('Failed to create user: ' + error.message, 'error', 'Error');
+            await showAlert('Operation failed: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
         }
@@ -168,7 +205,11 @@ const ManageUsers: React.FC = () => {
                             Upload Excel
                         </button>
                         <button
-                            onClick={() => setIsAddModalOpen(true)}
+                            onClick={() => {
+                                setEditMode(false);
+                                setFormData({ email: '', password: '', displayName: '', department: '' });
+                                setIsAddModalOpen(true);
+                            }}
                             className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
                         >
                             <Plus className="w-4 h-4 mr-2" />
@@ -208,13 +249,14 @@ const ManageUsers: React.FC = () => {
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Email</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Department</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Role</th>
+                                {canAdd && <th className="px-6 py-4 text-right text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-50">
                             {loading ? (
-                                <tr><td colSpan={4} className="p-4 text-center">Loading users...</td></tr>
+                                <tr><td colSpan={5} className="p-4 text-center">Loading users...</td></tr>
                             ) : users.length === 0 ? (
-                                <tr><td colSpan={4} className="p-4 text-center">No users found for this role.</td></tr>
+                                <tr><td colSpan={5} className="p-4 text-center">No users found for this role.</td></tr>
                             ) : (
                                 users.map((user) => (
                                     <tr key={user.uid} className="hover:bg-indigo-50/30 transition-colors group">
@@ -235,6 +277,24 @@ const ManageUsers: React.FC = () => {
                                                 {activeTab.replace('_', ' ')}
                                             </span>
                                         </td>
+                                        {canAdd && (
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button
+                                                    onClick={() => handleEdit(user)}
+                                                    className="text-indigo-600 hover:text-indigo-900 mr-4 p-1 hover:bg-indigo-100 rounded transition"
+                                                    title="Edit"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(user.uid, user.displayName)}
+                                                    className="text-red-600 hover:text-red-900 p-1 hover:bg-red-100 rounded transition"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))
                             )}
@@ -243,28 +303,34 @@ const ManageUsers: React.FC = () => {
                 </div>
             </div>
 
-            {/* Add User Modal */}
-            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={`Add ${ROLES.find(r => r.id === activeTab)?.label}`}>
+            {/* Add/Edit User Modal */}
+            <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditMode(false); }} title={`${editMode ? 'Edit' : 'Add'} ${ROLES.find(r => r.id === activeTab)?.label}`}>
                 <form onSubmit={handleCreateUser} className="space-y-4">
                     <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
-                    <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                    <div className="relative">
-                        <input
-                            required
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Password"
-                            className="input-field pr-10"
-                            value={formData.password}
-                            onChange={e => setFormData({ ...formData, password: e.target.value })}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                        >
-                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                    </div>
+
+                    {!editMode && (
+                        <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                    )}
+
+                    {!editMode && (
+                        <div className="relative">
+                            <input
+                                required
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                className="input-field pr-10"
+                                value={formData.password}
+                                onChange={e => setFormData({ ...formData, password: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Department (Optional)</label>
@@ -281,7 +347,7 @@ const ManageUsers: React.FC = () => {
                     </div>
 
                     <button disabled={creating} type="submit" className="w-full btn-primary mt-4">
-                        {creating ? 'Creating...' : 'Create User'}
+                        {creating ? 'Processing...' : (editMode ? 'Update User' : 'Create User')}
                     </button>
                 </form>
             </Modal>

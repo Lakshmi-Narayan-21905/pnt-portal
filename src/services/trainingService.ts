@@ -62,6 +62,17 @@ export const TrainingService = {
         }
     },
 
+    // Update a training program
+    updateTraining: async (id: string, trainingData: Partial<Training>) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, id);
+            await updateDoc(docRef, trainingData);
+        } catch (error) {
+            console.error("Error updating training:", error);
+            throw error;
+        }
+    },
+
     // Delete a training
     deleteTraining: async (id: string) => {
         try {

@@ -22,6 +22,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import * as XLSX from 'xlsx';
+import { formatDate } from '../../utils/dateUtils';
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1'];
 const STATUS_COLORS = {
@@ -246,7 +247,7 @@ const PlacementHeadDashboard: React.FC = () => {
                 newAlerts.push({
                     type: 'deadline',
                     message: `Deadline for ${c.name} ends in ${Math.ceil(hoursLeft)} hours.`,
-                    date: new Date(c.deadline).toLocaleDateString()
+                    date: formatDate(c.deadline)
                 });
             }
         });
@@ -290,7 +291,7 @@ const PlacementHeadDashboard: React.FC = () => {
             const data = companies.map(c => ({
                 Company: c.name,
                 Type: c.type,
-                DriveDate: new Date(c.driveDate).toLocaleDateString(),
+                DriveDate: formatDate(c.driveDate),
                 Applicants: c.applicants?.length || 0
             }));
             const ws = XLSX.utils.json_to_sheet(data);
@@ -323,11 +324,9 @@ const PlacementHeadDashboard: React.FC = () => {
                         <Search className="w-4 h-4 mr-2" /> Find Student
                     </button>
                     <div className="flex rounded-md shadow-sm">
-                        <button onClick={() => handleExport('students')} className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-l-lg hover:bg-gray-50 border-r-0 transition">
-                            <Download className="w-4 h-4 mr-2" /> Report
-                        </button>
-                        <button onClick={() => handleExport('drives')} className="flex items-center px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-r-lg hover:bg-gray-50 transition text-sm">
-                            Drive Data
+
+                        <button onClick={() => handleExport('drives')} className="flex items-center px-4 py-2 border border-green-200 shadow-sm text-sm font-medium rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all    ">
+                            <Download className="w-4 h-4 mr-2" /> Drive Data
                         </button>
                     </div>
 
@@ -555,7 +554,7 @@ const PlacementHeadDashboard: React.FC = () => {
                                                 <div className="text-xs text-gray-500">{c.type}</div>
                                             </td>
                                             <td className="px-4 py-3 text-gray-600">
-                                                {new Date(c.driveDate).toLocaleDateString()}
+                                                {formatDate(c.driveDate)}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">

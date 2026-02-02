@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { AnnouncementService } from '../../services/announcementService';
 import type { Announcement } from '../../types';
 import { Bell, Calendar, User } from 'lucide-react';
+import { formatDateTime } from '../../utils/dateUtils';
 
 const StudentAnnouncements: React.FC = () => {
     const { userProfile } = useAuth();
@@ -76,9 +77,7 @@ const StudentAnnouncements: React.FC = () => {
                             <div className="flex items-center gap-4 text-xs text-gray-400 border-t border-gray-50 pt-3">
                                 <span className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
-                                    {new Date(ann.date).toLocaleDateString(undefined, {
-                                        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                                    })}
+                                    {formatDateTime(ann.date)}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <User className="w-3 h-3" />

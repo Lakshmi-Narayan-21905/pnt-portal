@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Plus, Calendar, Search } from 'lucide-react';
+import { GraduationCap, Plus, Calendar, Search, Edit, Trash2 } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
@@ -11,6 +11,7 @@ const TrainingPrograms: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
     const navigate = useNavigate();
 
     // Form State
@@ -52,7 +53,7 @@ const TrainingPrograms: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await TrainingService.addTraining({
+            const trainingPayload = {
                 title: formData.title,
                 description: formData.description,
                 trainer: formData.trainer,
@@ -62,15 +63,55 @@ const TrainingPrograms: React.FC = () => {
                 },
                 startDate: new Date(formData.startDate).getTime(),
                 endDate: new Date(formData.endDate).getTime()
-            });
-            setIsModalOpen(false);
+            };
+
+            if (editingId) {
+                await TrainingService.updateTraining(editingId, trainingPayload);
+            } else {
+                await TrainingService.addTraining(trainingPayload);
+            }
+
+            handleCloseModal();
             fetchTrainings();
-            setFormData({
-                title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
-            });
         } catch (error) {
-            alert('Failed to add training');
+            alert('Failed to save training');
         }
+    };
+
+    const handleEdit = (e: React.MouseEvent, training: Training) => {
+        e.stopPropagation();
+        setEditingId(training.id);
+        setFormData({
+            title: training.title,
+            description: training.description,
+            trainer: training.trainer,
+            branches: training.eligibility.branches ? training.eligibility.branches.join(', ') : '',
+            year: training.eligibility.year,
+            startDate: new Date(training.startDate).toISOString().split('T')[0],
+            endDate: new Date(training.endDate).toISOString().split('T')[0]
+        });
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (window.confirm('Are you sure you want to delete this training program?')) {
+            try {
+                await TrainingService.deleteTraining(id);
+                fetchTrainings();
+            } catch (error) {
+                console.error("Delete failed", error);
+                alert("Failed to delete training");
+            }
+        }
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingId(null);
+        setFormData({
+            title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
+        });
     };
 
     const handleCardClick = (training: Training) => {
@@ -122,17 +163,30 @@ const TrainingPrograms: React.FC = () => {
                             onClick={() => handleCardClick(training)}
                             className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 hover:shadow-lg hover:shadow-brand-green-emerald/10 transition cursor-pointer relative group flex flex-col h-full"
                         >
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-white/50 backdrop-blur-md px-2 py-1 rounded text-gray-600">
-                                Click for details
-                            </div>
+
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-brand-green-ice rounded-lg">
                                     <GraduationCap className="w-6 h-6 text-brand-green-primary" />
                                 </div>
-                                <span className="px-2 py-1 text-xs rounded-full font-medium bg-brand-green-light text-brand-green-dark border border-brand-green-mint/20">
-                                    Year {training.eligibility.year}
-                                </span>
                             </div>
+
+                            <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button
+                                    onClick={(e) => handleEdit(e, training)}
+                                    className="p-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-blue-50 hover:text-blue-600 transition"
+                                    title="Edit"
+                                >
+                                    <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={(e) => handleDelete(e, training.id)}
+                                    className="p-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-red-50 hover:text-red-600 transition"
+                                    title="Delete"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+
                             <h3 className="text-lg font-bold text-gray-900 mb-1">{training.title}</h3>
                             <p className="text-gray-500 text-sm mb-4">by {training.trainer}</p>
 
@@ -141,6 +195,9 @@ const TrainingPrograms: React.FC = () => {
                                     <Calendar className="w-4 h-4 mr-2 text-brand-green-emerald" />
                                     {new Date(training.startDate).toLocaleDateString()}
                                 </div>
+                                <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                    Year {training.eligibility.year}
+                                </span>
                                 <div className="text-sm font-medium text-brand-green-dark bg-brand-green-ice px-3 py-1 rounded-full border border-brand-green-mint/30">
                                     {training.participants?.length || 0} Reg.
                                 </div>
@@ -150,7 +207,7 @@ const TrainingPrograms: React.FC = () => {
                 </div>
             )}
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Training Program">
+            <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingId ? "Edit Training Program" : "Add Training Program"}>
                 <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto px-2">
                     <input required placeholder="Training Title" className="input-field w-full" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
                     <input required placeholder="Trainer / Organization" className="input-field w-full" value={formData.trainer} onChange={e => setFormData({ ...formData, trainer: e.target.value })} />
@@ -197,7 +254,7 @@ const TrainingPrograms: React.FC = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full btn-primary mt-6 py-2.5">Create Training</button>
+                    <button type="submit" className="w-full btn-primary mt-6 py-2.5">{editingId ? 'Update Training' : 'Create Training'}</button>
                 </form>
             </Modal>
         </div>

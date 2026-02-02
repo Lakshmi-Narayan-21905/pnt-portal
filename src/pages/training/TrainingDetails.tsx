@@ -5,6 +5,7 @@ import { UserService } from '../../services/userService';
 import type { Training, UserProfile } from '../../types';
 import { DEPARTMENTS } from '../../utils/constants';
 import { ArrowLeft, GraduationCap, Calendar, User } from 'lucide-react';
+import { formatDate } from '../../utils/dateUtils';
 
 const TrainingDetails: React.FC = () => {
     const { trainingId } = useParams();
@@ -128,14 +129,14 @@ const TrainingDetails: React.FC = () => {
                         <Calendar className="w-5 h-5 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500 font-semibold uppercase">Start Date</p>
-                            <p className="font-medium">{new Date(training.startDate).toLocaleDateString()}</p>
+                            <p className="font-medium">{formatDate(training.startDate)}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <Calendar className="w-5 h-5 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500 font-semibold uppercase">End Date</p>
-                            <p className="font-medium">{new Date(training.endDate).toLocaleDateString()}</p>
+                            <p className="font-medium">{formatDate(training.endDate)}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">

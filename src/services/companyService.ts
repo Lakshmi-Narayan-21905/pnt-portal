@@ -55,8 +55,8 @@ export const CompanyService = {
         try {
             const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
             return querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
+                ...doc.data(),
+                id: doc.id
             } as Company));
         } catch (error) {
             console.error("Error fetching companies:", error);
@@ -70,7 +70,7 @@ export const CompanyService = {
             const docRef = doc(db, COLLECTION_NAME, id);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                return { id: docSnap.id, ...docSnap.data() } as Company;
+                return { ...docSnap.data(), id: docSnap.id } as Company;
             }
             return null;
         } catch (error) {

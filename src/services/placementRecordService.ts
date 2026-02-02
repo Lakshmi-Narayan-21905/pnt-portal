@@ -68,5 +68,18 @@ export const PlacementRecordService = {
             })
         );
         await Promise.all(batchPromises); // Simple parallel execution for now
+    },
+
+    // Update a record
+    updateRecord: async (id: string, updates: Partial<PlacementRecord>) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, id);
+            // Don't update id or createdAt usually
+            const { id: _, createdAt: __, ...cleanUpdates } = updates as any;
+            await import('firebase/firestore').then(mod => mod.updateDoc(docRef, cleanUpdates));
+        } catch (error) {
+            console.error("Error updating placement record:", error);
+            throw error;
+        }
     }
 };
