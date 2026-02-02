@@ -106,7 +106,7 @@ const ManageCompanies: React.FC = () => {
                 </button>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="bg-white shadow-md rounded-lg overflow-hidden">
                 {loading ? (
                     <div className="p-4 text-center text-gray-500">Loading companies...</div>
                 ) : companies.length === 0 ? (
@@ -114,7 +114,7 @@ const ManageCompanies: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                         {companies.map((company) => (
-                            <div key={company.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                            <div key={company.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-300">
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center">
                                         <div className="p-3 bg-blue-50 rounded-lg mr-3">

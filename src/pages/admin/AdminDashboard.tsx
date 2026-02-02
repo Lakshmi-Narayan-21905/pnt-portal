@@ -46,37 +46,56 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-gray-600">Welcome back, {userProfile?.displayName}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-indigo-primary/5 transition flex items-center">
-                    <div className="p-4 bg-brand-indigo-ice rounded-lg mr-4 border border-brand-indigo-light/20">
-                        <Users className="w-8 h-8 text-brand-indigo-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div
+                    className="bg-indigo-50/50 p-6 rounded-2xl shadow-md border border-indigo-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center group relative overflow-hidden min-w-[280px]"
+                    style={{ animation: 'fadeInUp 0.5s ease-out forwards' }}
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    <div className="p-4 bg-white rounded-xl mr-4 border border-indigo-100 shadow-sm group-hover:shadow-md transition-all">
+                        <Users className="w-8 h-8 text-indigo-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium uppercase">Total Students</h3>
-                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalStudents}</p>
+                        <h3 className="text-indigo-900/60 text-sm font-bold uppercase tracking-wider">Total Students</h3>
+                        <p className="text-4xl font-extrabold text-indigo-950 mt-1">{stats.totalStudents}</p>
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-indigo-primary/5 transition flex items-center">
-                    <div className="p-4 bg-brand-indigo-ice rounded-lg mr-4 border border-brand-indigo-light/20">
-                        <Building2 className="w-8 h-8 text-brand-indigo-primary" />
+                <div
+                    className="bg-blue-50/50 p-6 rounded-2xl shadow-md border border-blue-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center group relative overflow-hidden min-w-[280px]"
+                    style={{ animation: 'fadeInUp 0.5s ease-out 0.1s forwards', opacity: 0 }}
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    <div className="p-4 bg-white rounded-xl mr-4 border border-blue-100 shadow-sm group-hover:shadow-md transition-all">
+                        <Building2 className="w-8 h-8 text-blue-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium uppercase">Active Drives</h3>
-                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.activeDrives}</p>
+                        <h3 className="text-blue-900/60 text-sm font-bold uppercase tracking-wider">Active Drives</h3>
+                        <p className="text-4xl font-extrabold text-blue-950 mt-1">{stats.activeDrives}</p>
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-indigo-primary/5 transition flex items-center">
-                    <div className="p-4 bg-brand-indigo-ice rounded-lg mr-4 border border-brand-indigo-light/20">
-                        <GraduationCap className="w-8 h-8 text-brand-indigo-primary" />
+                <div
+                    className="bg-emerald-50/50 p-6 rounded-2xl shadow-md border border-emerald-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center group relative overflow-hidden min-w-[280px]"
+                    style={{ animation: 'fadeInUp 0.5s ease-out 0.2s forwards', opacity: 0 }}
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    <div className="p-4 bg-white rounded-xl mr-4 border border-emerald-100 shadow-sm group-hover:shadow-md transition-all">
+                        <GraduationCap className="w-8 h-8 text-emerald-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium uppercase">Total Trainings</h3>
-                        <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalTrainings}</p>
+                        <h3 className="text-emerald-900/60 text-sm font-bold uppercase tracking-wider">Total Trainings</h3>
+                        <p className="text-4xl font-extrabold text-emerald-950 mt-1">{stats.totalTrainings}</p>
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
         </div>
     );
 };

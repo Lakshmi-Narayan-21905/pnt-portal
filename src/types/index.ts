@@ -26,6 +26,7 @@ export interface UserProfile {
     profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
 
     placementStatus?: 'PLACED' | 'UNPLACED' | 'OFFERED';
+    photoURL?: string;
 
     createdAt: number;
 }

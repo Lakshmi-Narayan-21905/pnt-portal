@@ -136,7 +136,7 @@ const StudentDrives: React.FC = () => {
     return (
         <StudentPageContainer title="Drives & Opportunities" subtitle="Explore and apply for campus placement drives">
             {/* Search & Filter Bar - Comprehensive & Clean */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 mb-8">
                 {/* Top Row: Search */}
                 <div className="mb-6">
                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Search Opportunities</label>
@@ -247,7 +247,7 @@ const StudentDrives: React.FC = () => {
                         const isExpired = Date.now() > company.deadline;
 
                         return (
-                            <div key={company.id} className="bg-white/60 backdrop-blur-xl rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-lg hover:shadow-blue-900/10 transition-all duration-300 flex flex-col h-full group">
+                            <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
                                 {/* Header: Name & Salary */}
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{company.name}</h3>

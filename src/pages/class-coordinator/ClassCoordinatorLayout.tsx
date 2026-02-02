@@ -6,10 +6,10 @@ import DashboardLayout from '../../components/DashboardLayout';
 const ClassCoordinatorLayout: React.FC = () => {
     const { userProfile: user } = useAuth();
 
-    const navItems = [
+    const navItems = React.useMemo(() => [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/class-coordinator/dashboard' },
         { icon: Users, label: 'My Students', path: '/class-coordinator/students' },
-    ];
+    ], []);
 
     return (
         <DashboardLayout

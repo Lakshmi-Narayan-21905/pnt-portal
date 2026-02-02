@@ -154,7 +154,7 @@ const ManageHeads: React.FC = () => {
             {loading ? (
                 <div className="text-center py-10">Loading...</div>
             ) : (
-                <div className="bg-white shadow rounded-lg overflow-hidden">
+                <div className="bg-white shadow-md rounded-lg overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>

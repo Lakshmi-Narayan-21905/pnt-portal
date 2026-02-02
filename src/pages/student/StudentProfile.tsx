@@ -55,8 +55,8 @@ const StudentProfile: React.FC = () => {
                 </div>
 
                 {/* Academic Details Card */}
-                <div className="bg-white/70 backdrop-blur-xl shadow-lg rounded-2xl overflow-hidden border border-white/60">
-                    <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40">
+                <div className="bg-white shadow-md rounded-2xl overflow-hidden border border-gray-100">
+                    <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
                         <h3 className="text-lg leading-6 font-bold text-gray-800">Academic Details</h3>
                         <p className="mt-1 text-sm text-gray-500">Current educational status and performance.</p>
                     </div>

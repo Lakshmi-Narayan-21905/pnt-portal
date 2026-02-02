@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
             <AnimatedBackground />
 
             <div className={`flex w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative z-10 transition-all duration-700 ease-out transform ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
-                <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white relative overflow-y-auto custom-scrollbar">
+                <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white relative overflow-y-auto custom-scrollbar">
                     {/* Background pattern for form side only */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
                     <div className="w-full max-w-sm relative z-10">
@@ -255,7 +255,7 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 {/* Right Side - Image */}
-                <div className="hidden lg:block lg:w-1/2 relative rounded-r-2xl overflow-hidden">
+                <div className="hidden md:block md:w-1/2 relative rounded-r-2xl overflow-hidden">
                     <img
                         src={loginBg}
                         alt="College Library"
