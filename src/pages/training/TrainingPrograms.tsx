@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Plus, Calendar } from 'lucide-react';
+import { GraduationCap, Plus, Calendar, Search } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
@@ -10,6 +10,7 @@ const TrainingPrograms: React.FC = () => {
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
     // Form State
@@ -80,21 +81,42 @@ const TrainingPrograms: React.FC = () => {
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Training Programs</h1>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-brand-green-primary text-white rounded-lg hover:bg-brand-green-dark transition shadow-lg shadow-brand-green-primary/30"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Add Training
-                </button>
+                <div className="flex items-center space-x-3">
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search trainings..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green-primary focus:border-transparent outline-none w-64 transition"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center px-4 py-2 bg-brand-green-primary text-white rounded-lg hover:bg-brand-green-dark transition shadow-lg shadow-brand-green-primary/30"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Add Training
+                    </button>
+                </div>
             </div>
 
             {loading ? (
                 <div className="text-center">Loading...</div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {trainings.length === 0 && <p className="text-gray-500">No active training programs.</p>}
-                    {trainings.map((training) => (
+                    {trainings.filter(training =>
+                        training.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        training.trainer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        training.eligibility?.branches?.some(b => b.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ).length === 0 && <p className="text-gray-500">No active training programs.</p>}
+                    {trainings.filter(training =>
+                        training.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        training.trainer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        training.eligibility?.branches?.some(b => b.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ).map((training) => (
                         <div
                             key={training.id}
                             onClick={() => handleCardClick(training)}

@@ -284,8 +284,11 @@ const CompanyDetails: React.FC = () => {
                                 value={filterDept}
                                 onChange={(e) => setFilterDept(e.target.value)}
                             >
-                                <option value="">All Departments</option>
-                                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                <option value="">All Eligible Departments</option>
+                                {(company?.eligibilityCriteria?.branches && company.eligibilityCriteria.branches.length > 0
+                                    ? company.eligibilityCriteria.branches
+                                    : DEPARTMENTS
+                                ).map(d => <option key={d} value={d}>{d}</option>)}
                             </select>
                         </div>
                     )}
