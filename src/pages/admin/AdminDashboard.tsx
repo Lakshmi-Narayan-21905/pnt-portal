@@ -22,7 +22,10 @@ import * as XLSX from 'xlsx';
 
 const COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
+import { useTheme } from '../../hooks/useTheme'; // Added import
+
 const AdminDashboard: React.FC = () => {
+    const theme = useTheme(); // Init hook
     const { userProfile } = useAuth();
     const [loading, setLoading] = useState(true);
     const [lastRefresh, setLastRefresh] = useState(new Date());
@@ -222,9 +225,9 @@ const AdminDashboard: React.FC = () => {
 
             {/* 2. Global KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <KPICard title="Total Users" value={stats.totalUsers} subtext={`${stats.activeUsers} Verified`} icon={Users} color="text-indigo-600" bg="bg-indigo-50" />
-                <KPICard title="Total Docs" value={stats.totalStorage} subtext="Across 4 Collections" icon={Database} color="text-blue-600" bg="bg-blue-50" />
-                <KPICard title="Writes (24h)" value={stats.dbWritesToday} subtext="New Records Created" icon={Activity} color="text-emerald-600" bg="bg-emerald-50" />
+                <KPICard title="Total Users" value={stats.totalUsers} subtext={`${stats.activeUsers} Verified`} icon={Users} color="text-indigo-600" bg="bg-indigo-50" border={theme.borderLeft} />
+                <KPICard title="Total Docs" value={stats.totalStorage} subtext="Across 4 Collections" icon={Database} color="text-blue-600" bg="bg-blue-50" border={theme.borderLeft} />
+                <KPICard title="Writes (24h)" value={stats.dbWritesToday} subtext="New Records Created" icon={Activity} color="text-emerald-600" bg="bg-emerald-50" border={theme.borderLeft} />
             </div>
 
             {/* 3. User Analytics & DB Growth */}
@@ -388,10 +391,11 @@ interface KPICardProps {
     icon: React.ElementType;
     color: string;
     bg: string;
+    border?: string;
 }
 
-const KPICard: React.FC<KPICardProps> = ({ title, value, subtext, icon: Icon, color, bg }) => (
-    <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-start justify-between hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group">
+const KPICard: React.FC<KPICardProps> = ({ title, value, subtext, icon: Icon, color, bg, border }) => (
+    <div className={`bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${border || 'border-gray-100'} border-l-4 flex items-start justify-between hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group`}>
         <div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wide group-hover:text-indigo-600 transition-colors">{title}</p>
             <h3 className="text-3xl font-bold text-gray-900 mt-2">{value}</h3>

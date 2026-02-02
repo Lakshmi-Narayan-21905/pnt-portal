@@ -31,7 +31,11 @@ const STATUS_COLORS = {
     offered: '#F59E0B'
 };
 
+import { useTheme } from '../../hooks/useTheme';
+
 const PlacementHeadDashboard: React.FC = () => {
+    const theme = useTheme();
+
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
@@ -338,12 +342,12 @@ const PlacementHeadDashboard: React.FC = () => {
 
             {/* 2. KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <KPISmall title="Active Drives" value={stats.activeDrives} icon={CheckCircle2} color="text-emerald-500" bg="bg-emerald-50" />
-                <KPISmall title="Total Companies" value={stats.totalCompanies} icon={Building2} color="text-blue-500" bg="bg-blue-50" />
-                <KPISmall title="Placed Students" value={stats.placedCount} icon={Briefcase} color="text-purple-500" bg="bg-purple-50" />
-                <KPISmall title="Total Students" value={stats.totalStudents} icon={Users} color="text-gray-500" bg="bg-gray-50" />
-                <KPISmall title="Coordinators" value={stats.totalCoordinators} icon={Users} color="text-indigo-500" bg="bg-indigo-50" />
-                <KPISmall title="Interviews (7d)" value={stats.upcomingInterviews} icon={Clock} color="text-orange-500" bg="bg-orange-50" />
+                <KPISmall title="Active Drives" value={stats.activeDrives} icon={CheckCircle2} color="text-emerald-500" bg="bg-emerald-50" border={theme.borderLeft} />
+                <KPISmall title="Total Companies" value={stats.totalCompanies} icon={Building2} color="text-blue-500" bg="bg-blue-50" border={theme.borderLeft} />
+                <KPISmall title="Placed Students" value={stats.placedCount} icon={Briefcase} color="text-purple-500" bg="bg-purple-50" border={theme.borderLeft} />
+                <KPISmall title="Total Students" value={stats.totalStudents} icon={Users} color="text-gray-500" bg="bg-gray-50" border={theme.borderLeft} />
+                <KPISmall title="Coordinators" value={stats.totalCoordinators} icon={Users} color="text-indigo-500" bg="bg-indigo-50" border={theme.borderLeft} />
+                <KPISmall title="Interviews (7d)" value={stats.upcomingInterviews} icon={Clock} color="text-orange-500" bg="bg-orange-50" border={theme.borderLeft} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -625,10 +629,12 @@ interface KPISmallProps {
     icon: React.ElementType;
     color: string;
     bg: string;
+    border?: string;
 }
 
-const KPISmall: React.FC<KPISmallProps> = ({ title, value, icon: Icon, color, bg }) => (
-    <div className={`p-5 rounded-xl border border-gray-100 bg-white/70 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-between group`}>
+const KPISmall: React.FC<KPISmallProps> = ({ title, value, icon: Icon, color, bg, border }) => (
+    <div className={`p-5 rounded-xl border ${border || 'border-gray-100'} bg-white/70 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-between group border-l-4`}>
+
         <div>
             <p className={`text-xs font-bold uppercase tracking-wide mb-1 opacity-70 ${color.replace('text-', 'text-')}`}>{title}</p>
             <p className={`text-3xl font-bold ${color.replace('500', '900').replace('600', '900')}`}>{value}</p>
