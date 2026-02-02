@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { Building2, Plus, Calendar, Trash2 } from 'lucide-react';
 import { CompanyService } from '../../services/companyService';
 import type { Company } from '../../types';
@@ -6,6 +7,7 @@ import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
 
 const ManageCompanies: React.FC = () => {
+    const { showAlert, showConfirm } = useAlert();
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,10 +61,17 @@ const ManageCompanies: React.FC = () => {
                 eligibilityCriteria: {
                     minCGPA: Number(formData.minCGPA),
                     backlogsAllowed: Number(formData.backlogs),
+                    standingArrears: 0,
+                    historyOfArrears: 0,
+                    sslc: 0,
+                    hsc: 0,
                     branches: formData.branches.split(',').map(b => b.trim())
                 },
                 deadline: new Date(formData.deadline).getTime(),
-                driveDate: new Date(formData.driveDate).getTime()
+                driveDate: new Date(formData.driveDate).getTime(),
+                type: 'SERVICE',
+                targetYear: new Date().getFullYear(),
+                rounds: []
             });
             setIsModalOpen(false);
             fetchCompanies();
@@ -70,14 +79,16 @@ const ManageCompanies: React.FC = () => {
             setFormData({
                 name: '', description: '', role: '', salary: '', minCGPA: 0, backlogs: 0, branches: '', deadline: '', driveDate: ''
             });
+            await showAlert('Company drive created successfully!', 'success', 'Success');
         } catch (error) {
-            alert('Failed to add company');
+            await showAlert('Failed to add company.', 'error', 'Error');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this company?')) {
+        if (await showConfirm('Are you sure you want to delete this company?', 'Confirm Delete', 'Yes, Delete', 'delete')) {
             await CompanyService.deleteCompany(id);
+            await showAlert('Company deleted successfully.', 'success', 'Deleted');
             fetchCompanies();
         }
     };

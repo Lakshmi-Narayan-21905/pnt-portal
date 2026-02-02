@@ -4,6 +4,7 @@ import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
 import type { UserProfile, UserRole } from '../../types';
 import Modal from '../../components/ui/Modal';
+import { useAlert } from '../../contexts/AlertContext';
 import * as XLSX from 'xlsx';
 import { DEPARTMENTS } from '../../utils/constants';
 
@@ -23,6 +24,7 @@ const ManageUsers: React.FC = () => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const { showAlert, showConfirm } = useAlert();
 
     // Form State
     const [formData, setFormData] = useState({
@@ -65,16 +67,20 @@ const ManageUsers: React.FC = () => {
                 displayName: formData.displayName,
                 role: activeTab, // Use activeTab for role
                 department: formData.department || '',
-                profileCompleted: true // Heads are pre-verified
+                profileCompleted: true, // Heads are pre-verified
+                createdAt: Date.now()
             });
 
             setIsAddModalOpen(false);
             setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
             fetchUsers();
-            alert('User created successfully');
+            setIsAddModalOpen(false);
+            setFormData({ email: '', password: '', displayName: '', department: '' }); // Reset form data
+            fetchUsers();
+            await showAlert('User created successfully', 'success', 'Success');
         } catch (error: any) {
             console.error(error);
-            alert('Failed to create user: ' + error.message);
+            await showAlert('Failed to create user: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
         }
@@ -93,24 +99,25 @@ const ManageUsers: React.FC = () => {
             const ws = wb.Sheets[wsname];
             const data = XLSX.utils.sheet_to_json(ws);
 
-            if (confirm(`Found ${data.length} records. Create users?`)) {
+            if (await showConfirm(`Found ${data.length} records. Create users?`, 'Confirm Upload', 'Yes, Create')) {
                 setCreating(true);
                 let successCount = 0;
-                for (const row: any of data) {
+                for (const row of data as any[]) {
                     try {
                         const email = row.email || row.username;
                         const pwd = row.password || 'password123';
                         const name = row.displayName || row.name || 'User';
                         const dept = row.department;
 
-                        const uid = await AdminAuthService.createUser(email, pwd);
+                        const userCredential = await AdminAuthService.createUser(email, pwd);
                         await UserService.createUserProfile({
-                            uid,
+                            uid: userCredential.uid,
                             email,
                             role: activeTab,
                             displayName: name,
                             department: dept,
-                            profileCompleted: true
+                            profileCompleted: true,
+                            createdAt: Date.now()
                         });
                         successCount++;
                     } catch (err) {
@@ -120,7 +127,7 @@ const ManageUsers: React.FC = () => {
                 setCreating(false);
                 setIsUploadModalOpen(false);
                 fetchUsers();
-                alert(`Successfully created ${successCount} users.`);
+                await showAlert(`Successfully created ${successCount} users.`, 'success', 'Batch Complete');
             }
         };
         reader.readAsBinaryString(file);

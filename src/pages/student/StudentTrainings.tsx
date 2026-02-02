@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TrainingService } from '../../services/trainingService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
 import { GraduationCap, Calendar, CheckCircle, Info } from 'lucide-react';
 import Modal from '../../components/Modal';
@@ -8,6 +9,7 @@ import StudentPageContainer from '../../components/student/StudentPageContainer'
 
 const StudentTrainings: React.FC = () => {
     const { userProfile } = useAuth();
+    const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState<string | null>(null);
@@ -39,7 +41,7 @@ const StudentTrainings: React.FC = () => {
 
     const handleRegister = async (trainingId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to register for this training?")) return;
+        if (!await showConfirm("Are you sure you want to register for this training?", "Confirm Registration", "Yes, Register")) return;
 
         setRegistering(trainingId);
         try {
@@ -49,10 +51,10 @@ const StudentTrainings: React.FC = () => {
                     ? { ...t, participants: [...(t.participants || []), userProfile.uid] }
                     : t
             ));
-            alert("Registered successfully!");
+            await showAlert("Registered successfully!", "success", "Success");
         } catch (error) {
             console.error("Error registering:", error);
-            alert("Failed to register. Please try again.");
+            await showAlert("Failed to register. Please try again.", "error", "Error");
         } finally {
             setRegistering(null);
         }

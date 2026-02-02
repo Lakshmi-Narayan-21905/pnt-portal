@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { Plus, Upload } from 'lucide-react';
 import { UserService } from '../../services/userService';
 import { AdminAuthService } from '../../services/adminAuthService';
@@ -8,6 +9,7 @@ import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
 
 const ClassStudents: React.FC = () => {
+    const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [students, setStudents] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -78,10 +80,10 @@ const ClassStudents: React.FC = () => {
             setIsAddModalOpen(false);
             setFormData({ email: '', password: '', displayName: '' });
             fetchStudents();
-            alert('Student created successfully');
+            await showAlert('Student created successfully', 'success', 'Success');
         } catch (error: any) {
             console.error(error);
-            alert('Failed to create student: ' + error.message);
+            await showAlert('Failed to create student: ' + error.message, 'error', 'Error');
         } finally {
             setCreating(false);
         }
@@ -99,7 +101,7 @@ const ClassStudents: React.FC = () => {
             const ws = wb.Sheets[wsname];
             const data: any[] = XLSX.utils.sheet_to_json(ws);
 
-            if (confirm(`Found ${data.length} records. Create students?`)) {
+            if (await showConfirm(`Found ${data.length} records. Create students?`, 'Confirm Upload', 'Yes, Create')) {
                 setCreating(true);
                 let successCount = 0;
                 for (const row of data) {
@@ -127,7 +129,7 @@ const ClassStudents: React.FC = () => {
                 setCreating(false);
                 setIsUploadModalOpen(false);
                 fetchStudents();
-                alert(`Successfully created ${successCount} students.`);
+                await showAlert(`Successfully created ${successCount} students.`, 'success', 'Success');
             }
         };
         reader.readAsBinaryString(file);
@@ -135,7 +137,7 @@ const ClassStudents: React.FC = () => {
 
     const handleApprove = async () => {
         if (!selectedStudent) return;
-        if (confirm(`Approve ${selectedStudent.displayName}?`)) {
+        if (await showConfirm(`Approve ${selectedStudent.displayName}?`, 'Approve Student', 'Yes, Approve', 'approve')) {
             try {
                 await UserService.updateUserProfile(selectedStudent.uid, {
                     ...selectedStudent,
@@ -143,15 +145,16 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
+                await showAlert('Student approved successfully', 'success', 'Approved');
             } catch (e) {
-                alert('Failed to approve');
+                await showAlert('Failed to approve', 'error', 'Error');
             }
         }
     };
 
     const handleDecline = async () => {
         if (!selectedStudent) return;
-        if (confirm(`Decline ${selectedStudent.displayName}? They will need to resubmit details.`)) {
+        if (await showConfirm(`Decline ${selectedStudent.displayName}? They will need to resubmit details.`, 'Decline Student', 'Yes, Decline', 'delete')) {
             try {
                 await UserService.updateUserProfile(selectedStudent.uid, {
                     ...selectedStudent,
@@ -160,8 +163,9 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
+                await showAlert('Student declined and profile reset', 'info', 'Declined');
             } catch (e) {
-                alert('Failed to decline');
+                await showAlert('Failed to decline', 'error', 'Error');
             }
         }
     };

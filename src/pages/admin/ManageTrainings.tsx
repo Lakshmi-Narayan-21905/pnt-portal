@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { GraduationCap, Plus, Trash2, Download } from 'lucide-react';
 import { TrainingService } from '../../services/trainingService';
 import type { Training } from '../../types';
@@ -6,6 +7,7 @@ import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
 
 const ManageTrainings: React.FC = () => {
+    const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,14 +67,16 @@ const ManageTrainings: React.FC = () => {
             setFormData({
                 title: '', description: '', trainer: '', branches: '', year: 1, startDate: '', endDate: ''
             });
+            await showAlert('Training program created successfully!', 'success', 'Success');
         } catch (error) {
-            alert('Failed to add training');
+            await showAlert('Failed to add training.', 'error', 'Error');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Delete this training?')) {
+        if (await showConfirm('Are you sure you want to delete this training program?', 'Confirm Delete', 'Yes, Delete', 'delete')) {
             await TrainingService.deleteTraining(id);
+            await showAlert('Training deleted successfully.', 'success', 'Deleted');
             fetchTrainings();
         }
     };

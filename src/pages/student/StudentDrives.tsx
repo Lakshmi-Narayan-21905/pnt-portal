@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAlert } from '../../contexts/AlertContext';
 import type { Company } from '../../types';
 import { Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, RotateCcw, MapPin } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
@@ -10,6 +11,7 @@ import StudentPageContainer from '../../components/student/StudentPageContainer'
 
 const StudentDrives: React.FC = () => {
     const { userProfile } = useAuth();
+    const { showAlert, showConfirm } = useAlert();
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [applying, setApplying] = useState<string | null>(null);
@@ -47,7 +49,7 @@ const StudentDrives: React.FC = () => {
 
     const handleApply = async (companyId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to 'Opt In' for this drive? This counts as an application.")) return;
+        if (!await showConfirm("Are you sure you want to 'Opt In' for this drive? This counts as an application.", "Confirm Application", "Yes, Opt In")) return;
 
         setApplying(companyId);
         try {
@@ -58,10 +60,10 @@ const StudentDrives: React.FC = () => {
                     ? { ...c, applicants: [...(c.applicants || []), userProfile.uid] }
                     : c
             ));
-            alert("Opted In successfully!");
+            await showAlert("Opted In successfully!", "success", "Success");
         } catch (error) {
             console.error("Error opting in:", error);
-            alert("Failed to opt in. Please try again.");
+            await showAlert("Failed to opt in. Please try again.", "error", "Error");
         } finally {
             setApplying(null);
         }
@@ -69,7 +71,7 @@ const StudentDrives: React.FC = () => {
 
     const handleOptOut = async (companyId: string) => {
         if (!userProfile?.uid) return;
-        if (!window.confirm("Are you sure you want to 'Opt Out'? You will NOT be able to apply for this drive later.")) return;
+        if (!await showConfirm("Are you sure you want to 'Opt Out'? You will NOT be able to apply for this drive later.", "Confirm Opt-Out", "Yes, Opt Out")) return;
 
         setApplying(companyId);
         try {
@@ -80,10 +82,10 @@ const StudentDrives: React.FC = () => {
                     ? { ...c, optedOut: [...(c.optedOut || []), userProfile.uid] }
                     : c
             ));
-            alert("Opted Out successfully.");
+            await showAlert("Opted Out successfully.", "success", "Opte Out");
         } catch (error) {
             console.error("Error opting out:", error);
-            alert("Failed to opt out.");
+            await showAlert("Failed to opt out.", "error", "Error");
         } finally {
             setApplying(null);
         }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAlert } from '../../contexts/AlertContext';
 import { Plus, Upload, Trash2, Search, FileText } from 'lucide-react';
 import { PlacementRecordService } from '../../services/placementRecordService';
 import { UserService } from '../../services/userService';
@@ -18,6 +19,7 @@ interface PreviewRecord {
 }
 
 const PlacementRecords: React.FC = () => {
+    const { showAlert, showConfirm } = useAlert();
     const [records, setRecords] = useState<PlacementRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -69,13 +71,13 @@ const PlacementRecords: React.FC = () => {
                 package: formData.package,
                 academicYear: formData.academicYear
             });
-            alert('Record added successfully');
+            await showAlert('Record added successfully', 'success', 'Success');
             setIsAddModalOpen(false);
             setFormData({ name: '', rollNo: '', department: '', companyName: '', package: '', academicYear: new Date().getFullYear().toString() });
             fetchRecords();
         } catch (error: any) {
             console.error(error);
-            alert('Failed to add record: ' + error.message);
+            await showAlert('Failed to add record: ' + error.message, 'error', 'Error');
         } finally {
             setProcessing(false);
         }
@@ -94,7 +96,8 @@ const PlacementRecords: React.FC = () => {
             const data: any[] = XLSX.utils.sheet_to_json(ws);
 
             if (data.length === 0) {
-                alert("File is empty");
+                // Must handle async inside non-async callback carefully, or just ignore await here since it's fire-and-forget UI
+                showAlert("File is empty", "error", "Empty File");
                 return;
             }
 
@@ -146,7 +149,7 @@ const PlacementRecords: React.FC = () => {
         try {
             const validRecords = previewData.filter(r => r.status === 'VALID');
             if (validRecords.length === 0) {
-                alert("No valid records to upload.");
+                await showAlert("No valid records to upload.", "warning", "No Valid Data");
                 setProcessing(false);
                 return;
             }
@@ -166,13 +169,13 @@ const PlacementRecords: React.FC = () => {
                 UserService.updateUserStatusByRollNo(r.rollNo, 'PLACED')
             ));
 
-            alert(`Successfully uploaded ${validRecords.length} records and updated student statuses.`);
+            await showAlert(`Successfully uploaded ${validRecords.length} records and updated student statuses.`, 'success', 'Upload Complete');
             setIsUploadModalOpen(false);
             setPreviewData([]);
             fetchRecords();
         } catch (error: any) {
             console.error(error);
-            alert('Bulk upload failed: ' + error.message);
+            await showAlert('Bulk upload failed: ' + error.message, 'error', 'Upload Failed');
         } finally {
             setProcessing(false);
         }
@@ -180,7 +183,7 @@ const PlacementRecords: React.FC = () => {
 
     // Delete
     const handleDelete = async (id: string) => {
-        if (confirm("Are you sure you want to delete this record?")) {
+        if (await showConfirm("Are you sure you want to delete this record?", "Confirm Delete", "Yes, Delete", 'delete')) {
             try {
                 // Check if this is the last record for this student
                 const recordToDelete = records.find(r => r.id === id);
@@ -198,9 +201,10 @@ const PlacementRecords: React.FC = () => {
 
                 await PlacementRecordService.deleteRecord(id);
                 fetchRecords();
+                await showAlert("Record deleted successfully.", "success", "Deleted");
             } catch (error) {
                 console.error(error);
-                alert("Failed to delete");
+                await showAlert("Failed to delete record.", "error", "Error");
             }
         }
     };
