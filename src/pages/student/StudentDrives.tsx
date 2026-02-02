@@ -9,8 +9,10 @@ import { formatDate } from '../../utils/dateUtils';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
+import { useTheme } from '../../hooks/useTheme';
 
 const StudentDrives: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const { showAlert, showConfirm } = useAlert();
     const [companies, setCompanies] = useState<Company[]>([]);
@@ -152,7 +154,7 @@ const StudentDrives: React.FC = () => {
     return (
         <StudentPageContainer title="Drives & Opportunities" subtitle="Explore and apply for campus placement drives">
             {/* Search & Filter Bar - Comprehensive & Clean */}
-            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 mb-8">
+            <div className={`bg-white rounded-xl p-6 shadow-md border ${theme.border} mb-8`}>
                 {/* Top Row: Search */}
                 <div className="mb-6">
                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Search Opportunities</label>
@@ -263,7 +265,7 @@ const StudentDrives: React.FC = () => {
                         const isExpired = Date.now() > company.deadline;
 
                         return (
-                            <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300 flex flex-col h-full group">
+                            <div key={company.id} className={`bg-white rounded-xl p-6 border ${theme.border} shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300 flex flex-col h-full group`}>
                                 {/* Header: Name & Salary */}
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{company.name}</h3>

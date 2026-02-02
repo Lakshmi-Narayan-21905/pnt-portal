@@ -5,7 +5,10 @@ import { UserService } from '../../services/userService';
 import { CompanyService } from '../../services/companyService';
 import { TrainingService } from '../../services/trainingService';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const DeptCoordinatorDashboard: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [stats, setStats] = useState({
         totalStudents: 0,
@@ -143,6 +146,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                             <Building2 className="w-5 h-5 text-blue-600" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">Placement Analytics</h2>
+
                     </div>
                     <div className="grid grid-cols-2 gap-2 sm:gap-4">
                         <div className="bg-blue-50 rounded-lg p-4 text-center">
@@ -170,6 +174,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
+
                 {/* Training Analytics */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <div className="flex items-center gap-3 mb-6">
@@ -177,6 +182,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                             <GraduationCap className="w-5 h-5 text-emerald-600" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">Training Analytics</h2>
+
                     </div>
                     <div className="grid grid-cols-2 gap-2 sm:gap-4">
                         <div className="bg-emerald-50 rounded-lg p-4 text-center">
@@ -205,6 +211,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 </div>
             </div>
 
+
             {/* Quick Stats Summary */}
             <div className="mt-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
@@ -223,6 +230,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     <div className="bg-white/20 backdrop-blur rounded-lg p-3 text-center">
                         <p className="text-2xl font-bold">{loading ? '...' : stats.deptEligibleDrives + stats.deptEligibleTrainings}</p>
                         <p className="text-sm opacity-90">Total Opportunities</p>
+
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg p-3 text-center">
                         <p className="text-2xl font-bold">{loading ? '...' : stats.optedInStudents + stats.studentsInTraining}</p>

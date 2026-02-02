@@ -7,8 +7,10 @@ import { Calendar, CheckCircle, Info, Loader2 } from 'lucide-react';
 import Modal from '../../components/Modal';
 import { formatDate } from '../../utils/dateUtils';
 import StudentPageContainer from '../../components/student/StudentPageContainer';
+import { useTheme } from '../../hooks/useTheme';
 
 const StudentTrainings: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const { showAlert, showConfirm } = useAlert();
     const [trainings, setTrainings] = useState<Training[]>([]);
@@ -80,7 +82,7 @@ const StudentTrainings: React.FC = () => {
                     const isCompleted = training.endDate < Date.now();
 
                     return (
-                        <div key={training.id} className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6 flex flex-col h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300">
+                        <div key={training.id} className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} p-6 flex flex-col h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300`}>
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{training.title}</h3>
                                 <p className="text-sm text-gray-600 mb-4 bg-blue-50/50 inline-block px-2 py-1 rounded">Trainer: {training.trainer}</p>

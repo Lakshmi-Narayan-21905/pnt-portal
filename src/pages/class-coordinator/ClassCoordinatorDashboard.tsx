@@ -5,7 +5,10 @@ import { UserService } from '../../services/userService';
 import { CompanyService } from '../../services/companyService';
 import { TrainingService } from '../../services/trainingService';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const ClassCoordinatorDashboard: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [stats, setStats] = useState({
         totalStudents: 0,
@@ -137,6 +140,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                 </p>
             </div>
 
+
             {/* Main Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 <StatCard icon={Users} title="Total Students" value={stats.totalStudents} color="bg-orange-500" />
@@ -154,6 +158,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                             <Building2 className="w-5 h-5 text-blue-600" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">Placement Analytics <span className="text-sm font-normal text-gray-500">(Section {userProfile?.section || 'All'})</span></h2>
+
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-blue-50 rounded-lg p-4 text-center">
@@ -181,6 +186,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
+
                 {/* Training Analytics */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <div className="flex items-center gap-3 mb-6">
@@ -188,6 +194,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                             <GraduationCap className="w-5 h-5 text-emerald-600" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">Training Analytics <span className="text-sm font-normal text-gray-500">(Section {userProfile?.section || 'All'})</span></h2>
+
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-emerald-50 rounded-lg p-4 text-center">
@@ -216,6 +223,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                 </div>
             </div>
 
+
             {/* Quick Stats Summary */}
             <div className="mt-4 sm:mt-6 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl p-4 sm:p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
@@ -226,6 +234,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     <div className="bg-white/20 backdrop-blur rounded-lg p-2 sm:p-3 text-center">
                         <p className="text-xl sm:text-2xl font-bold">{loading ? '...' : stats.totalStudents}</p>
                         <p className="text-xs sm:text-sm opacity-90">Total Members</p>
+
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg p-2 sm:p-3 text-center">
                         <p className="text-xl sm:text-2xl font-bold">{loading ? '...' : stats.placedStudents + stats.offeredStudents}</p>

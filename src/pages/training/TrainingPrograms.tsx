@@ -6,8 +6,10 @@ import { useAlert } from '../../contexts/AlertContext';
 import type { Training } from '../../types';
 import Modal from '../../components/ui/Modal';
 import { DEPARTMENTS } from '../../utils/constants';
+import { useTheme } from '../../hooks/useTheme';
 
 const TrainingPrograms: React.FC = () => {
+    const theme = useTheme();
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,9 +73,6 @@ const TrainingPrograms: React.FC = () => {
 
         setSubmitting(true);
         try {
-            // ... logic continues ...
-
-
             const trainingPayload = {
                 title: formData.title,
                 description: formData.description,
@@ -185,7 +184,7 @@ const TrainingPrograms: React.FC = () => {
                         <div
                             key={training.id}
                             onClick={() => handleCardClick(training)}
-                            className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 hover:shadow-lg hover:shadow-brand-green-emerald/10 transition cursor-pointer relative group flex flex-col h-full"
+                            className={`bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border ${theme.border} hover:shadow-lg hover:shadow-brand-green-emerald/10 transition cursor-pointer relative group flex flex-col h-full`}
                         >
 
                             <div className="flex justify-between items-start mb-4">
