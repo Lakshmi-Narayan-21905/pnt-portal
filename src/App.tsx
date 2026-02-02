@@ -4,8 +4,6 @@ import LoginPage from './pages/LoginPage';
 import { AlertProvider } from './contexts/AlertContext';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageUsers from './pages/admin/ManageUsers';
-import ManageCompanies from './pages/admin/ManageCompanies';
-import ManageTrainings from './pages/admin/ManageTrainings';
 import AdminLayout from './pages/admin/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -56,8 +54,6 @@ const App: React.FC = () => {
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<ManageUsers />} />
-              <Route path="manage-companies" element={<ManageCompanies />} />
-              <Route path="manage-trainings" element={<ManageTrainings />} />
               <Route index element={<Navigate to="dashboard" replace />} />
             </Route>
           </Route>
