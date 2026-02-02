@@ -40,7 +40,7 @@ const StudentCoordinatorAssignment: React.FC = () => {
     const sectionMap = ['A', 'B', 'C', 'D'].map(section => {
       const coord = deptUsers.find(
         u =>
-          u.role === 'STUDENT_COORDINATOR' &&
+          u.role === 'CLASS_COORDINATOR' &&
           u.section?.toUpperCase().includes(section)
       );
 
@@ -93,7 +93,7 @@ const StudentCoordinatorAssignment: React.FC = () => {
 
       // Assign new coordinator
       await UserService.updateUserProfile(student.uid, {
-        role: 'STUDENT_COORDINATOR',
+        role: 'CLASS_COORDINATOR',
         section: selectedSection
       });
 
@@ -167,7 +167,7 @@ const StudentCoordinatorAssignment: React.FC = () => {
                 className="w-full text-left px-4 py-2 border rounded hover:bg-indigo-50"
               >
                 {student.displayName}
-                {student.role === 'STUDENT_COORDINATOR' && (
+                {student.role === 'CLASS_COORDINATOR' && (
                   <span className="ml-2 text-xs text-green-600">(Current)</span>
                 )}
               </button>
