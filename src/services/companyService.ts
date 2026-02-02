@@ -1,49 +1,11 @@
-import {
-    collection,
-    addDoc,
-    updateDoc,
-    deleteDoc,
-    doc,
-    getDocs,
-    getDoc,
-    arrayUnion
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { apiRequest } from './api';
 import type { Company } from '../types';
-import { AnnouncementService } from './announcementService';
-
-const COLLECTION_NAME = 'companies';
 
 export const CompanyService = {
     // Add a new company drive
     addCompany: async (companyData: Omit<Company, 'id' | 'applicants'>) => {
         try {
-            const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-                ...companyData,
-                applicants: [],
-                id: '' // Will be ignored by addDoc but needed for type
-            });
-
-            // Automated Announcement
-            try {
-                const targetDepts = (companyData.eligibilityCriteria?.branches && companyData.eligibilityCriteria.branches.length > 0)
-                    ? companyData.eligibilityCriteria.branches
-                    : ['all'];
-
-                await AnnouncementService.createAnnouncement({
-                    title: `New Drive: ${companyData.name}`,
-                    content: `A new placement drive for ${companyData.name} has been scheduled.\n\nType: ${companyData.type}\nRole(s): ${companyData.roles.join(', ')}\nDeadline: ${new Date(companyData.deadline).toLocaleDateString()}\n\nCheck 'Company Drives' for more details and to apply!`,
-                    authorId: 'SYSTEM',
-                    authorRole: 'PLACEMENT_HEAD', // Impersonating system/head
-                    authorName: 'System (Auto)',
-                    targetDepts
-                });
-            } catch (annError) {
-                console.warn("Failed to create automated announcement:", annError);
-                // Don't fail the whole operation if announcement fails
-            }
-
-            return docRef.id;
+            return await apiRequest<string>('/companies', 'POST', companyData);
         } catch (error) {
             console.error("Error adding company:", error);
             throw error;
@@ -53,11 +15,7 @@ export const CompanyService = {
     // Get all companies
     getAllCompanies: async (): Promise<Company[]> => {
         try {
-            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-            return querySnapshot.docs.map(doc => ({
-                ...doc.data(),
-                id: doc.id
-            } as Company));
+            return await apiRequest<Company[]>('/companies');
         } catch (error) {
             console.error("Error fetching companies:", error);
             throw error;
@@ -67,23 +25,19 @@ export const CompanyService = {
     // Get a single company by ID
     getCompanyById: async (id: string): Promise<Company | null> => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                return { ...docSnap.data(), id: docSnap.id } as Company;
-            }
-            return null;
+            return await apiRequest<Company>(`/companies/${id}`);
         } catch (error) {
+            // 404 throws error in apiRequest, catch it here?
+            // If we want null, we should check status.
             console.error("Error fetching company:", error);
-            throw error;
+            return null;
         }
     },
 
     // Update company details
     updateCompany: async (id: string, updates: Partial<Company>) => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            await updateDoc(docRef, updates);
+            await apiRequest(`/companies/${id}`, 'PUT', updates);
         } catch (error) {
             console.error("Error updating company:", error);
             throw error;
@@ -93,7 +47,7 @@ export const CompanyService = {
     // Delete a company
     deleteCompany: async (id: string) => {
         try {
-            await deleteDoc(doc(db, COLLECTION_NAME, id));
+            await apiRequest(`/companies/${id}`, 'DELETE');
         } catch (error) {
             console.error("Error deleting company:", error);
             throw error;
@@ -103,10 +57,7 @@ export const CompanyService = {
     // Apply to a specific drive
     applyToDrive: async (companyId: string, studentId: string) => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, companyId);
-            await updateDoc(docRef, {
-                applicants: arrayUnion(studentId)
-            });
+            await apiRequest(`/companies/${companyId}/apply`, 'POST', { studentId });
         } catch (error) {
             console.error("Error applying to drive:", error);
             throw error;
@@ -116,10 +67,7 @@ export const CompanyService = {
     // Opt out of a drive
     optOutDrive: async (companyId: string, studentId: string) => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, companyId);
-            await updateDoc(docRef, {
-                optedOut: arrayUnion(studentId)
-            });
+            await apiRequest(`/companies/${companyId}/optout`, 'POST', { studentId });
         } catch (error) {
             console.error("Error opting out of drive:", error);
             throw error;

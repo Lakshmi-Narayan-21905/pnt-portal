@@ -1,85 +1,38 @@
-import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { apiRequest } from './api';
 import type { PlacementRecord } from '../types';
 
-const COLLECTION_NAME = 'placement_records';
-
 export const PlacementRecordService = {
-    // Add a single record
     addRecord: async (record: Omit<PlacementRecord, 'id' | 'createdAt'>) => {
-        try {
-            const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-                ...record,
-                createdAt: Date.now()
-            });
-            return docRef.id;
-        } catch (error) {
-            console.error("Error adding placement record:", error);
-            throw error;
-        }
+        return apiRequest<string>('/placements', 'POST', record);
     },
 
-    // Get all records
-    getAllRecords: async (): Promise<PlacementRecord[]> => {
-        try {
-            const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
-            const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as PlacementRecord));
-        } catch (error) {
-            console.error("Error fetching placement records:", error);
-            throw error;
-        }
+    getAllRecords: async () => {
+        return apiRequest<PlacementRecord[]>('/placements');
     },
 
-    // Delete a record
+    updateRecord: async (id: string, updates: Partial<PlacementRecord>) => {
+        // Remove id/createdAt if present just in case
+        const { id: _, createdAt: __, ...cleanUpdates } = updates as any;
+        return apiRequest(`/placements/${id}`, 'PUT', cleanUpdates);
+    },
+
     deleteRecord: async (id: string) => {
-        try {
-            await deleteDoc(doc(db, COLLECTION_NAME, id));
-        } catch (error) {
-            console.error("Error deleting placement record:", error);
-            throw error;
-        }
+        return apiRequest(`/placements/${id}`, 'DELETE');
     },
 
-    // Get records by Roll Number
-    getRecordsByRollNo: async (rollNo: string): Promise<PlacementRecord[]> => {
+    getRecordsByRollNo: async (rollNo: string) => {
+        // Fetch all and filter client side for now as backend doesn't support query param yet
         try {
-            const q = query(collection(db, COLLECTION_NAME), where('rollNo', '==', rollNo));
-            const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as PlacementRecord));
+            const all = await apiRequest<PlacementRecord[]>('/placements');
+            return all.filter(r => r.rollNo === rollNo);
         } catch (error) {
             console.error("Error fetching records by rollNo:", error);
             return [];
         }
     },
 
-    // Bulk create
     bulkCreateRecords: async (records: Omit<PlacementRecord, 'id' | 'createdAt'>[]) => {
-        const batchPromises = records.map(record =>
-            addDoc(collection(db, COLLECTION_NAME), {
-                ...record,
-                createdAt: Date.now()
-            })
-        );
-        await Promise.all(batchPromises); // Simple parallel execution for now
-    },
-
-    // Update a record
-    updateRecord: async (id: string, updates: Partial<PlacementRecord>) => {
-        try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            // Don't update id or createdAt usually
-            const { id: _, createdAt: __, ...cleanUpdates } = updates as any;
-            await import('firebase/firestore').then(mod => mod.updateDoc(docRef, cleanUpdates));
-        } catch (error) {
-            console.error("Error updating placement record:", error);
-            throw error;
-        }
+        // Execute in parallel
+        await Promise.all(records.map(record => apiRequest('/placements', 'POST', record)));
     }
 };
