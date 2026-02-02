@@ -47,33 +47,33 @@ const ClassCoordinatorDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
-                    <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
-                        <Users className="w-8 h-8 text-brand-orange-primary" />
+                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(249,115,22,0.15)] hover:border-orange-200 transition-all duration-300 group">
+                    <div className="p-4 bg-orange-50 rounded-xl shadow-sm mr-4 group-hover:bg-orange-100 transition-colors">
+                        <Users className="w-8 h-8 text-orange-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium uppercase">My Students</h3>
+                        <h3 className="text-orange-900/70 text-sm font-bold uppercase tracking-wider">My Students</h3>
                         <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalStudents}</p>
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
-                    <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
-                        <CheckCircle className="w-8 h-8 text-brand-orange-primary" />
+                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(249,115,22,0.15)] hover:border-orange-200 transition-all duration-300 group">
+                    <div className="p-4 bg-orange-50 rounded-xl shadow-sm mr-4 group-hover:bg-orange-100 transition-colors">
+                        <CheckCircle className="w-8 h-8 text-orange-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium uppercase">Placed Students</h3>
+                        <h3 className="text-orange-900/70 text-sm font-bold uppercase tracking-wider">Placed Students</h3>
                         <p className="text-3xl font-bold text-gray-900 mt-1">{stats.placedStudents}</p>
-                        <p className="text-xs text-brand-orange-deep mt-1">Offers (Pending)</p>
+                        <p className="text-xs text-orange-600 font-medium mt-1">Offers Received</p>
                     </div>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-sm border border-white/60 hover:shadow-lg hover:shadow-brand-orange-primary/5 transition flex items-center">
-                    <div className="p-4 bg-brand-orange-ice rounded-lg mr-4 border border-brand-orange-light/20">
-                        <Building2 className="w-8 h-8 text-brand-orange-primary" />
+                <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center hover:shadow-[0_8px_24px_rgba(249,115,22,0.15)] hover:border-orange-200 transition-all duration-300 group">
+                    <div className="p-4 bg-orange-50 rounded-xl shadow-sm mr-4 group-hover:bg-orange-100 transition-colors">
+                        <Building2 className="w-8 h-8 text-orange-600" />
                     </div>
                     <div>
-                        <h3 className="text-gray-500 text-sm font-medium uppercase">Total Drives</h3>
+                        <h3 className="text-orange-900/70 text-sm font-bold uppercase tracking-wider">Total Drives</h3>
                         <p className="text-3xl font-bold text-gray-900 mt-1">{stats.totalDrives}</p>
                     </div>
                 </div>

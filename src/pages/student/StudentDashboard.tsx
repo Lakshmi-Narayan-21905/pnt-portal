@@ -23,26 +23,26 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon, delay }) => (
     <div
-        className="bg-indigo-50/50 p-6 rounded-2xl shadow-md border border-indigo-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group min-w-[280px]"
+        className="bg-white p-6 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_8px_24px_rgba(99,102,241,0.15)] hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group min-w-[280px]"
         style={{ animation: `fadeInUp 0.5s ease-out ${delay}s backwards` }}
     >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none opacity-50"></div>
         <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="p-3 bg-white rounded-xl border border-indigo-100 shadow-sm group-hover:shadow-md transition-all">
+            <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors">
                 <Icon className="w-6 h-6 text-indigo-600" />
             </div>
-            <span className="flex items-center text-xs font-semibold text-emerald-700 bg-emerald-100/50 border border-emerald-200 px-2 py-1 rounded-full">
+            <span className="flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">
                 +12% <span className="ml-1 text-emerald-600/70 font-normal">vs last month</span>
             </span>
         </div>
         <div className="relative z-10">
-            <h3 className="text-indigo-900/60 text-sm font-bold uppercase tracking-wider mb-1">{title}</h3>
+            <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">{title}</h3>
             <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-indigo-950 drop-shadow-sm">
+                <span className="text-3xl font-extrabold text-gray-900 drop-shadow-sm">
                     <AnimatedCounter value={count} />
                 </span>
             </div>
-            <p className="text-xs text-indigo-800/70 mt-2 font-medium bg-indigo-100/50 inline-block px-2 py-0.5 rounded-lg border border-indigo-200/50">{subtitle}</p>
+            <p className="text-xs text-gray-500 mt-2 font-medium bg-gray-50 inline-block px-2 py-0.5 rounded-lg border border-gray-100">{subtitle}</p>
         </div>
     </div>
 );

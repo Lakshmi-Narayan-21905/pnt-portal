@@ -219,48 +219,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-<<<<<<< HEAD
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div
-                    className="bg-indigo-50/50 p-6 rounded-2xl shadow-md border border-indigo-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center group relative overflow-hidden min-w-[280px]"
-                    style={{ animation: 'fadeInUp 0.5s ease-out forwards' }}
-                >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                    <div className="p-4 bg-white rounded-xl mr-4 border border-indigo-100 shadow-sm group-hover:shadow-md transition-all">
-                        <Users className="w-8 h-8 text-indigo-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-indigo-900/60 text-sm font-bold uppercase tracking-wider">Total Students</h3>
-                        <p className="text-4xl font-extrabold text-indigo-950 mt-1">{stats.totalStudents}</p>
-                    </div>
-                </div>
 
-                <div
-                    className="bg-blue-50/50 p-6 rounded-2xl shadow-md border border-blue-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center group relative overflow-hidden min-w-[280px]"
-                    style={{ animation: 'fadeInUp 0.5s ease-out 0.1s forwards', opacity: 0 }}
-                >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                    <div className="p-4 bg-white rounded-xl mr-4 border border-blue-100 shadow-sm group-hover:shadow-md transition-all">
-                        <Building2 className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-blue-900/60 text-sm font-bold uppercase tracking-wider">Active Drives</h3>
-                        <p className="text-4xl font-extrabold text-blue-950 mt-1">{stats.activeDrives}</p>
-                    </div>
-                </div>
-
-                <div
-                    className="bg-emerald-50/50 p-6 rounded-2xl shadow-md border border-emerald-100 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center group relative overflow-hidden min-w-[280px]"
-                    style={{ animation: 'fadeInUp 0.5s ease-out 0.2s forwards', opacity: 0 }}
-                >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                    <div className="p-4 bg-white rounded-xl mr-4 border border-emerald-100 shadow-sm group-hover:shadow-md transition-all">
-                        <GraduationCap className="w-8 h-8 text-emerald-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-emerald-900/60 text-sm font-bold uppercase tracking-wider">Total Trainings</h3>
-                        <p className="text-4xl font-extrabold text-emerald-950 mt-1">{stats.totalTrainings}</p>
-=======
             {/* 2. Global KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <KPICard title="Total Users" value={stats.totalUsers} subtext={`${stats.activeUsers} Verified`} icon={Users} color="text-indigo-600" bg="bg-indigo-50" />
@@ -270,7 +229,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* 3. User Analytics & DB Growth */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6">
                     <h3 className="font-bold text-gray-800 mb-6">User Distribution</h3>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
@@ -304,7 +263,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="lg:col-span-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6">
                     <h3 className="font-bold text-gray-800 mb-6">Database Growth (Writes)</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -330,14 +289,14 @@ const AdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
 
                 {/* Collection Overview */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Collection Overview</h3>
                         <Database className="w-4 h-4 text-gray-400" />
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-white text-gray-500 border-b">
+                            <thead className="bg-white/50 text-gray-500 border-b">
                                 <tr>
                                     <th className="px-6 py-3 font-medium">Collection Name</th>
                                     <th className="px-6 py-3 font-medium">Doc Count</th>
@@ -371,13 +330,13 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Logs (Now full width since Insights are gone) */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50">
                         <h3 className="font-bold text-gray-800">Recent System Events</h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-white text-gray-500 border-b">
+                            <thead className="bg-white/50 text-gray-500 border-b">
                                 <tr>
                                     <th className="px-6 py-3 font-medium">Timestamp</th>
                                     <th className="px-6 py-3 font-medium">Event Type</th>
@@ -405,7 +364,7 @@ const AdminDashboard: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
->>>>>>> 3b37c6bde13cadb2e33370ea641d468c19f662cf
+
                     </div>
                 </div>
 
@@ -432,13 +391,13 @@ interface KPICardProps {
 }
 
 const KPICard: React.FC<KPICardProps> = ({ title, value, subtext, icon: Icon, color, bg }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between">
+    <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-start justify-between hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group">
         <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">{title}</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide group-hover:text-indigo-600 transition-colors">{title}</p>
             <h3 className="text-3xl font-bold text-gray-900 mt-2">{value}</h3>
             <p className="text-xs text-gray-400 mt-1">{subtext}</p>
         </div>
-        <div className={`p-3 rounded-lg ${bg} ${color}`}>
+        <div className={`p-3 rounded-lg ${bg} ${color} group-hover:scale-110 transition-transform`}>
             <Icon className="w-6 h-6" />
         </div>
     </div>

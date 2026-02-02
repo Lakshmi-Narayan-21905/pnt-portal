@@ -4,20 +4,14 @@ import {
     LayoutDashboard,
     Users,
     Building2,
-    Calendar,
     Briefcase,
-    TrendingUp,
-    PieChart as PieIcon,
     BarChart3,
     AlertCircle,
     CheckCircle2,
     Clock,
     Plus,
     Download,
-    Search,
-    FileText,
-    DollarSign,
-    Filter
+    Search
 } from 'lucide-react';
 import { CompanyService } from '../../services/companyService';
 import { UserService } from '../../services/userService';
@@ -25,8 +19,7 @@ import { PlacementRecordService } from '../../services/placementRecordService';
 import type { Company, UserProfile, PlacementRecord } from '../../types';
 import {
     BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
-    LineChart, Line, AreaChart, Area, ComposedChart
+    XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import * as XLSX from 'xlsx';
 
@@ -67,7 +60,6 @@ const PlacementHeadDashboard: React.FC = () => {
         placementsOverTime: any[]; // Keeping generic for now as it's empty
         salaryDistribution: { name: string; count: number }[];
         topRecruiters: { name: string; count: number }[];
-        avgPackageByDept: { name: string; avg: number }[];
         eligibilityOverview: { name: string; value: number; color: string }[];
     }>({
         driveStatus: [],
@@ -78,7 +70,6 @@ const PlacementHeadDashboard: React.FC = () => {
         placementsOverTime: [],
         salaryDistribution: [],
         topRecruiters: [],
-        avgPackageByDept: [],
         eligibilityOverview: []
     });
 
@@ -177,19 +168,28 @@ const PlacementHeadDashboard: React.FC = () => {
             { name: 'Unplaced', value: unplacedCount, color: STATUS_COLORS.unplaced }
         ];
 
-        // E. Placements by Department
+        // E. Placements by Department (Headcount of Placed Students)
         const placementsByDeptMap: Record<string, number> = {};
+        const uniquePlacedStudents = new Set<string>();
+
+        // Use records to determine unique placed students.
+        // This handles cases where student profile status might not be updated but a record exists.
         recs.forEach(r => {
-            const d = r.department || 'Unknown';
-            placementsByDeptMap[d] = (placementsByDeptMap[d] || 0) + 1;
+            // Identify student by roll number.
+            const studentId = r.rollNo?.toLowerCase();
+            if (studentId && !uniquePlacedStudents.has(studentId)) {
+                uniquePlacedStudents.add(studentId);
+                const d = r.department || 'Unknown';
+                placementsByDeptMap[d] = (placementsByDeptMap[d] || 0) + 1;
+            }
         });
+
         const placementsByDept = Object.entries(placementsByDeptMap).map(([name, count]) => ({ name, count }));
 
         // F. Salary & Offer Analytics - Package Distribution
         // bucket: <3, 3-5, 5-10, 10+
         const salaryBuckets = { '< 3 LPA': 0, '3-5 LPA': 0, '5-10 LPA': 0, '10+ LPA': 0 };
         const companiesByOfferCount: Record<string, number> = {};
-        const packagesByDept: Record<string, { total: number, count: number }> = {};
 
         recs.forEach(r => {
             // Salary
@@ -200,11 +200,6 @@ const PlacementHeadDashboard: React.FC = () => {
                 else if (pkg < 5) salaryBuckets['3-5 LPA']++;
                 else if (pkg < 10) salaryBuckets['5-10 LPA']++;
                 else salaryBuckets['10+ LPA']++;
-
-                // Avg Package by Dept
-                if (!packagesByDept[r.department]) packagesByDept[r.department] = { total: 0, count: 0 };
-                packagesByDept[r.department].total += pkg;
-                packagesByDept[r.department].count++;
             }
 
             // Top Recruiters
@@ -216,11 +211,6 @@ const PlacementHeadDashboard: React.FC = () => {
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 10);
-
-        const avgPackageByDept = Object.entries(packagesByDept).map(([dept, data]) => ({
-            name: dept,
-            avg: parseFloat((data.total / data.count).toFixed(2))
-        }));
 
         // G. Eligibility Overview (Student Batch Health)
         const eligibleCount = studs.filter(s =>
@@ -242,7 +232,6 @@ const PlacementHeadDashboard: React.FC = () => {
             placementsOverTime: [], // Skipping for now as record dates aren't reliably parsed without specific logic
             salaryDistribution,
             topRecruiters,
-            avgPackageByDept,
             eligibilityOverview
         });
 
@@ -361,7 +350,7 @@ const PlacementHeadDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* 3. Alerts & Notifications (Top Priority) */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-bold text-gray-800 flex items-center gap-2">
                             <AlertCircle className="w-5 h-5 text-gray-400" /> Action Required
@@ -372,8 +361,8 @@ const PlacementHeadDashboard: React.FC = () => {
                             <p className="text-gray-400 text-sm italic">No urgent alerts at this time.</p>
                         ) : alerts.map((alert, idx) => (
                             <div key={idx} className={`p-3 rounded-lg border text-sm flex gap-3 ${alert.type === 'deadline' ? 'bg-red-50 border-red-100 text-red-700' :
-                                    alert.type === 'action' ? 'bg-yellow-50 border-yellow-100 text-yellow-800' :
-                                        'bg-blue-50 border-blue-100 text-blue-700'
+                                alert.type === 'action' ? 'bg-yellow-50 border-yellow-100 text-yellow-800' :
+                                    'bg-blue-50 border-blue-100 text-blue-700'
                                 }`}>
                                 <div className="mt-0.5"><AlertCircle className="w-4 h-4" /></div>
                                 <div>
@@ -386,7 +375,7 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 4. Drive Status & Funnel */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <h3 className="font-bold text-gray-800 mb-6">Recruitment Drive Status</h3>
                     <div className="h-48">
                         <ResponsiveContainer width="100%" height="100%">
@@ -412,7 +401,7 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 5. Placement Status */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <h3 className="font-bold text-gray-800 mb-6">Student Placement Status</h3>
                     <div className="h-64 relative">
                         <ResponsiveContainer width="100%" height="100%">
@@ -446,7 +435,7 @@ const PlacementHeadDashboard: React.FC = () => {
 
             {/* 6. Recruitment Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-gray-800">Top Recruiters (Offers)</h3>
                         <BarChart3 className="w-5 h-5 text-gray-400" />
@@ -468,7 +457,7 @@ const PlacementHeadDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-gray-800">Highest Registration Drives</h3>
                         <Users className="w-5 h-5 text-gray-400" />
@@ -486,33 +475,31 @@ const PlacementHeadDashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
-
             {/* 7. Department & Salary  */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="lg:col-span-2 bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-gray-800">Avg. Package by Department (LPA)</h3>
-                        <DollarSign className="w-5 h-5 text-gray-400" />
+                        <h3 className="font-bold text-gray-800">Students Placed by Department</h3>
+                        <Users className="w-5 h-5 text-gray-400" />
                     </div>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={chartData.avgPackageByDept}>
+                            <BarChart data={chartData.placementsByDept}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
                                 <RechartsTooltip />
-                                <Bar dataKey="avg" fill="#10B981" radius={[4, 4, 0, 0]} barSize={40}>
-                                    {chartData.avgPackageByDept.map((_, index) => (
+                                <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} barSize={40}>
+                                    {chartData.placementsByDept.map((_, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Bar>
+                                    ))}             </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 p-6">
                     <h3 className="font-bold text-gray-800 mb-6">Package Distribution</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -541,14 +528,14 @@ const PlacementHeadDashboard: React.FC = () => {
             {/* 8. Recent Tables */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Active Drives List */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Live & Upcoming Drives</h3>
                         <button onClick={() => navigate('../companies')} className="text-xs text-blue-600 font-medium hover:underline">View All</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-white text-gray-500 border-b">
+                            <thead className="bg-white/50 text-gray-500 border-b">
                                 <tr>
                                     <th className="px-4 py-3 font-medium">Company</th>
                                     <th className="px-4 py-3 font-medium">Date</th>
@@ -588,14 +575,14 @@ const PlacementHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Placements List */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-md border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Recent Placements</h3>
                         <button onClick={() => navigate('../records')} className="text-xs text-blue-600 font-medium hover:underline">View All</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-white text-gray-500 border-b">
+                            <thead className="bg-white/50 text-gray-500 border-b">
                                 <tr>
                                     <th className="px-4 py-3 font-medium">Student</th>
                                     <th className="px-4 py-3 font-medium">Company</th>
@@ -642,13 +629,13 @@ interface KPISmallProps {
 }
 
 const KPISmall: React.FC<KPISmallProps> = ({ title, value, icon: Icon, color, bg }) => (
-    <div className={`p-4 rounded-xl border border-gray-100 bg-white shadow-sm flex items-center justify-between`}>
+    <div className={`p-5 rounded-xl border border-gray-100 bg-white/70 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-between group`}>
         <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{title}</p>
-            <p className="text-2xl font-bold text-gray-800">{value}</p>
+            <p className={`text-xs font-bold uppercase tracking-wide mb-1 opacity-70 ${color.replace('text-', 'text-')}`}>{title}</p>
+            <p className={`text-3xl font-bold ${color.replace('500', '900').replace('600', '900')}`}>{value}</p>
         </div>
-        <div className={`p-2.5 rounded-lg ${bg} ${color}`}>
-            <Icon className="w-5 h-5" />
+        <div className={`p-3 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform`}>
+            <Icon className={`w-6 h-6 ${color}`} />
         </div>
     </div>
 );

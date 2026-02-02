@@ -114,11 +114,11 @@ const ManageCompanies: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                         {companies.map((company) => (
-                            <div key={company.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+                            <div key={company.id} className="bg-white border border-gray-100 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(99,102,241,0.12)] hover:border-indigo-200 transition-all duration-300 group">
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center">
-                                        <div className="p-3 bg-blue-50 rounded-lg mr-3">
-                                            <Building2 className="w-6 h-6 text-blue-600" />
+                                        <div className="p-3 bg-indigo-50 rounded-lg mr-3 group-hover:bg-indigo-100 transition-colors">
+                                            <Building2 className="w-6 h-6 text-indigo-600" />
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-gray-900">{company.name}</h3>

@@ -266,26 +266,26 @@ const PlacementRecords: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-emerald-50/50 backdrop-blur-sm border-b border-emerald-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package (LPA)</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Student Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Roll No</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Department</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Company</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Package (LPA)</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-emerald-900/70 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={6} className="p-4 text-center">Loading...</td></tr>
                         ) : filteredRecords.length === 0 ? (
                             <tr><td colSpan={6} className="p-4 text-center">No records found.</td></tr>
                         ) : (
                             filteredRecords.map((record) => (
-                                <tr key={record.id} className="hover:bg-gray-50">
+                                <tr key={record.id} className="hover:bg-emerald-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{record.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.rollNo}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.department}</td>

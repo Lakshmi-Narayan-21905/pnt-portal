@@ -46,7 +46,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-purple-800/30',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-purple-50/60'
         },
         blue: {
             sidebarGradient: 'from-blue-950 to-blue-900 border-r border-blue-800/50 shadow-2xl',
@@ -57,7 +57,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-blue-800/30',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-blue-50/60'
         },
         green: {
             sidebarGradient: 'from-emerald-950 to-emerald-900 border-r border-emerald-800/50 shadow-2xl',
@@ -68,7 +68,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-emerald-800/30',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-emerald-50/60'
         },
         lavender: {
             sidebarGradient: 'from-violet-950 to-violet-900 border-r border-violet-800/50 shadow-2xl',
@@ -79,7 +79,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-violet-800/30',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-violet-50/60'
         },
         orange: {
             sidebarGradient: 'from-orange-950 to-orange-900 border-r border-orange-800/50 shadow-2xl',
@@ -90,7 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-orange-800/30',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-orange-50/60'
         },
         indigo: {
             sidebarGradient: 'from-indigo-950 to-indigo-900 border-r border-indigo-800/50 shadow-2xl',
@@ -101,7 +101,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-indigo-800/30',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-indigo-50/60'
         },
         amber: {
             sidebarGradient: 'from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700 shadow-2xl',
@@ -112,7 +112,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
             border: 'border-stone-700/50',
-            pageBg: 'bg-slate-50'
+            pageBg: 'bg-stone-50/60'
         }
     };
 

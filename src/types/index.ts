@@ -78,6 +78,7 @@ export interface PlacementRecord {
     rollNo: string;
     department: string;
     companyName: string;
+    role?: string; // Added to support role display
     package?: string; // Optional (LPA)
     academicYear: string; // e.g. "2023-2027" or just "2026"
     createdAt?: number;

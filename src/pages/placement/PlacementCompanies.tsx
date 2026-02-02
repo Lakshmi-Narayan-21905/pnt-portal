@@ -146,14 +146,14 @@ const PlacementCompanies: React.FC = () => {
                         <div
                             key={company.id}
                             onClick={() => handleCardClick(company)}
-                            className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 hover:shadow-lg hover:shadow-brand-green-emerald/10 transition cursor-pointer relative group flex flex-col h-full"
+                            className="bg-white border border-gray-100 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:border-emerald-200 transition-all duration-300 cursor-pointer relative group flex flex-col h-full"
                         >
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-xs bg-white/50 backdrop-blur-md px-2 py-1 rounded text-gray-600">
                                 Click for details
                             </div>
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-brand-green-ice rounded-lg">
-                                    <Building2 className="w-6 h-6 text-brand-green-primary" />
+                                <div className="p-3 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors">
+                                    <Building2 className="w-6 h-6 text-emerald-600" />
                                 </div>
                                 <span className={`px-2 py-1 text-xs rounded-full font-medium bg-brand-green-light text-brand-green-dark border border-brand-green-mint/20`}>
                                     Open

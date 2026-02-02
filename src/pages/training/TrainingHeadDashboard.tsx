@@ -34,7 +34,7 @@ const STATUS_COLORS = {
 const TrainingHeadDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    
+
     // Data State
     const [trainings, setTrainings] = useState<Training[]>([]);
     const [coordinators, setCoordinators] = useState<{ dept: UserProfile[], class: UserProfile[] }>({ dept: [], class: [] });
@@ -91,7 +91,7 @@ const TrainingHeadDashboard: React.FC = () => {
 
     const processAnalytics = (allTrainings: Training[], deptCoords: UserProfile[], classCoords: UserProfile[]) => {
         const now = Date.now();
-        
+
         // 1. Program Status Logic
         const active = allTrainings.filter(t => t.startDate <= now && t.endDate >= now);
         const upcoming = allTrainings.filter(t => t.startDate > now);
@@ -119,7 +119,7 @@ const TrainingHeadDashboard: React.FC = () => {
 
         // 5. Participants per Training (Top 10)
         const participationData = [...allTrainings]
-            .map(t => ({ name: t.title.substring(0, 15) + (t.title.length>15?'...':''), count: t.participants?.length || 0, fullName: t.title }))
+            .map(t => ({ name: t.title.substring(0, 15) + (t.title.length > 15 ? '...' : ''), count: t.participants?.length || 0, fullName: t.title }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 10);
 
@@ -206,36 +206,36 @@ const TrainingHeadDashboard: React.FC = () => {
 
             {/* KPI Cards Row 1: Programs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <KPICard 
-                    title="Active Programs" 
-                    value={stats.activeCount} 
-                    icon={CheckCircle2} 
-                    color="text-emerald-600" 
-                    bg="bg-emerald-50" 
+                <KPICard
+                    title="Active Programs"
+                    value={stats.activeCount}
+                    icon={CheckCircle2}
+                    color="text-emerald-600"
+                    bg="bg-emerald-50"
                     border="border-emerald-100"
                 />
-                <KPICard 
-                    title="Upcoming Programs" 
-                    value={stats.upcomingCount} 
-                    icon={Clock} 
-                    color="text-blue-600" 
-                    bg="bg-blue-50" 
+                <KPICard
+                    title="Upcoming Programs"
+                    value={stats.upcomingCount}
+                    icon={Clock}
+                    color="text-blue-600"
+                    bg="bg-blue-50"
                     border="border-blue-100"
                 />
-                 <KPICard 
-                    title="Total Trainings" 
-                    value={trainings.length} 
-                    icon={GraduationCap} 
-                    color="text-purple-600" 
-                    bg="bg-purple-50" 
+                <KPICard
+                    title="Total Trainings"
+                    value={trainings.length}
+                    icon={GraduationCap}
+                    color="text-purple-600"
+                    bg="bg-purple-50"
                     border="border-purple-100"
                 />
-                <KPICard 
-                    title="Unique Participants" 
-                    value={stats.uniqueStudentsCovered} 
-                    icon={Users} 
-                    color="text-orange-600" 
-                    bg="bg-orange-50" 
+                <KPICard
+                    title="Unique Participants"
+                    value={stats.uniqueStudentsCovered}
+                    icon={Users}
+                    color="text-orange-600"
+                    bg="bg-orange-50"
                     border="border-orange-100"
                 />
             </div>
@@ -263,7 +263,7 @@ const TrainingHeadDashboard: React.FC = () => {
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 {/* 1. Status Distribution (Donut) */}
                 <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center justify-between mb-6">
@@ -271,7 +271,7 @@ const TrainingHeadDashboard: React.FC = () => {
                         <PieIcon className="w-5 h-5 text-gray-400" />
                     </div>
                     <div className="h-64">
-                         <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={chartData.statusData}
@@ -287,7 +287,7 @@ const TrainingHeadDashboard: React.FC = () => {
                                     ))}
                                 </Pie>
                                 <RechartsTooltip />
-                                <Legend verticalAlign="bottom" height={36}/>
+                                <Legend verticalAlign="bottom" height={36} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
@@ -300,18 +300,18 @@ const TrainingHeadDashboard: React.FC = () => {
                         <TrendingUp className="w-5 h-5 text-gray-400" />
                     </div>
                     <div className="h-64">
-                         <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={chartData.timelineData}>
                                 <defs>
                                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB"/>
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} />
-                                <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
                                 <Area type="monotone" dataKey="count" stroke="#3B82F6" fillOpacity={1} fill="url(#colorCount)" strokeWidth={3} />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -327,10 +327,10 @@ const TrainingHeadDashboard: React.FC = () => {
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData.participationData} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB"/>
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
                                 <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" width={150} tick={{fill: '#4B5563', fontSize: 13}} axisLine={false} tickLine={false} />
-                                <RechartsTooltip cursor={{fill: '#F3F4F6'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}} />
+                                <YAxis dataKey="name" type="category" width={150} tick={{ fill: '#4B5563', fontSize: 13 }} axisLine={false} tickLine={false} />
+                                <RechartsTooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
                                 <Bar dataKey="count" fill="#8B5CF6" radius={[0, 4, 4, 0]} barSize={24} name="Participants">
                                     {chartData.participationData.map((_, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -341,18 +341,18 @@ const TrainingHeadDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                 {/* 4. Dept Coordinators */}
-                 <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                {/* 4. Dept Coordinators */}
+                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Coordinators by Dept</h3>
                         <BarChart3 className="w-5 h-5 text-gray-400" />
                     </div>
                     <div className="h-64">
-                         <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData.deptCoordData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB"/>
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 10}} interval={0} angle={-45} textAnchor="end" height={60} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} interval={0} angle={-45} textAnchor="end" height={60} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
                                 <RechartsTooltip />
                                 <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} />
                             </BarChart>
@@ -366,13 +366,13 @@ const TrainingHeadDashboard: React.FC = () => {
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-green-100 text-green-700 rounded-lg">
-                            <AlertCircle className="w-5 h-5" /> 
+                            <AlertCircle className="w-5 h-5" />
                         </div>
                         <h3 className="font-bold text-gray-800 text-lg">Active Training Programs Report</h3>
                     </div>
                     <span className="text-sm text-gray-500">Live programs requiring attention</span>
                 </div>
-                
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-600">
                         <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
@@ -396,41 +396,41 @@ const TrainingHeadDashboard: React.FC = () => {
                                 trainings
                                     .filter(t => t.startDate <= Date.now() && t.endDate >= Date.now())
                                     .map((t) => (
-                                    <tr key={t.id} className="hover:bg-gray-50/80 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{t.title}</div>
-                                            <div className="text-xs text-gray-500">ID: {t.id.substring(0,6)}...</div>
-                                        </td>
-                                        <td className="px-6 py-4">{t.trainer}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-gray-900">{new Date(t.startDate).toLocaleDateString()}</span>
-                                                <span className="text-xs text-gray-400">to {new Date(t.endDate).toLocaleDateString()}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-8 h-1 bg-gray-200 rounded-full overflow-hidden flex-1 max-w-[60px]">
-                                                    <div className="h-full bg-blue-500 w-[50%]"></div> {/* Mock progress */}
+                                        <tr key={t.id} className="hover:bg-gray-50/80 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900">{t.title}</div>
+                                                <div className="text-xs text-gray-500">ID: {t.id.substring(0, 6)}...</div>
+                                            </td>
+                                            <td className="px-6 py-4">{t.trainer}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-gray-900">{new Date(t.startDate).toLocaleDateString()}</span>
+                                                    <span className="text-xs text-gray-400">to {new Date(t.endDate).toLocaleDateString()}</span>
                                                 </div>
-                                                <span className="font-medium">{t.participants?.length || 0}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs border border-purple-100">
-                                                Year {t.eligibility.year}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button 
-                                                onClick={() => navigate(`../trainings/${t.id}`)}
-                                                className="text-brand-green-primary hover:text-brand-green-dark font-medium text-xs border border-brand-green-primary/20 bg-brand-green-ice/50 px-3 py-1.5 rounded-lg transition"
-                                            >
-                                                Manage
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-1 bg-gray-200 rounded-full overflow-hidden flex-1 max-w-[60px]">
+                                                        <div className="h-full bg-blue-500 w-[50%]"></div> {/* Mock progress */}
+                                                    </div>
+                                                    <span className="font-medium">{t.participants?.length || 0}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs border border-purple-100">
+                                                    Year {t.eligibility.year}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button
+                                                    onClick={() => navigate(`../trainings/${t.id}`)}
+                                                    className="text-brand-green-primary hover:text-brand-green-dark font-medium text-xs border border-brand-green-primary/20 bg-brand-green-ice/50 px-3 py-1.5 rounded-lg transition"
+                                                >
+                                                    Manage
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
                             )}
                         </tbody>
                     </table>
@@ -451,10 +451,10 @@ interface KPICardProps {
 }
 
 const KPICard: React.FC<KPICardProps> = ({ title, value, icon: Icon, color, bg, border }) => (
-    <div className={`p-6 rounded-xl shadow-sm border ${border} ${bg} hover:shadow-md transition-all`}>
+    <div className={`p-6 rounded-xl shadow-md border ${border} bg-white/70 backdrop-blur-md hover:shadow-lg transition-all duration-300 group`}>
         <div className="flex items-start justify-between mb-4">
-            <div className={`p-2 rounded-lg bg-white/60 ${color} shadow-sm`}>
-                <Icon className="w-6 h-6" />
+            <div className={`p-3 rounded-xl bg-white shadow-sm transition-transform group-hover:scale-110`}>
+                <Icon className={`w-6 h-6 ${color}`} />
             </div>
             {/* Optional Trend Indicator could go here */}
         </div>

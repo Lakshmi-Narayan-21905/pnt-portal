@@ -154,28 +154,28 @@ const ManageHeads: React.FC = () => {
             {loading ? (
                 <div className="text-center py-10">Loading...</div>
             ) : (
-                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-100">
+                        <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-900/70 uppercase tracking-wider">Department</th>
                                 {/* <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th> */}
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-50">
                             {heads.length === 0 ? (
                                 <tr>
                                     <td colSpan={3} className="px-6 py-4 text-center text-gray-500">No heads found.</td>
                                 </tr>
                             ) : (
                                 heads.map((head) => (
-                                    <tr key={head.uid}>
+                                    <tr key={head.uid} className="hover:bg-indigo-50/30 transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                                    <span className="text-primary-600 font-bold">{head.displayName.charAt(0)}</span>
+                                                <div className="flex-shrink-0 h-10 w-10 bg-indigo-100/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                    <span className="text-indigo-700 font-bold">{head.displayName.charAt(0)}</span>
                                                 </div>
                                                 <div className="ml-4">
                                                     <div className="text-sm font-medium text-gray-900">{head.displayName}</div>

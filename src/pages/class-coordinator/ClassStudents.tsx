@@ -195,16 +195,16 @@ const ClassStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
-                <table className="min-w-full divide-y divide-brand-orange-light/30">
-                    <thead className="bg-brand-orange-ice/50">
+            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-orange-50/50 backdrop-blur-sm border-b border-orange-100">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Name</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-brand-orange-deep uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-orange-900/70 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-orange-900/70 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-orange-900/70 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-brand-orange-light/30">
+                    <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
                             <tr><td colSpan={3} className="p-8 text-center text-gray-500">Loading...</td></tr>
                         ) : students.length === 0 ? (
@@ -214,11 +214,11 @@ const ClassStudents: React.FC = () => {
                                 <tr
                                     key={student.uid}
                                     onClick={() => setSelectedStudent(student)}
-                                    className="cursor-pointer hover:bg-brand-orange-ice/30 transition-colors"
+                                    className="cursor-pointer hover:bg-orange-50/30 transition-colors group"
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-brand-orange-ice flex items-center justify-center text-brand-orange-primary font-bold shadow-sm border border-brand-orange-light/30">
+                                            <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 font-bold shadow-sm group-hover:scale-110 transition-transform duration-300">
                                                 {student.displayName?.charAt(0)}
                                             </div>
                                             <div className="ml-4 text-sm font-medium text-gray-900">{student.displayName}</div>
@@ -226,9 +226,9 @@ const ClassStudents: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileStatus === 'VERIFIED' ? 'bg-brand-green-ice text-brand-green-deep border-brand-green-light' :
-                                            student.profileStatus === 'APPROVAL_PENDING' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                'bg-brand-orange-ice text-brand-orange-deep border-brand-orange-light'
+                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileStatus === 'VERIFIED' ? 'bg-green-50 text-green-700 border-green-100' :
+                                            student.profileStatus === 'APPROVAL_PENDING' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                'bg-orange-50 text-orange-700 border-orange-100'
                                             }`}>
                                             {student.profileStatus === 'VERIFIED' ? 'Verified' :
                                                 student.profileStatus === 'APPROVAL_PENDING' ? 'Approval Pending' :

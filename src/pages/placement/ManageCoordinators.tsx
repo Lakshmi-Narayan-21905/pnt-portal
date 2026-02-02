@@ -106,14 +106,14 @@ const ManageCoordinators: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {coordinators.length === 0 && <p className="text-gray-500 col-span-full text-center">No coordinators found.</p>}
                     {coordinators.map((coord) => (
-                        <div key={coord.uid} className="bg-white/60 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex flex-col items-center hover:shadow-lg hover:shadow-brand-green-emerald/10 transition group">
-                            <div className="w-20 h-20 rounded-full bg-brand-green-ice flex items-center justify-center mb-4 relative shadow-inner">
+                        <div key={coord.uid} className="bg-white border border-gray-100 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex flex-col items-center hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:border-emerald-200 transition-all duration-300 group">
+                            <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mb-4 relative shadow-inner group-hover:bg-emerald-100 transition-colors">
                                 {coord.photoURL ? (
                                     <img src={coord.photoURL} alt={coord.displayName} className="w-full h-full rounded-full object-cover" />
                                 ) : (
-                                    <span className="text-2xl font-bold text-brand-green-primary">{coord.displayName.charAt(0)}</span>
+                                    <span className="text-2xl font-bold text-emerald-600">{coord.displayName.charAt(0)}</span>
                                 )}
-                                <div className="absolute bottom-0 right-0 p-1.5 bg-brand-green-primary rounded-full border-2 border-white shadow-sm">
+                                <div className="absolute bottom-0 right-0 p-1.5 bg-emerald-500 rounded-full border-2 border-white shadow-sm">
                                     <Users className="w-3 h-3 text-white" />
                                 </div>
                             </div>
@@ -122,7 +122,7 @@ const ManageCoordinators: React.FC = () => {
                             <p className="text-gray-500 text-sm mb-3">{coord.email}</p>
 
                             <div className="flex items-center gap-2 mb-4">
-                                <span className="px-3 py-1 bg-brand-green-ice text-brand-green-dark text-xs font-semibold rounded-full border border-brand-green-mint/20">
+                                <span className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-semibold rounded-full border border-emerald-100">
                                     {coord.department}
                                 </span>
                             </div>

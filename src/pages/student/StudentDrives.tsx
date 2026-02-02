@@ -3,7 +3,7 @@ import { CompanyService } from '../../services/companyService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAlert } from '../../contexts/AlertContext';
 import type { Company } from '../../types';
-import { Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, RotateCcw, MapPin } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Search, RotateCcw, MapPin } from 'lucide-react';
 import { checkEligibility } from '../../utils/eligibility';
 import Modal from '../../components/Modal';
 import { JOB_ROLES } from '../../utils/constants';
@@ -241,13 +241,13 @@ const StudentDrives: React.FC = () => {
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {filteredCompanies.map((company) => {
-                        const { eligible, reason } = checkEligibility(userProfile!, company);
+                        const { eligible } = checkEligibility(userProfile!, company);
                         const hasApplied = (company.applicants || []).includes(userProfile!.uid);
                         const hasOptedOut = (company.optedOut || []).includes(userProfile!.uid);
                         const isExpired = Date.now() > company.deadline;
 
                         return (
-                            <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
+                            <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300 flex flex-col h-full group">
                                 {/* Header: Name & Salary */}
                                 <div className="flex justify-between items-start mb-1">
                                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{company.name}</h3>
