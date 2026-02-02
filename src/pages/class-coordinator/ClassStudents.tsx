@@ -43,7 +43,14 @@ const ClassStudents: React.FC = () => {
                 filtered = filtered.filter(u => u.section === userProfile.section);
             }
 
-            setStudents(filtered);
+            // Include the coordinator's own profile in the list
+            const coordinatorAsStudent: UserProfile = {
+                ...userProfile,
+                // Mark as coordinator for display purposes
+            };
+
+            // Combine students with coordinator (coordinator at the top)
+            setStudents([coordinatorAsStudent, ...filtered]);
         } catch (error) {
             console.error(error);
         } finally {
