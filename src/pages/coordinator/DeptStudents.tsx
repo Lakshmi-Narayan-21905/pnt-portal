@@ -40,11 +40,21 @@ const DeptStudents: React.FC = () => {
         if (!userProfile?.department) return;
         setLoading(true);
         try {
-            // Fetch all students and filter by department
-            // In a production app, we should have a query for this, but reusing getByRole is fine for now
-            const allStudents = await UserService.getUsersByRole('STUDENT');
+            // Fetch both Students and Class Coordinators
+            const [allStudents, allCoordinators] = await Promise.all([
+                UserService.getUsersByRole('STUDENT'),
+                UserService.getUsersByRole('CLASS_COORDINATOR')
+            ]);
+
             const deptStudents = allStudents.filter(u => u.department === userProfile.department);
-            setStudents(deptStudents);
+            const deptCoordinators = allCoordinators.filter(u => u.department === userProfile.department);
+
+            // Merge and sort by display name
+            const combinedDocs = [...deptStudents, ...deptCoordinators].sort((a, b) =>
+                (a.displayName || '').localeCompare(b.displayName || '')
+            );
+
+            setStudents(combinedDocs);
         } catch (error) {
             console.error(error);
         } finally {
@@ -276,17 +286,25 @@ const DeptStudents: React.FC = () => {
                             students.map((student) => (
                                 <tr key={student.uid} className="hover:bg-purple-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap">
-
                                         <div
                                             className="flex items-center cursor-pointer group"
                                             onClick={() => setSelectedStudent(student)}
                                         >
-                                            <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
-
+                                            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${student.role === 'CLASS_COORDINATOR'
+                                                    ? 'bg-indigo-100 text-indigo-600 ring-2 ring-indigo-200'
+                                                    : 'bg-purple-100 text-purple-600'
+                                                }`}>
                                                 {student.displayName?.charAt(0)}
                                             </div>
-                                            <div className="ml-4 text-sm font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
-                                                {student.displayName}
+                                            <div className="ml-4">
+                                                <div className="text-sm font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
+                                                    {student.displayName}
+                                                </div>
+                                                {student.role === 'CLASS_COORDINATOR' && (
+                                                    <span className="text-[10px] uppercase font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                                                        Coordinator
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </td>

@@ -85,8 +85,6 @@ const DeptCoordinators: React.FC = () => {
         }
     };
 
-    // Filter students for the current target section
-    const availableStudents = students.filter(s => s.section === targetSection);
     // Also include current coordinator in the list if we verify they are "in this section" locally? 
     // Actually current coordinator is NOT in 'students' list anymore (since we moved them). 
     // The user screenshot shows "KOWSHIK P (Current)". 
@@ -152,37 +150,48 @@ const DeptCoordinators: React.FC = () => {
                 onClose={() => setIsSelectModalOpen(false)}
                 title={`Assign Coordinator – Section ${targetSection}`}
             >
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                    {/* List Current Coordinator if exists */}
-                    {currentCoordinator && (
-                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex justify-between items-center">
-                            <div>
-                                <h4 className="font-bold text-gray-800">{currentCoordinator.displayName}</h4>
-                                <p className="text-xs text-green-700 font-semibold">(Current Coordinator)</p>
-                            </div>
-                            <span className="text-green-600"><Check className="w-5 h-5" /></span>
-                        </div>
-                    )}
+                <div>
+                    <p className="text-sm text-gray-500 mb-4">Select a student from the department to assign as Class Coordinator for Section <strong>{targetSection}</strong>.</p>
 
-                    {/* List Students */}
-                    {availableStudents.length === 0 ? (
-                        <p className="text-center text-gray-500 py-4">No eligible students found in Section {targetSection}.</p>
-                    ) : (
-                        availableStudents.map(student => (
-                            <button
-                                key={student.uid}
-                                disabled={assigning}
-                                onClick={() => handleAssignCoordinator(student)}
-                                className="w-full text-left p-4 bg-white border border-gray-100 hover:border-blue-300 hover:bg-blue-50 rounded-lg transition-all group flex justify-between items-center shadow-sm"
-                            >
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        {/* List Current Coordinator if exists */}
+                        {currentCoordinator && (
+                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex justify-between items-center mb-4">
                                 <div>
-                                    <h4 className="font-medium text-gray-800 group-hover:text-blue-800">{student.displayName}</h4>
-                                    <p className="text-xs text-gray-500">{student.email}</p>
+                                    <h4 className="font-bold text-gray-800">{currentCoordinator.displayName}</h4>
+                                    <p className="text-xs text-green-700 font-semibold">(Current Coordinator)</p>
                                 </div>
-                                <span className="opacity-0 group-hover:opacity-100 text-blue-600 font-medium text-sm">Select</span>
-                            </button>
-                        ))
-                    )}
+                                <span className="text-green-600"><Check className="w-5 h-5" /></span>
+                            </div>
+                        )}
+
+                        {/* List All Students of Dept */}
+                        {students.length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">No students found in this department.</p>
+                        ) : (
+                            students.sort((a, b) => (a.section || '').localeCompare(b.section || '')).map(student => (
+                                <button
+                                    key={student.uid}
+                                    disabled={assigning}
+                                    onClick={() => handleAssignCoordinator(student)}
+                                    className="w-full text-left p-4 bg-white border border-gray-100 hover:border-blue-300 hover:bg-blue-50 rounded-lg transition-all group flex justify-between items-center shadow-sm"
+                                >
+                                    <div>
+                                        <h4 className="font-medium text-gray-800 group-hover:text-blue-800">{student.displayName}</h4>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <span>{student.email}</span>
+                                            {student.section && (
+                                                <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">
+                                                    Sec {student.section}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <span className="opacity-0 group-hover:opacity-100 text-blue-600 font-medium text-sm">Select</span>
+                                </button>
+                            ))
+                        )}
+                    </div>
                 </div>
             </Modal>
         </div>
