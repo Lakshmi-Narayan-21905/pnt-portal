@@ -26,6 +26,21 @@ const CompleteProfile: React.FC = () => {
 
     const currentYearNum = new Date().getFullYear();
 
+    const getStudyYearValue = (yearStr: string) => {
+        switch (yearStr) {
+            case '1st Year': return 1;
+            case '2nd Year': return 2;
+            case '3rd Year': return 3;
+            case '4th Year': return 4;
+            default: return 1;
+        }
+    };
+
+    const studyYearVal = getStudyYearValue(formData.currentYear);
+    const yearDiff = currentYearNum - studyYearVal;
+    const passoutOption1 = yearDiff + 3;
+    const passoutOption2 = yearDiff + 4;
+
     const validateRollNo = (roll: string) => {
         // Format: 2 digits + 3 letters + 3 digits (e.g. 23csr118) -> Total 8 chars
         // OR user said "accept only 7 characters", but examples were 8. 
@@ -125,8 +140,8 @@ const CompleteProfile: React.FC = () => {
                                     value={formData.passoutYear}
                                     onChange={e => setFormData({ ...formData, passoutYear: e.target.value })}
                                 >
-                                    <option value={currentYearNum}>{currentYearNum} </option>
-                                    <option value={currentYearNum + 1}>{currentYearNum + 1} </option>
+                                    <option value={passoutOption1}>{passoutOption1}</option>
+                                    <option value={passoutOption2}>{passoutOption2}</option>
                                 </select>
                             </div>
 
@@ -136,7 +151,16 @@ const CompleteProfile: React.FC = () => {
                                     required
                                     className="mt-1 block w-full input-field"
                                     value={formData.currentYear}
-                                    onChange={e => setFormData({ ...formData, currentYear: e.target.value })}
+                                    onChange={e => {
+                                        const newYear = e.target.value;
+                                        const val = getStudyYearValue(newYear);
+                                        const diff = currentYearNum - val;
+                                        setFormData({
+                                            ...formData,
+                                            currentYear: newYear,
+                                            passoutYear: (diff + 4).toString()
+                                        });
+                                    }}
                                 >
                                     <option value="1st Year">1st Year</option>
                                     <option value="2nd Year">2nd Year</option>
