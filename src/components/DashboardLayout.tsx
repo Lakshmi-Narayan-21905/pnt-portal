@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Menu, LogOut, ChevronLeft, ChevronRight, User, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeMode } from '../contexts/ThemeContext';
 
 interface NavigationItem {
     label: string;
@@ -25,6 +26,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [hasUnread, setHasUnread] = useState(false);
+    const { isDarkMode, toggleTheme } = useThemeMode();
 
     const checkUnread = async () => {
         if (!userProfile) return;
@@ -65,82 +67,83 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
     const isActive = (path: string) => location.pathname === path;
 
     const themeConfig = {
+        // All themes now use grayscale for black and white theme
         purple: {
-            sidebarGradient: 'from-purple-950 to-purple-900 border-r border-purple-800/50 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-purple-400 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-purple-300/80',
-            logoBg: 'bg-gradient-to-br from-purple-500 to-purple-700',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-purple-800/30',
-            pageBg: 'bg-purple-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         },
         blue: {
-            sidebarGradient: 'from-blue-950 to-blue-900 border-r border-blue-800/50 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-blue-400 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-blue-300/80',
-            logoBg: 'bg-gradient-to-br from-blue-500 to-blue-700',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-blue-800/30',
-            pageBg: 'bg-blue-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         },
         green: {
-            sidebarGradient: 'from-emerald-950 to-emerald-900 border-r border-emerald-800/50 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-emerald-400 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-emerald-300/80',
-            logoBg: 'bg-gradient-to-br from-emerald-500 to-emerald-700',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-emerald-800/30',
-            pageBg: 'bg-emerald-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         },
         lavender: {
-            sidebarGradient: 'from-violet-950 to-violet-900 border-r border-violet-800/50 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-violet-400 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-violet-300/80',
-            logoBg: 'bg-gradient-to-br from-violet-500 to-violet-700',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-violet-800/30',
-            pageBg: 'bg-violet-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         },
         orange: {
-            sidebarGradient: 'from-orange-950 to-orange-900 border-r border-orange-800/50 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-orange-400 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-orange-300/80',
-            logoBg: 'bg-gradient-to-br from-orange-500 to-orange-700',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-orange-800/30',
-            pageBg: 'bg-orange-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         },
         indigo: {
-            sidebarGradient: 'from-indigo-950 to-indigo-900 border-r border-indigo-800/50 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-indigo-400 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-indigo-300/80',
-            logoBg: 'bg-gradient-to-br from-indigo-500 to-indigo-700',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-indigo-800/30',
-            pageBg: 'bg-indigo-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         },
         amber: {
-            sidebarGradient: 'from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700 shadow-2xl',
-            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-amber-500 rounded-lg shadow-inner',
+            sidebarGradient: 'from-gray-950 to-gray-900 border-r border-gray-800/50 shadow-2xl',
+            activeItemBg: 'bg-white/10 backdrop-blur-md border-l-4 border-white rounded-lg shadow-inner',
             activeItemText: 'text-white font-bold tracking-wide',
-            accentText: 'text-amber-500/80',
-            logoBg: 'bg-gradient-to-br from-amber-600 to-amber-800',
+            accentText: 'text-gray-400',
+            logoBg: 'bg-gradient-to-br from-gray-700 to-gray-900',
             hoverBg: 'hover:bg-white/5 hover:text-white',
             lightAccent: 'bg-white/10 text-white hover:bg-white/20',
-            border: 'border-stone-700/50',
-            pageBg: 'bg-stone-50/60'
+            border: 'border-gray-800/30',
+            pageBg: 'bg-gray-50/60'
         }
     };
 
@@ -283,11 +286,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
                         </div>
                     )}
 
+                    {/* Theme Toggle Button */}
+                    <button
+                        onClick={toggleTheme}
+                        className={`
+                            flex items-center w-full px-3 py-3 rounded-xl transition-all duration-200 shadow-sm border border-gray-200
+                            bg-white text-gray-700 hover:bg-gray-100 hover:border-gray-300 hover:shadow-md mb-2
+                            ${!isSidebarOpen && 'justify-center'}
+                        `}
+                        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                    >
+                        {isDarkMode ? <Sun className="w-5 h-5 flex-shrink-0" /> : <Moon className="w-5 h-5 flex-shrink-0" />}
+                        {isSidebarOpen && <span className="ml-3 font-bold text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>}
+                    </button>
+
                     <button
                         onClick={handleLogout}
                         className={`
-                            flex items-center w-full px-3 py-3 rounded-xl transition-all duration-200 shadow-sm border border-gray-100
-                            bg-white text-red-500 hover:bg-red-50 hover:border-red-100 hover:shadow-md
+                            flex items-center w-full px-3 py-3 rounded-xl transition-all duration-200 shadow-sm border border-gray-200
+                            bg-white text-gray-700 hover:bg-gray-100 hover:border-gray-300 hover:shadow-md
                             ${!isSidebarOpen && 'justify-center'}
                         `}
                         title="Logout"

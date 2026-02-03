@@ -42,107 +42,111 @@ import StudentTrainings from './pages/student/StudentTrainings';
 import ManageAnnouncements from './components/announcements/ManageAnnouncements';
 import StudentAnnouncements from './components/announcements/StudentAnnouncements';
 
+import { ThemeProvider } from './contexts/ThemeContext';
+
 const App: React.FC = () => {
   return (
-    <Router>
-      <AlertProvider>
+    <ThemeProvider>
+      <Router>
+        <AlertProvider>
 
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Admin Routers */}
-          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<ManageUsers />} />
-              <Route index element={<Navigate to="dashboard" replace />} />
+            {/* Admin Routers */}
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<ManageUsers />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+              </Route>
             </Route>
-          </Route>
 
 
 
 
-          {/* Placement Head Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['PLACEMENT_HEAD']} />}>
-            <Route path="/placement-head" element={<PlacementHeadLayout />}>
-              <Route path="dashboard" element={<PlacementHeadDashboard />} />
-              <Route path="coordinators" element={<ManageCoordinators />} />
-              <Route path="companies" element={<PlacementCompanies />} />
-              <Route path="companies/:companyId" element={<CompanyDetails />} />
-              <Route path="students" element={<PlacementStudents />} />
-              <Route path="records" element={<PlacementRecords />} />
-              <Route path="announcements" element={<ManageAnnouncements />} />
-              <Route index element={<Navigate to="dashboard" replace />} />
+            {/* Placement Head Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['PLACEMENT_HEAD']} />}>
+              <Route path="/placement-head" element={<PlacementHeadLayout />}>
+                <Route path="dashboard" element={<PlacementHeadDashboard />} />
+                <Route path="coordinators" element={<ManageCoordinators />} />
+                <Route path="companies" element={<PlacementCompanies />} />
+                <Route path="companies/:companyId" element={<CompanyDetails />} />
+                <Route path="students" element={<PlacementStudents />} />
+                <Route path="records" element={<PlacementRecords />} />
+                <Route path="announcements" element={<ManageAnnouncements />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+              </Route>
             </Route>
-          </Route>
-          {/* Training Head Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['TRAINING_HEAD']} />}>
-            <Route path="/training-head" element={<TrainingHeadLayout />}>
-              <Route path="dashboard" element={<TrainingHeadDashboard />} />
-              <Route path="trainings" element={<TrainingPrograms />} />
-              <Route path="trainings/:trainingId" element={<TrainingDetails />} />
-              <Route path="coordinators" element={<TrainingCoordinators />} />
-              <Route path="students" element={<TrainingStudents />} />
-              <Route path="announcements" element={<ManageAnnouncements />} />
-              <Route index element={<Navigate to="dashboard" replace />} />
+            {/* Training Head Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['TRAINING_HEAD']} />}>
+              <Route path="/training-head" element={<TrainingHeadLayout />}>
+                <Route path="dashboard" element={<TrainingHeadDashboard />} />
+                <Route path="trainings" element={<TrainingPrograms />} />
+                <Route path="trainings/:trainingId" element={<TrainingDetails />} />
+                <Route path="coordinators" element={<TrainingCoordinators />} />
+                <Route path="students" element={<TrainingStudents />} />
+                <Route path="announcements" element={<ManageAnnouncements />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
 
+              </Route>
             </Route>
-          </Route>
 
 
-          {/* Dept Coordinator Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['DEPT_COORDINATOR']} />}>
-            <Route path="/dept-coordinator" element={<DeptCoordinatorLayout />}>
-              <Route path="dashboard" element={<DeptCoordinatorDashboard />} />
-              <Route path="students" element={<DeptStudents />} />
-              <Route path="coordinators" element={<DeptCoordinators />} />
-              <Route path="companies" element={<DeptPlacements />} />
-              <Route path="companies/:companyId" element={<CompanyDetails />} />
-              <Route path="trainings" element={<DeptTrainings />} />
-              <Route path="trainings/:trainingId" element={<TrainingDetails />} />
-              <Route path="announcements" element={<ManageAnnouncements />} />
-              <Route index element={<Navigate to="dashboard" replace />} />
+            {/* Dept Coordinator Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['DEPT_COORDINATOR']} />}>
+              <Route path="/dept-coordinator" element={<DeptCoordinatorLayout />}>
+                <Route path="dashboard" element={<DeptCoordinatorDashboard />} />
+                <Route path="students" element={<DeptStudents />} />
+                <Route path="coordinators" element={<DeptCoordinators />} />
+                <Route path="companies" element={<DeptPlacements />} />
+                <Route path="companies/:companyId" element={<CompanyDetails />} />
+                <Route path="trainings" element={<DeptTrainings />} />
+                <Route path="trainings/:trainingId" element={<TrainingDetails />} />
+                <Route path="announcements" element={<ManageAnnouncements />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
 
+              </Route>
             </Route>
-          </Route>
 
-          {/* Class Coordinator Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['CLASS_COORDINATOR']} />}>
-            <Route path="/class-coordinator" element={<ClassCoordinatorLayout />}>
-              <Route path="dashboard" element={<ClassCoordinatorDashboard />} />
-              <Route path="students" element={<ClassStudents />} />
+            {/* Class Coordinator Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['CLASS_COORDINATOR']} />}>
+              <Route path="/class-coordinator" element={<ClassCoordinatorLayout />}>
+                <Route path="dashboard" element={<ClassCoordinatorDashboard />} />
+                <Route path="students" element={<ClassStudents />} />
 
-              {/* Student Features for Coordinator */}
-              <Route path="profile" element={<StudentProfile />} />
-              <Route path="drives" element={<StudentDrives />} />
-              <Route path="trainings" element={<StudentTrainings />} />
-              <Route path="announcements" element={<StudentAnnouncements />} />
+                {/* Student Features for Coordinator */}
+                <Route path="profile" element={<StudentProfile />} />
+                <Route path="drives" element={<StudentDrives />} />
+                <Route path="trainings" element={<StudentTrainings />} />
+                <Route path="announcements" element={<StudentAnnouncements />} />
 
-              <Route index element={<Navigate to="dashboard" replace />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+              </Route>
             </Route>
-          </Route>
 
 
-          {/* Student Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
-            <Route path="/student/complete-profile" element={<CompleteProfile />} />
-            <Route path="/student" element={<StudentLayout />}>
-              <Route path="dashboard" element={<StudentDashboard />} />
-              <Route path="profile" element={<StudentProfile />} />
-              <Route path="drives" element={<StudentDrives />} />
-              <Route path="trainings" element={<StudentTrainings />} />
-              <Route path="announcements" element={<StudentAnnouncements />} />
-              <Route index element={<Navigate to="dashboard" replace />} />
+            {/* Student Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
+              <Route path="/student/complete-profile" element={<CompleteProfile />} />
+              <Route path="/student" element={<StudentLayout />}>
+                <Route path="dashboard" element={<StudentDashboard />} />
+                <Route path="profile" element={<StudentProfile />} />
+                <Route path="drives" element={<StudentDrives />} />
+                <Route path="trainings" element={<StudentTrainings />} />
+                <Route path="announcements" element={<StudentAnnouncements />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
 
+              </Route>
             </Route>
-          </Route>
 
-          {/* Default Redirect */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AlertProvider>
-    </Router>
+            {/* Default Redirect */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </AlertProvider>
+      </Router>
+    </ThemeProvider>
   );
 };
 

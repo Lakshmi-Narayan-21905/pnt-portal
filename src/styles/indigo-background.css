@@ -1,6 +1,7 @@
+/* Indigo Theme Background - Black & White Theme */
 .indigo-bg-wrapper {
-    background: #E6E8F0;
-    /* Brand Indigo Ice */
+    background: #FAFAFA;
+    /* Light Gray */
     position: absolute;
     top: 0;
     left: 0;
@@ -17,12 +18,12 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.05), transparent 70%),
-        radial-gradient(circle at 80% 20%, rgba(55, 48, 163, 0.03), transparent 50%);
+    background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.04), transparent 70%),
+        radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.02), transparent 50%);
     animation: rotateBackground 60s linear infinite;
 }
 
-/* Subtle Indigo Floating Elements */
+/* Subtle Floating Elements */
 .indigo-bg-wrapper::after {
     content: '';
     position: absolute;
@@ -30,7 +31,7 @@
     left: 10%;
     width: 40vw;
     height: 40vw;
-    background: radial-gradient(circle, rgba(199, 210, 254, 0.1), transparent 70%);
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.05), transparent 70%);
     border-radius: 50%;
     filter: blur(80px);
     animation: float 20s ease-in-out infinite alternate;

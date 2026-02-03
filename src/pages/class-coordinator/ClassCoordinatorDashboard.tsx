@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Briefcase, UserCheck, AlertCircle, CheckCircle2, TrendingUp, Calendar, Building2, GraduationCap, XCircle, Eye } from 'lucide-react';
+import { Users, Briefcase, AlertCircle, CheckCircle2, TrendingUp, Calendar, Building2, GraduationCap, XCircle, Eye } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Modal from '../../components/Modal';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,8 +7,10 @@ import { UserService } from '../../services/userService';
 import { CompanyService } from '../../services/companyService';
 import { TrainingService } from '../../services/trainingService';
 import { AnnouncementService } from '../../services/announcementService';
+import { useTheme } from '../../hooks/useTheme';
 
 const ClassCoordinatorDashboard: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [loading, setLoading] = useState(true);
 
@@ -274,7 +276,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
             {/* Row 1: KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Total */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl border ${theme.border} shadow-sm flex items-center justify-between`}>
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase">Total Students</p>
                         <p className="text-2xl font-bold text-gray-800">{stats.totalStudents}</p>
@@ -282,7 +284,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Users className="w-5 h-5" /></div>
                 </div>
                 {/* Placed */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl border ${theme.border} shadow-sm flex items-center justify-between`}>
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase">Placed</p>
                         <p className="text-2xl font-bold text-green-600">{stats.placedStudents}</p>
@@ -290,7 +292,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     <div className="p-2 bg-green-50 text-green-600 rounded-lg"><CheckCircle2 className="w-5 h-5" /></div>
                 </div>
                 {/* Unplaced */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl border ${theme.border} shadow-sm flex items-center justify-between`}>
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase">Unplaced</p>
                         <p className="text-2xl font-bold text-orange-600">{stats.unplacedStudents}</p>
@@ -298,7 +300,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                     <div className="p-2 bg-orange-50 text-orange-600 rounded-lg"><XCircle className="w-5 h-5" /></div>
                 </div>
                 {/* Percentage */}
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl border ${theme.border} shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase">Success Rate</p>
                         <p className="text-2xl font-bold text-indigo-600">{stats.placementPercentage}%</p>
@@ -310,7 +312,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
             {/* Row 2: Readiness & Training */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[260px]">
                 {/* Readiness Donut */}
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+                <div className={`bg-white p-5 rounded-xl border ${theme.border} shadow-sm flex flex-col`}>
                     <h3 className="text-sm font-semibold text-gray-700 mb-4">Placement Readiness</h3>
                     <div className="flex-1 flex items-center justify-center">
                         <div className="w-[180px] h-[180px]" style={{ width: 180, height: 180 }}>
@@ -344,7 +346,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                 </div>
 
                 {/* Training Coverage */}
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center">
+                <div className={`bg-white p-5 rounded-xl border ${theme.border} shadow-sm flex flex-col justify-center`}>
                     <h3 className="text-sm font-semibold text-gray-700 mb-6">Training Participation</h3>
                     <div className="space-y-6 px-4">
                         <div>
@@ -373,7 +375,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
             {/* Row 3: Action Panel */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
                 {/* At-Risk Students */}
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div className={`bg-white p-5 rounded-xl border ${theme.border} shadow-sm`}>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-red-500" />
@@ -413,7 +415,7 @@ const ClassCoordinatorDashboard: React.FC = () => {
                 </div>
 
                 {/* Upcoming Drive Readiness */}
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+                <div className={`bg-white p-5 rounded-xl border ${theme.border} shadow-sm flex flex-col`}>
                     <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                         <Briefcase className="w-4 h-4 text-blue-500" />
                         Next Drive Readiness {stats.upcomingDrive ? `- ${stats.upcomingDrive.name}` : ''}

@@ -1,6 +1,7 @@
+/* Lavender Theme Background - Black & White Theme */
 .lavender-bg-wrapper {
-    background: #FAF9FE;
-    /* Whitely Lavender */
+    background: #FAFAFA;
+    /* Light Gray */
     position: absolute;
     top: 0;
     left: 0;
@@ -17,12 +18,12 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.03), transparent 70%),
-        radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.03), transparent 50%);
+    background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.03), transparent 70%),
+        radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.02), transparent 50%);
     animation: rotateBackground 60s linear infinite;
 }
 
-/* Subtle Lavender Floating Elements */
+/* Subtle Floating Elements */
 .lavender-bg-wrapper::after {
     content: '';
     position: absolute;
@@ -30,7 +31,7 @@
     left: 10%;
     width: 30vw;
     height: 30vw;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.05), transparent 70%);
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.04), transparent 70%);
     border-radius: 50%;
     filter: blur(80px);
     animation: float 20s ease-in-out infinite alternate;

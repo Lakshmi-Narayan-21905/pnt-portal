@@ -8,75 +8,75 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    50: '#f0f9ff',
-                    100: '#e0f2fe',
-                    200: '#b9e6fe',
-                    300: '#7cd3fd',
-                    400: '#36bffa',
-                    500: '#0ca5e9',
-                    600: '#0284c7',
-                    700: '#0369a1',
-                    800: '#075985',
-                    900: '#0c4a6e',
+                    50: '#FAFAFA',
+                    100: '#F5F5F5',
+                    200: '#E5E5E5',
+                    300: '#D4D4D4',
+                    400: '#A3A3A3',
+                    500: '#737373',
+                    600: '#525252',
+                    700: '#404040',
+                    800: '#262626',
+                    900: '#171717',
                 },
                 amber: {
-                    black: '#040706',
-                    brown: '#5B1707',
-                    primary: '#CF5E02',
-                    light: '#F4B028',
-                    dim: '#D87E0A',
-                    gold: '#DC940F',
+                    black: '#000000',
+                    brown: '#262626',
+                    primary: '#525252',
+                    light: '#A3A3A3',
+                    dim: '#737373',
+                    gold: '#525252',
                 },
                 brand: {
-                    ice: '#EDF3FB',      // Background
-                    light: '#CAF0F8',    // Light Accent
-                    cyan: '#90E0EF',     // Cyan Accent
-                    primary: '#00B4D8',  // Primary Buttons/Highlights
-                    blue: '#0077B6',     // Secondary Brand
-                    navy: '#03045E',     // Text/Dark Elements
-                    dark: '#023E8A',     // Darker Blue
+                    ice: '#FAFAFA',      // Background
+                    light: '#F5F5F5',    // Light Accent
+                    cyan: '#E5E5E5',     // Accent
+                    primary: '#525252',  // Primary Buttons/Highlights
+                    blue: '#404040',     // Secondary Brand
+                    navy: '#171717',     // Text/Dark Elements
+                    dark: '#262626',     // Darker
                 },
                 'brand-green': {
-                    ice: '#F2FCF5',      // Very Light Mint Background (Mildest Green)
-                    light: '#D1F0DB',    // Light Green Accent
-                    mint: '#6FCF97',     // Minty Green
-                    primary: '#27AE60',  // Primary Green Button (Stripe Green-ish)
-                    emerald: '#10B981',  // Emerald Green
-                    deep: '#047857',     // Deep Green Text
-                    dark: '#064E3B',     // Darkest Green
+                    ice: '#FAFAFA',
+                    light: '#F5F5F5',
+                    mint: '#A3A3A3',
+                    primary: '#525252',
+                    emerald: '#404040',
+                    deep: '#262626',
+                    dark: '#171717',
                 },
                 'brand-purple': {
-                    ice: '#F3E8FF',      // Very Light Purple
-                    light: '#E9D5FF',    // Light Purple
-                    primary: '#9333EA',  // Purple 600
-                    deep: '#6B21A8',     // Purple 800
-                    dark: '#581C87',     // Purple 900
+                    ice: '#FAFAFA',
+                    light: '#F5F5F5',
+                    primary: '#525252',
+                    deep: '#262626',
+                    dark: '#171717',
                 },
                 'brand-lavender': {
-                    ice: '#F8F7FC',      // Very Light Lavender Background
-                    light: '#EBE9F7',    // Light Lavender Accent
-                    lilac: '#C4B5FD',    // Lilac Accent
-                    primary: '#8B5CF6',  // Primary Violet Button (Tailwind Violet-500 equivalent)
-                    purple: '#7C3AED',   // Purple
-                    deep: '#6D28D9',     // Deep Violet Text
-                    dark: '#5B21B6',     // Darkest Violet
+                    ice: '#FAFAFA',
+                    light: '#F5F5F5',
+                    lilac: '#D4D4D4',
+                    primary: '#525252',
+                    purple: '#404040',
+                    deep: '#262626',
+                    dark: '#171717',
                 },
                 'brand-orange': {
-                    ice: '#FFF8F1',      // Very Light Cream
-                    cream: '#FFF3E0',    // User provided light
-                    light: '#FFE0B2',    // User provided accent
-                    medium: '#FFB74D',   // User provided medium
-                    primary: '#FB8C00',  // Strong Orange for buttons
-                    deep: '#E65100',     // User provided dark (Text/Active)
-                    rust: '#BF360C',     // Darkest Rust
+                    ice: '#FAFAFA',
+                    cream: '#F5F5F5',
+                    light: '#E5E5E5',
+                    medium: '#A3A3A3',
+                    primary: '#525252',
+                    deep: '#262626',
+                    rust: '#171717',
                 },
                 'brand-indigo': {
-                    ice: '#E6E8F0',      // User provided lightest
-                    light: '#C7D2FE',    // Light Accent
-                    soft: '#A5B4FC',     // Soft Indigo
-                    primary: '#4F46E5',  // Indigo 600
-                    deep: '#3730A3',     // Indigo 800
-                    dark: '#1E1B4B',     // Indigo 950
+                    ice: '#FAFAFA',
+                    light: '#F5F5F5',
+                    soft: '#D4D4D4',
+                    primary: '#525252',
+                    deep: '#262626',
+                    dark: '#171717',
                 }
             },
         },

@@ -149,12 +149,12 @@ const LoginPage: React.FC = () => {
 
                         {/* Messages */}
                         {displayError && (
-                            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg mb-4 text-xs">
+                            <div className="bg-gray-100 border border-gray-300 text-gray-800 px-3 py-2 rounded-lg mb-4 text-xs">
                                 {displayError}
                             </div>
                         )}
                         {resetMessage && (
-                            <div className="bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-lg mb-4 text-xs">
+                            <div className="bg-gray-100 border border-gray-300 text-gray-800 px-3 py-2 rounded-lg mb-4 text-xs">
                                 {resetMessage}
                             </div>
                         )}

@@ -107,16 +107,16 @@ const DashboardCalendar: React.FC<DashboardCalendarProps> = ({ title, events, ty
                         } else {
                             cellClass += "text-gray-700 hover:bg-gray-50 ";
                             if (hasEvents) {
-                                cellClass += "cursor-pointer hover:border-indigo-100 shadow-sm ";
+                                cellClass += "cursor-pointer hover:border-gray-500 shadow-sm ";
                             }
                         }
 
                         if (type === 'range' && hasEvents && isCurrentMonth) {
-                            cellClass += "bg-orange-50 text-orange-900 border-orange-100 ";
+                            cellClass += " text-gray-800 border-black ";
                         }
 
                         if (type === 'point' && hasEvents && isCurrentMonth) {
-                            cellClass += "bg-indigo-50 text-indigo-900 border-indigo-100 ";
+                            cellClass += " text-gray-800 border-black ";
                         }
 
                         // Get the first event to display label
@@ -135,8 +135,7 @@ const DashboardCalendar: React.FC<DashboardCalendarProps> = ({ title, events, ty
 
                                 {hasEvents && isCurrentMonth && (
                                     <div className="mt-1 w-full px-1">
-                                        <div className={`text-[10px] leading-tight truncate rounded px-1 py-0.5 w-full text-center ${type === 'point' ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'
-                                            }`}>
+                                        <div className={`text-[10px] leading-tight truncate rounded px-1 py-0.5 w-full text-center text-gray-800`}>
                                             {displayEvent.title}
                                             {dayEvents.length > 1 && <span className="ml-1 text-[9px] opacity-75">+{dayEvents.length - 1}</span>}
                                         </div>
@@ -148,7 +147,7 @@ const DashboardCalendar: React.FC<DashboardCalendarProps> = ({ title, events, ty
                 </div>
 
                 <div className="mt-4 text-xs text-gray-400 text-center">
-                    {type === 'range' ? 'Orange days indicate scheduled training.' : 'Blue days indicate upcoming drives.'}
+                    {type === 'range' ? 'Highlighted days indicate scheduled training.' : 'Highlighted days indicate upcoming drives.'}
                 </div>
             </div>
         </div>

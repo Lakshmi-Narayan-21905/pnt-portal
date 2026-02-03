@@ -7,7 +7,10 @@ import { CompanyService } from '../../services/companyService';
 import { TrainingService } from '../../services/trainingService';
 import type { UserProfile } from '../../types';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const DeptCoordinatorDashboard: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [loading, setLoading] = useState(true);
 
@@ -19,8 +22,8 @@ const DeptCoordinatorDashboard: React.FC = () => {
         readiness: { ready: 0, partial: 0, notReady: 0 },
         trainingCoverage: 0,
         enrolledCount: 0,
-        weakSections: [] as { section: string, pct: number, issue: string }[],
-        sectionReadiness: [] as { section: string, ready: number, partial: number, notReady: number }[]
+        atRiskStudents: [] as any[],
+        nextDriveStats: null as any
     });
 
     useEffect(() => {
@@ -181,7 +184,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
 
             {/* Row 1: KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl shadow-sm border ${theme.border} flex items-center justify-between`}>
                     <div>
                         <p className="text-gray-500 text-xs font-medium uppercase">Total Students</p>
                         <h3 className="text-2xl font-bold text-gray-800">{loading ? '...' : stats.totalStudents}</h3>
@@ -191,7 +194,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl shadow-sm border ${theme.border} flex items-center justify-between`}>
                     <div>
                         <p className="text-gray-500 text-xs font-medium uppercase">Placed</p>
                         <h3 className="text-2xl font-bold text-gray-800">{loading ? '...' : stats.placedStudents}</h3>
@@ -201,7 +204,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl shadow-sm border ${theme.border} flex items-center justify-between`}>
                     <div>
                         <p className="text-gray-500 text-xs font-medium uppercase">Placement %</p>
                         <h3 className="text-2xl font-bold text-gray-800">{loading ? '...' : `${stats.placementPercentage}%`}</h3>
@@ -211,7 +214,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className={`bg-white p-4 rounded-xl shadow-sm border ${theme.border} flex items-center justify-between`}>
                     <div>
                         <p className="text-gray-500 text-xs font-medium uppercase">Coordinators</p>
                         <h3 className="text-2xl font-bold text-gray-800">{loading ? '...' : stats.totalCoordinators}</h3>
@@ -225,7 +228,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
             {/* Row 2: Readiness & Training */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 flex-1 min-h-0">
                 {/* Readiness Donut */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col">
+                <div className={`bg-white rounded-xl shadow-sm border ${theme.border} p-4 flex flex-col`}>
                     <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-gray-400" />
                         Placement Readiness
@@ -282,7 +285,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 </div>
 
                 {/* Training Coverage */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col justify-center">
+                <div className={`bg-white rounded-xl shadow-sm border ${theme.border} p-4 flex flex-col justify-center`}>
                     <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
                         <GraduationCap className="w-4 h-4 text-gray-400" />
                         Training Coverage
@@ -315,7 +318,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
 
                 {/* At Risk Students */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col">
+                <div className={`bg-white rounded-xl shadow-sm border ${theme.border} p-4 flex flex-col`}>
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-red-500" />
@@ -363,7 +366,7 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 </div>
 
                 {/* Next Drive Readiness */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col">
+                <div className={`bg-white rounded-xl shadow-sm border ${theme.border} p-4 flex flex-col`}>
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
                             <Briefcase className="w-4 h-4 text-blue-500" />

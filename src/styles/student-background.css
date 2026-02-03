@@ -1,20 +1,17 @@
-/* Student Background Animations */
+/* Student Background Animations - Black & White Theme */
 
 .student-bg-wrapper {
-    background: #EDF3FB;
-    /* Brand Ice Blue Base */
+    background: #FAFAFA;
+    /* Light Gray Base */
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
-    /* Fixed height for the background canvas */
     overflow: hidden;
-    overflow: hidden;
-    /* z-index is handled by parent container */
 }
 
-/* Floating Squares (The 'Herosection elements') */
+/* Floating Squares */
 .bg-circles {
     position: absolute;
     top: 0;
@@ -32,12 +29,11 @@
     list-style: none;
     width: 20px;
     height: 20px;
-    background: rgba(37, 99, 235, 0.6);
-    /* Blue-600 with Higher opacity (0.4 -> 0.6) */
+    background: rgba(0, 0, 0, 0.4);
+    /* Black with opacity */
     animation: animate 25s linear infinite;
     bottom: -150px;
     border-radius: 4px;
-    /* Slight radius for 'squares' look, distinct from perfect circles */
 }
 
 .bg-circles li:nth-child(1) {
@@ -147,7 +143,7 @@
     left: 0;
     width: 200%;
     height: 100%;
-    background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0icmdiYSgzNywgOTksIDIzNSwgMC4wNSkiIGZpbGwtb3BhY2l0eT0iMSIgZD0iTTAsMjI0TDcyMCwzMTBMMTQ0MCwxNjBMMTQ0MCwzMjBMMCwzMjBaIj48L3BhdGg+PC9zdmc+');
+    background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0icmdiYSgwLCAwLCAwLCAwLjA1KSIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNMCwyMjRMNzIwLDMxMEwxNDQwLDE2MEwxNDQwLDMyMEwwLDMyMFoiPjwvcGF0aD48L3N2Zz4=');
     background-repeat: repeat-x;
     background-size: 50% 100%;
     animation: waveMove 20s linear infinite;
@@ -181,8 +177,6 @@
     position: absolute;
     inset: 0;
     background: rgba(255, 255, 255, 0.05);
-    /* Minimal white tint */
     backdrop-filter: blur(2px);
-    /* Very slight blur to keep content readable but squares visible */
     z-index: -10;
 }
