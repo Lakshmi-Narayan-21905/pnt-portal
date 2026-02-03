@@ -10,6 +10,7 @@ import {
 
 import { auth } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { UserService } from '../services/userService';
 
 // Import images from assets folder
 import logo from '../assets/logo.png';
@@ -77,10 +78,25 @@ const LoginPage: React.FC = () => {
 
         try {
             await setPersistence(auth, browserSessionPersistence);
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (err: any) {
-            console.error("Login Error:", err);
-            setLocalError('Failed to login. Please check your credentials.');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // Single Session Enforcement: Generate and store Session ID
+            const sessionId = Date.now().toString() + "-" + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('sessionId', sessionId);
+
+            // We need to update the profile immediately
+            // Note: We're using the direct service call here to ensure it happens before navigation
+            // and to avoid race conditions with AuthContext
+            try {
+                // Import dynamically or ensure UserService is imported at top
+                // But we can't do dynamic import easily inside try/catch for this.
+                // Assuming UserService is imported.
+                await UserService.updateUserProfile(userCredential.user.uid, { sessionId });
+            } catch (profileErr) {
+                console.error("Failed to update session ID", profileErr);
+                // Non-fatal? If we fail to update DB, the other tab won't know we logged in.
+                // But we proceed.
+            }
         } finally {
             setLoading(false);
         }

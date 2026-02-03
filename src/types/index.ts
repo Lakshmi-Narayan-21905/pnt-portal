@@ -30,6 +30,7 @@ export interface UserProfile {
 
     placementStatus?: 'PLACED' | 'UNPLACED' | 'OFFERED';
 
+    sessionId?: string;
 
     createdAt: number;
 }

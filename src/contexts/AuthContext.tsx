@@ -32,6 +32,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const profile = await UserService.getUserProfile(uid);
 
             if (profile) {
+                // Single Session Enforcement
+                const currentSessionId = sessionStorage.getItem('sessionId');
+
+                // If the profile has a session ID, and we have a session ID locally, they MUST match.
+                // If we don't have a local session ID, we assume it's a fresh session (or cleared cache)
+                // and we let the login flow (if happening) take precedence. 
+                // But if we are just sitting on a page and refresh, we should have the ID.
+
+                if (profile.sessionId && currentSessionId && profile.sessionId !== currentSessionId) {
+                    console.warn("Session mismatch detected. Logging out.");
+                    await firebaseSignOut(auth);
+                    setCurrentUser(null);
+                    setUserProfile(null);
+                    sessionStorage.removeItem('sessionId');
+                    setError("You have been logged out because you signed in from another location.");
+                    return;
+                }
+
                 setUserProfile(profile);
             } else {
                 console.warn("User document not found for UID:", uid);
@@ -53,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         // Initialize real-time listeners for cache invalidation
         realtimeListenerService.initializeAllListeners();
-        
+
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
             if (user) {
