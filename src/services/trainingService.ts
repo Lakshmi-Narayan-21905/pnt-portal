@@ -1,51 +1,15 @@
-
-import {
-    collection,
-    addDoc,
-    updateDoc,
-    deleteDoc,
-    doc,
-    getDocs,
-    arrayUnion
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { apiRequest } from './api';
 import type { Training } from '../types';
-import { AnnouncementService } from './announcementService';
-import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
-
-const COLLECTION_NAME = 'trainings';
+import { cacheService, CACHE_KEYS, CACHE_CONFIGS } from './cacheService';
 
 export const TrainingService = {
     // Add a new training program
     addTraining: async (trainingData: Omit<Training, 'id' | 'participants'>) => {
         try {
-            const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-                ...trainingData,
-                participants: []
-            });
-
-            // Automated Announcement
-            try {
-                const targetDepts = (trainingData.eligibility?.branches && trainingData.eligibility.branches.length > 0)
-                    ? trainingData.eligibility.branches
-                    : ['all'];
-
-                await AnnouncementService.createAnnouncement({
-                    title: `New Training: ${trainingData.title} `,
-                    content: `A new training program "${trainingData.title}" by ${trainingData.trainer} has been announced.\n\nDuration: ${new Date(trainingData.startDate).toLocaleDateString()} - ${new Date(trainingData.endDate).toLocaleDateString()} \n\nCheck 'My Trainings' to register!`,
-                    authorId: 'SYSTEM',
-                    authorRole: 'TRAINING_HEAD',
-                    authorName: 'System (Auto)',
-                    targetDepts
-                });
-            } catch (annError) {
-                console.warn("Failed to create automated announcement:", annError);
-            }
-
-            // Invalidate trainings cache
-            cacheService.invalidatePattern(CACHE_KEYS.TRAININGS.PATTERN);
-
-            return docRef.id;
+            const result = await apiRequest<string>('/trainings', 'POST', trainingData);
+            // Invalidate cache after addition
+            cacheService.delete(CACHE_KEYS.TRAININGS);
+            return result;
         } catch (error) {
             console.error("Error adding training:", error);
             throw error;
@@ -53,22 +17,27 @@ export const TrainingService = {
     },
 
     // Get all trainings
-    getAllTrainings: async (): Promise<Training[]> => {
+    getAllTrainings: async (forceRefresh: boolean = false): Promise<Training[]> => {
         try {
-            return await cacheService.wrapWithCache(
-                CACHE_KEYS.TRAININGS.ALL,
-                async () => {
-                    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-                    return querySnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    } as Training));
-                },
-                CACHE_TTL.SHORT
-            );
+            const cacheKey = CACHE_KEYS.TRAININGS;
+            
+            // Check cache first
+            if (!forceRefresh) {
+                const cached = cacheService.get<Training[]>(cacheKey, CACHE_CONFIGS.TRAININGS);
+                if (cached) {
+                    return cached;
+                }
+            }
+            
+            const trainings = await apiRequest<Training[]>('/trainings');
+            
+            // Cache the result
+            cacheService.set(cacheKey, trainings, CACHE_CONFIGS.TRAININGS);
+            
+            return trainings;
         } catch (error) {
             console.error("Error fetching trainings:", error);
-            throw error;
+            return [];
         }
     },
 
@@ -96,10 +65,10 @@ export const TrainingService = {
     // Update a training program
     updateTraining: async (id: string, trainingData: Partial<Training>) => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            await updateDoc(docRef, trainingData);
-            // Invalidate cache
-            cacheService.invalidatePattern(CACHE_KEYS.TRAININGS.PATTERN);
+            await apiRequest(`/trainings/${id}`, 'PUT', trainingData);
+            // Invalidate cache after update
+            cacheService.delete(CACHE_KEYS.TRAINING_BY_ID(id));
+            cacheService.delete(CACHE_KEYS.TRAININGS);
         } catch (error) {
             console.error("Error updating training:", error);
             throw error;
@@ -109,9 +78,10 @@ export const TrainingService = {
     // Delete a training
     deleteTraining: async (id: string) => {
         try {
-            await deleteDoc(doc(db, COLLECTION_NAME, id));
-            // Invalidate cache
-            cacheService.invalidatePattern(CACHE_KEYS.TRAININGS.PATTERN);
+            await apiRequest(`/trainings/${id}`, 'DELETE');
+            // Invalidate cache after deletion
+            cacheService.delete(CACHE_KEYS.TRAINING_BY_ID(id));
+            cacheService.delete(CACHE_KEYS.TRAININGS);
         } catch (error) {
             console.error("Error deleting training:", error);
             throw error;
@@ -121,13 +91,18 @@ export const TrainingService = {
     // Register for a training program
     registerForTraining: async (trainingId: string, studentId: string) => {
         try {
-            const docRef = doc(db, COLLECTION_NAME, trainingId);
-            await updateDoc(docRef, {
-                participants: arrayUnion(studentId)
-            });
+            await apiRequest(`/trainings/${trainingId}/register`, 'POST', { studentId });
+            // Invalidate training cache as participants changed
+            cacheService.delete(CACHE_KEYS.TRAINING_BY_ID(trainingId));
+            cacheService.delete(CACHE_KEYS.TRAININGS);
         } catch (error) {
             console.error("Error registering for training:", error);
             throw error;
         }
+    },
+
+    // Clear all training caches
+    clearCache: () => {
+        cacheService.delete(CACHE_KEYS.TRAININGS);
     }
 };

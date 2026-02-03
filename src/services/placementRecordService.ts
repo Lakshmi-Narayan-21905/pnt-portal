@@ -1,106 +1,72 @@
-import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { apiRequest } from './api';
 import type { PlacementRecord } from '../types';
-import { cacheService, CACHE_KEYS, CACHE_TTL } from './cacheService';
-
-const COLLECTION_NAME = 'placement_records';
+import { cacheService, CACHE_KEYS, CACHE_CONFIGS } from './cacheService';
 
 export const PlacementRecordService = {
-    // Add a single record
     addRecord: async (record: Omit<PlacementRecord, 'id' | 'createdAt'>) => {
-        try {
-            const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-                ...record,
-                createdAt: Date.now()
-            });
-            // Invalidate placement records cache
-            cacheService.invalidatePattern(CACHE_KEYS.PLACEMENT_RECORDS.PATTERN);
-            return docRef.id;
-        } catch (error) {
-            console.error("Error adding placement record:", error);
-            throw error;
-        }
+        const result = await apiRequest<string>('/placements', 'POST', record);
+        // Invalidate cache after addition
+        cacheService.delete(CACHE_KEYS.PLACEMENTS);
+        return result;
     },
 
-    // Get all records
-    getAllRecords: async (): Promise<PlacementRecord[]> => {
-        try {
-            return await cacheService.wrapWithCache(
-                CACHE_KEYS.PLACEMENT_RECORDS.ALL,
-                async () => {
-                    const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
-                    const snapshot = await getDocs(q);
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    } as PlacementRecord));
-                },
-                CACHE_TTL.MEDIUM
-            );
-        } catch (error) {
-            console.error("Error fetching placement records:", error);
-            throw error;
+    getAllRecords: async (forceRefresh: boolean = false) => {
+        const cacheKey = CACHE_KEYS.PLACEMENTS;
+        
+        // Check cache first
+        if (!forceRefresh) {
+            const cached = cacheService.get<PlacementRecord[]>(cacheKey, CACHE_CONFIGS.PLACEMENTS);
+            if (cached) {
+                return cached;
+            }
         }
+        
+        const records = await apiRequest<PlacementRecord[]>('/placements');
+        
+        // Cache the result
+        cacheService.set(cacheKey, records, CACHE_CONFIGS.PLACEMENTS);
+        
+        return records;
     },
 
-    // Delete a record
+    updateRecord: async (id: string, updates: Partial<PlacementRecord>) => {
+        // Remove id/createdAt if present just in case
+        const { id: _, createdAt: __, ...cleanUpdates } = updates as any;
+        const result = await apiRequest(`/placements/${id}`, 'PUT', cleanUpdates);
+        // Invalidate cache after update
+        cacheService.delete(CACHE_KEYS.PLACEMENT_BY_ID(id));
+        cacheService.delete(CACHE_KEYS.PLACEMENTS);
+        return result;
+    },
+
     deleteRecord: async (id: string) => {
-        try {
-            await deleteDoc(doc(db, COLLECTION_NAME, id));
-            // Invalidate placement records cache
-            cacheService.invalidatePattern(CACHE_KEYS.PLACEMENT_RECORDS.PATTERN);
-        } catch (error) {
-            console.error("Error deleting placement record:", error);
-            throw error;
-        }
+        const result = await apiRequest(`/placements/${id}`, 'DELETE');
+        // Invalidate cache after deletion
+        cacheService.delete(CACHE_KEYS.PLACEMENT_BY_ID(id));
+        cacheService.delete(CACHE_KEYS.PLACEMENTS);
+        return result;
     },
 
-    // Get records by Roll Number
-    getRecordsByRollNo: async (rollNo: string): Promise<PlacementRecord[]> => {
+    getRecordsByRollNo: async (rollNo: string, forceRefresh: boolean = false) => {
+        // Fetch all and filter client side for now as backend doesn't support query param yet
         try {
-            return await cacheService.wrapWithCache(
-                CACHE_KEYS.PLACEMENT_RECORDS.BY_ROLL(rollNo),
-                async () => {
-                    const q = query(collection(db, COLLECTION_NAME), where('rollNo', '==', rollNo));
-                    const snapshot = await getDocs(q);
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    } as PlacementRecord));
-                },
-                CACHE_TTL.MEDIUM
-            );
+            const all = await PlacementRecordService.getAllRecords(forceRefresh);
+            return all.filter(r => r.rollNo === rollNo);
         } catch (error) {
             console.error("Error fetching records by rollNo:", error);
             return [];
         }
     },
 
-    // Bulk create
     bulkCreateRecords: async (records: Omit<PlacementRecord, 'id' | 'createdAt'>[]) => {
-        const batchPromises = records.map(record =>
-            addDoc(collection(db, COLLECTION_NAME), {
-                ...record,
-                createdAt: Date.now()
-            })
-        );
-        await Promise.all(batchPromises); // Simple parallel execution for now
-        // Invalidate placement records cache
-        cacheService.invalidatePattern(CACHE_KEYS.PLACEMENT_RECORDS.PATTERN);
+        // Execute in parallel
+        await Promise.all(records.map(record => apiRequest('/placements', 'POST', record)));
+        // Invalidate cache after bulk creation
+        cacheService.delete(CACHE_KEYS.PLACEMENTS);
     },
 
-    // Update a record
-    updateRecord: async (id: string, updates: Partial<PlacementRecord>) => {
-        try {
-            const docRef = doc(db, COLLECTION_NAME, id);
-            // Don't update id or createdAt usually
-            const { id: _, createdAt: __, ...cleanUpdates } = updates as any;
-            await import('firebase/firestore').then(mod => mod.updateDoc(docRef, cleanUpdates));
-            // Invalidate placement records cache
-            cacheService.invalidatePattern(CACHE_KEYS.PLACEMENT_RECORDS.PATTERN);
-        } catch (error) {
-            console.error("Error updating placement record:", error);
-            throw error;
-        }
+    // Clear all placement caches
+    clearCache: () => {
+        cacheService.delete(CACHE_KEYS.PLACEMENTS);
     }
 };

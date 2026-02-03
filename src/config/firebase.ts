@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 export const firebaseConfig = {
@@ -16,12 +15,9 @@ export const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 
-// Secondary App for Admin User Creation (optional, allows creating users without logging out admin)
-// Note: In a real production environment, this should be done via Cloud Functions to keep Admin SDK secure.
-// For this client-side demo, we use the standard auth flow, but be aware of the limitation:
-// `createUserWithEmailAndPassword` signs in the user immediately.
-// We will handle this in the service layer by managing session persistence or warning the user.
+// Note: Firestore (db) is NO LONGER exported for client-side use.
+// All data access must go through the functions API.
+
 export default app;

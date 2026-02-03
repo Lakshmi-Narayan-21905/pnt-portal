@@ -1,385 +1,332 @@
 /**
- * CacheService - Intelligent caching layer for database operations
- * Features:
- * - In-memory caching with TTL (time-to-live)
- * - Automatic cache invalidation on data updates
- * - Optional localStorage persistence for cross-session caching
- * - Cache statistics and monitoring
- * - Encrypted localStorage storage to prevent data leakage
+
+ * Secure Cache Service
+ * - Stores data in localStorage with encryption
+ * - Implements cache invalidation based on data version/timestamp
+ * - Prevents data leakage by hashing stored data
  */
 
-interface CacheEntry<T> {
-    data: T;
-    timestamp: number;
-    ttl: number; // Time to live in milliseconds
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+  version: string;
 }
 
-interface CacheStats {
-    hits: number;
-    misses: number;
-    size: number;
-}
-
-/**
- * Simple encryption utilities for localStorage data protection
- * Uses Base64 encoding with obfuscation to prevent casual data inspection
- */
-class CacheEncryption {
-    private static readonly ENCRYPTION_KEY = 'PNT_PORTAL_CACHE_2026'; // Change this for your app
-
-    /**
-     * Encrypt data for localStorage storage
-     */
-    static encrypt(data: string): string {
-        try {
-            // Convert to base64
-            const base64 = btoa(encodeURIComponent(data));
-
-            // Apply XOR cipher with key
-            const encrypted = this.xorCipher(base64, this.ENCRYPTION_KEY);
-
-            // Add random salt prefix to make it harder to recognize patterns
-            const salt = Math.random().toString(36).substring(2, 10);
-            return salt + ':' + encrypted;
-        } catch (error) {
-            console.error('Encryption failed:', error);
-            return data; // Fallback to unencrypted if encryption fails
-        }
-    }
-
-    /**
-     * Decrypt data from localStorage
-     */
-    static decrypt(encryptedData: string): string | null {
-        try {
-            // Remove salt prefix
-            const parts = encryptedData.split(':');
-            if (parts.length !== 2) {
-                return null;
-            }
-
-            const encrypted = parts[1];
-
-            // Reverse XOR cipher
-            const base64 = this.xorCipher(encrypted, this.ENCRYPTION_KEY);
-
-            // Decode from base64
-            return decodeURIComponent(atob(base64));
-        } catch (error) {
-            // Silent fail for decryption issues
-            return null;
-        }
-    }
-
-    /**
-     * Simple XOR cipher for obfuscation
-     */
-    private static xorCipher(text: string, key: string): string {
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-            result += String.fromCharCode(charCode);
-        }
-        return btoa(result); // Encode to base64 to handle special characters
-    }
+interface CacheConfig {
+  ttl?: number; // Time to live in milliseconds (default: 5 minutes)
+  encryptionKey?: string; // Encryption key (default: generated from app)
 }
 
 class CacheService {
-    private cache: Map<string, CacheEntry<any>> = new Map();
-    private stats: CacheStats = { hits: 0, misses: 0, size: 0 };
-    private useLocalStorage: boolean = false;
-    private storagePrefix: string = 'pnt_cache_';
+  private static instance: CacheService;
+  private readonly CACHE_PREFIX = '_pnt_cache_';
+  private readonly VERSION_PREFIX = '_pnt_version_';
+  private readonly defaultTTL = 5 * 60 * 1000; // 5 minutes
+  private encryptionKey: string;
 
-    constructor(options?: { useLocalStorage?: boolean; storagePrefix?: string }) {
-        this.useLocalStorage = options?.useLocalStorage || false;
-        this.storagePrefix = options?.storagePrefix || 'pnt_cache_';
+  private constructor() {
+    // Generate a consistent key from browser fingerprint
+    this.encryptionKey = this.generateEncryptionKey();
+  }
 
-        // Load from localStorage if enabled
-        if (this.useLocalStorage) {
-            this.loadFromLocalStorage();
+  public static getInstance(): CacheService {
+    if (!CacheService.instance) {
+      CacheService.instance = new CacheService();
+    }
+    return CacheService.instance;
+  }
+
+  /**
+   * Generate an encryption key based on browser/session fingerprint
+   */
+  private generateEncryptionKey(): string {
+    // Use a combination of factors to create a unique key per session
+    const userAgent = navigator.userAgent;
+    const language = navigator.language;
+    const platform = navigator.platform;
+    const screenResolution = `${screen.width}x${screen.height}`;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    const fingerprint = `${userAgent}-${language}-${platform}-${screenResolution}-${timezone}`;
+    return this.simpleHash(fingerprint);
+  }
+
+  /**
+   * Simple hash function for encryption key
+   */
+  private simpleHash(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  /**
+   * Encrypt data using XOR cipher with base64 encoding
+   */
+  private encrypt(data: string): string {
+    try {
+      const encrypted = this.xorCipher(data, this.encryptionKey);
+      return btoa(encodeURIComponent(encrypted)); // Base64 encode
+    } catch (error) {
+      console.error('Encryption error:', error);
+      throw new Error('Failed to encrypt cache data');
+    }
+  }
+
+  /**
+   * Decrypt data
+   */
+  private decrypt(encryptedData: string): string {
+    try {
+      const decoded = decodeURIComponent(atob(encryptedData)); // Base64 decode
+      return this.xorCipher(decoded, this.encryptionKey);
+    } catch (error) {
+      console.error('Decryption error:', error);
+      throw new Error('Failed to decrypt cache data');
+    }
+  }
+
+  /**
+   * XOR cipher for encryption/decryption
+   */
+  private xorCipher(str: string, key: string): string {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return result;
+  }
+
+  /**
+   * Generate a cache key
+   */
+  private getCacheKey(key: string): string {
+    return `${this.CACHE_PREFIX}${this.simpleHash(key)}`;
+  }
+
+  /**
+   * Generate a version key
+   */
+  private getVersionKey(key: string): string {
+    return `${this.VERSION_PREFIX}${this.simpleHash(key)}`;
+  }
+
+  /**
+   * Set data in cache with encryption
+   */
+  public set<T>(key: string, data: T, config?: CacheConfig): void {
+    try {
+      const cacheItem: CacheItem<T> = {
+        data,
+        timestamp: Date.now(),
+        version: this.generateDataVersion(data)
+      };
+
+      const serialized = JSON.stringify(cacheItem);
+      const encrypted = this.encrypt(serialized);
+      
+      const cacheKey = this.getCacheKey(key);
+      const versionKey = this.getVersionKey(key);
+      
+      localStorage.setItem(cacheKey, encrypted);
+      localStorage.setItem(versionKey, cacheItem.version);
+      
+      // Set TTL if provided
+      if (config?.ttl) {
+        const expiryKey = `${cacheKey}_expiry`;
+        localStorage.setItem(expiryKey, (Date.now() + config.ttl).toString());
+      }
+    } catch (error) {
+      console.error('Cache set error:', error);
+      // Fail silently to not break app functionality
+    }
+  }
+
+  /**
+   * Get data from cache with decryption
+   */
+  public get<T>(key: string, config?: CacheConfig): T | null {
+    try {
+      const cacheKey = this.getCacheKey(key);
+      const encrypted = localStorage.getItem(cacheKey);
+      
+      if (!encrypted) {
+        return null;
+      }
+
+      // Check expiry
+      const expiryKey = `${cacheKey}_expiry`;
+      const expiry = localStorage.getItem(expiryKey);
+      const ttl = config?.ttl || this.defaultTTL;
+      
+      if (expiry && Date.now() > parseInt(expiry)) {
+        this.delete(key);
+        return null;
+      }
+
+      const decrypted = this.decrypt(encrypted);
+      const cacheItem: CacheItem<T> = JSON.parse(decrypted);
+
+      // Check if cache is expired by timestamp
+      if (Date.now() - cacheItem.timestamp > ttl) {
+        this.delete(key);
+        return null;
+      }
+
+      return cacheItem.data;
+    } catch (error) {
+      console.error('Cache get error:', error);
+      // If decryption fails, clear corrupted cache
+      this.delete(key);
+      return null;
+    }
+  }
+
+  /**
+   * Check if cache is valid and fresh
+   */
+  public isValid(key: string, serverVersion?: string): boolean {
+    try {
+      const cacheKey = this.getCacheKey(key);
+      const encrypted = localStorage.getItem(cacheKey);
+      
+      if (!encrypted) {
+        return false;
+      }
+
+      // Check expiry
+      const expiryKey = `${cacheKey}_expiry`;
+      const expiry = localStorage.getItem(expiryKey);
+      if (expiry && Date.now() > parseInt(expiry)) {
+        return false;
+      }
+
+      // If server version is provided, compare with cached version
+      if (serverVersion) {
+        const versionKey = this.getVersionKey(key);
+        const cachedVersion = localStorage.getItem(versionKey);
+        return cachedVersion === serverVersion;
+      }
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Generate a version hash from data
+   */
+  private generateDataVersion(data: any): string {
+    const str = JSON.stringify(data);
+    return this.simpleHash(str);
+  }
+
+  /**
+   * Delete cache entry
+   */
+  public delete(key: string): void {
+    try {
+      const cacheKey = this.getCacheKey(key);
+      const versionKey = this.getVersionKey(key);
+      const expiryKey = `${cacheKey}_expiry`;
+      
+      localStorage.removeItem(cacheKey);
+      localStorage.removeItem(versionKey);
+      localStorage.removeItem(expiryKey);
+    } catch (error) {
+      console.error('Cache delete error:', error);
+    }
+  }
+
+  /**
+   * Clear all cache entries
+   */
+  public clearAll(): void {
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(this.CACHE_PREFIX) || key.startsWith(this.VERSION_PREFIX)) {
+          localStorage.removeItem(key);
         }
-
-        // Periodic cleanup of expired entries (every 5 minutes)
-        setInterval(() => this.cleanupExpired(), 5 * 60 * 1000);
+      });
+    } catch (error) {
+      console.error('Cache clear error:', error);
     }
+  }
 
-    /**
-     * Get data from cache
-     */
-    get<T>(key: string): T | null {
-        const entry = this.cache.get(key);
+  /**
+   * Get cache statistics
+   */
+  public getStats(): { totalEntries: number; totalSize: number } {
+    let totalEntries = 0;
+    let totalSize = 0;
 
-        if (!entry) {
-            this.stats.misses++;
-            return null;
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(this.CACHE_PREFIX)) {
+          totalEntries++;
+          const value = localStorage.getItem(key);
+          if (value) {
+            totalSize += value.length;
+          }
         }
-
-        // Check if entry has expired
-        if (Date.now() - entry.timestamp > entry.ttl) {
-            this.delete(key);
-            this.stats.misses++;
-            return null;
-        }
-
-        this.stats.hits++;
-        return entry.data as T;
+      });
+    } catch (error) {
+      console.error('Cache stats error:', error);
     }
 
-    /**
-     * Set data in cache with TTL
-     * @param key - Cache key
-     * @param data - Data to cache
-     * @param ttl - Time to live in milliseconds (default: 5 minutes)
-     */
-    set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
-        const entry: CacheEntry<T> = {
-            data,
-            timestamp: Date.now(),
-            ttl
-        };
+    return { totalEntries, totalSize };
+  }
 
-        this.cache.set(key, entry);
-        this.stats.size = this.cache.size;
+  /**
+   * Invalidate cache based on data version change
+   */
+  public invalidateIfChanged<T>(key: string, newData: T): boolean {
+    const newVersion = this.generateDataVersion(newData);
+    const versionKey = this.getVersionKey(key);
+    const cachedVersion = localStorage.getItem(versionKey);
 
-        // Persist to localStorage if enabled
-        if (this.useLocalStorage) {
-            this.saveToLocalStorage(key, entry);
-        }
+    if (cachedVersion && cachedVersion !== newVersion) {
+      this.delete(key);
+      return true; // Cache was invalidated
     }
 
-    /**
-     * Delete a specific cache entry
-     */
-    delete(key: string): void {
-        this.cache.delete(key);
-        this.stats.size = this.cache.size;
-
-        if (this.useLocalStorage) {
-            localStorage.removeItem(this.storagePrefix + key);
-        }
-    }
-
-    /**
-     * Invalidate cache entries by pattern
-     * Example: invalidatePattern('users_') will clear all keys starting with 'users_'
-     */
-    invalidatePattern(pattern: string): void {
-        const keysToDelete: string[] = [];
-
-        this.cache.forEach((_, key) => {
-            if (key.startsWith(pattern) || key.includes(pattern)) {
-                keysToDelete.push(key);
-            }
-        });
-
-        keysToDelete.forEach(key => this.delete(key));
-    }
-
-    /**
-     * Clear all cache
-     */
-    clear(): void {
-        this.cache.clear();
-        this.stats.size = 0;
-
-        if (this.useLocalStorage) {
-            // Clear all items with our prefix
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith(this.storagePrefix)) {
-                    localStorage.removeItem(key);
-                }
-            });
-        }
-    }
-
-    /**
-     * Get cache statistics
-     */
-    getStats(): CacheStats & { hitRate: string } {
-        const total = this.stats.hits + this.stats.misses;
-        const hitRate = total > 0
-            ? ((this.stats.hits / total) * 100).toFixed(2) + '%'
-            : '0%';
-
-        return {
-            ...this.stats,
-            hitRate
-        };
-    }
-
-    /**
-     * Reset cache statistics
-     */
-    resetStats(): void {
-        this.stats = { hits: 0, misses: 0, size: this.cache.size };
-    }
-
-    /**
-     * Check if a key exists and is not expired
-     */
-    has(key: string): boolean {
-        const entry = this.cache.get(key);
-        if (!entry) return false;
-
-        if (Date.now() - entry.timestamp > entry.ttl) {
-            this.delete(key);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Get remaining TTL for a cache entry (in milliseconds)
-     */
-    getRemainingTTL(key: string): number {
-        const entry = this.cache.get(key);
-        if (!entry) return 0;
-
-        const remaining = entry.ttl - (Date.now() - entry.timestamp);
-        return remaining > 0 ? remaining : 0;
-    }
-
-    /**
-     * Save cache entry to localStorage (encrypted)
-     */
-    private saveToLocalStorage<T>(key: string, entry: CacheEntry<T>): void {
-        try {
-            const jsonString = JSON.stringify(entry);
-            const encrypted = CacheEncryption.encrypt(jsonString);
-
-            localStorage.setItem(
-                this.storagePrefix + key,
-                encrypted
-            );
-        } catch (error) {
-            console.warn('Failed to save to localStorage:', error);
-            // localStorage might be full or unavailable
-        }
-    }
-
-    /**
-     * Load cache from localStorage on initialization (with decryption)
-     */
-    private loadFromLocalStorage(): void {
-        try {
-            Object.keys(localStorage).forEach(storageKey => {
-                if (storageKey.startsWith(this.storagePrefix)) {
-                    const key = storageKey.replace(this.storagePrefix, '');
-                    const encryptedData = localStorage.getItem(storageKey);
-
-                    if (encryptedData) {
-                        try {
-                            // Decrypt the data
-                            const decrypted = CacheEncryption.decrypt(encryptedData);
-
-                            if (!decrypted) {
-                                localStorage.removeItem(storageKey);
-                                return;
-                            }
-
-                            const entry = JSON.parse(decrypted) as CacheEntry<any>;
-
-                            // Only load if not expired
-                            if (Date.now() - entry.timestamp <= entry.ttl) {
-                                this.cache.set(key, entry);
-                            } else {
-                                localStorage.removeItem(storageKey);
-                            }
-                        } catch (parseError) {
-                            // Remove corrupted entry
-                            localStorage.removeItem(storageKey);
-                        }
-                    }
-                }
-            });
-
-            this.stats.size = this.cache.size;
-        } catch (error) {
-            console.warn('Failed to load from localStorage:', error);
-        }
-    }
-
-    /**
-     * Clean up expired entries
-     */
-    private cleanupExpired(): void {
-        const now = Date.now();
-        const keysToDelete: string[] = [];
-
-        this.cache.forEach((entry, key) => {
-            if (now - entry.timestamp > entry.ttl) {
-                keysToDelete.push(key);
-            }
-        });
-
-        keysToDelete.forEach(key => this.delete(key));
-    }
-
-    /**
-     * Wrap an async function with caching
-     * This is a higher-order function that automatically handles cache get/set
-     */
-    async wrapWithCache<T>(
-        key: string,
-        fetchFunction: () => Promise<T>,
-        ttl: number = 5 * 60 * 1000
-    ): Promise<T> {
-        // Try to get from cache first
-        const cached = this.get<T>(key);
-        if (cached !== null) {
-            return cached;
-        }
-
-        // If not in cache, fetch the data
-        const data = await fetchFunction();
-
-        // Store in cache
-        this.set(key, data, ttl);
-
-        return data;
-    }
+    return false; // Cache is still valid
+  }
 }
 
-// Export singleton instance
-export const cacheService = new CacheService({
-    useLocalStorage: true, // Enable localStorage persistence
-    storagePrefix: 'pnt_cache_'
-});
+export const cacheService = CacheService.getInstance();
 
-// Export cache key patterns for consistency
+// Cache key constants for consistent usage across services
 export const CACHE_KEYS = {
-    USERS: {
-        ALL: (role: string) => `users_role_${role}`,
-        SINGLE: (uid: string) => `user_${uid}`,
-        PATTERN: 'users_'
-    },
-    COMPANIES: {
-        ALL: 'companies_all',
-        SINGLE: (id: string) => `company_${id}`,
-        PATTERN: 'compan'
-    },
-    TRAININGS: {
-        ALL: 'trainings_all',
-        SINGLE: (id: string) => `training_${id}`,
-        PATTERN: 'training'
-    },
-    ANNOUNCEMENTS: {
-        FOR_STUDENT: (dept?: string, uid?: string) => `announcements_student_${dept || 'all'}_${uid || ''}`,
-        LATEST_DATE: (dept?: string) => `announcements_latest_${dept || 'all'}`,
-        PATTERN: 'announcement'
-    },
-    PLACEMENT_RECORDS: {
-        ALL: 'placement_records_all',
-        BY_ROLL: (rollNo: string) => `placement_records_roll_${rollNo}`,
-        PATTERN: 'placement_record'
-    }
+  USER_PROFILE: (uid: string) => `user_profile_${uid}`,
+  ALL_USERS: 'all_users',
+  USERS_BY_ROLE: (role: string) => `users_role_${role}`,
+  ANNOUNCEMENTS: 'announcements',
+  COMPANIES: 'companies',
+  COMPANY_BY_ID: (id: string) => `company_${id}`,
+  TRAININGS: 'trainings',
+  TRAINING_BY_ID: (id: string) => `training_${id}`,
+  PLACEMENTS: 'placements',
+  PLACEMENT_BY_ID: (id: string) => `placement_${id}`,
+} as const;
+
+// Default cache configuration
+export const DEFAULT_CACHE_CONFIG: CacheConfig = {
+  ttl: 5 * 60 * 1000, // 5 minutes
 };
 
-// Cache TTL constants (in milliseconds)
-export const CACHE_TTL = {
-    SHORT: 2 * 60 * 1000,      // 2 minutes - for frequently changing data
-    MEDIUM: 5 * 60 * 1000,     // 5 minutes - default
-    LONG: 15 * 60 * 1000,      // 15 minutes - for relatively static data
-    VERY_LONG: 60 * 60 * 1000  // 1 hour - for rarely changing data
-};
+// Cache configuration for different data types
+export const CACHE_CONFIGS = {
+  USER_DATA: { ttl: 10 * 60 * 1000 }, // 10 minutes
+  ANNOUNCEMENTS: { ttl: 2 * 60 * 1000 }, // 2 minutes
+  COMPANIES: { ttl: 15 * 60 * 1000 }, // 15 minutes
+  TRAININGS: { ttl: 15 * 60 * 1000 }, // 15 minutes
+  PLACEMENTS: { ttl: 10 * 60 * 1000 }, // 10 minutes
+} as const;
