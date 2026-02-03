@@ -19,7 +19,7 @@ export const UserService = {
     getUserProfile: async (uid: string, forceRefresh: boolean = false): Promise<UserProfile | null> => {
         try {
             const cacheKey = CACHE_KEYS.USER_PROFILE(uid);
-            
+
             // Check cache first
             if (!forceRefresh) {
                 const cached = cacheService.get<UserProfile>(cacheKey, CACHE_CONFIGS.USER_DATA);
@@ -27,14 +27,14 @@ export const UserService = {
                     return cached;
                 }
             }
-            
+
             const profile = await apiRequest<UserProfile>(`/users/profile/${uid}`);
-            
+
             // Cache the result
             if (profile) {
                 cacheService.set(cacheKey, profile, CACHE_CONFIGS.USER_DATA);
             }
-            
+
             return profile;
         } catch (error) {
             console.error("Error getting user profile:", error);
@@ -69,11 +69,16 @@ export const UserService = {
         }
     },
 
+    // Get all students
+    getAllStudents: async (forceRefresh: boolean = false): Promise<UserProfile[]> => {
+        return UserService.getUsersByRole('STUDENT', forceRefresh);
+    },
+
     // Get all users with a specific role
     getUsersByRole: async (role: UserRole, forceRefresh: boolean = false): Promise<UserProfile[]> => {
         try {
             const cacheKey = CACHE_KEYS.USERS_BY_ROLE(role);
-            
+
             // Check cache first
             if (!forceRefresh) {
                 const cached = cacheService.get<UserProfile[]>(cacheKey, CACHE_CONFIGS.USER_DATA);
@@ -81,12 +86,12 @@ export const UserService = {
                     return cached;
                 }
             }
-            
+
             const users = await apiRequest<UserProfile[]>(`/users/role/${role}`);
-            
+
             // Cache the result
             cacheService.set(cacheKey, users, CACHE_CONFIGS.USER_DATA);
-            
+
             return users;
         } catch (error) {
             console.error("Error fetching all students:", error);
@@ -98,7 +103,7 @@ export const UserService = {
     getAllUsers: async (forceRefresh: boolean = false): Promise<UserProfile[]> => {
         try {
             const cacheKey = CACHE_KEYS.ALL_USERS;
-            
+
             // Check cache first
             if (!forceRefresh) {
                 const cached = cacheService.get<UserProfile[]>(cacheKey, CACHE_CONFIGS.USER_DATA);
@@ -106,12 +111,12 @@ export const UserService = {
                     return cached;
                 }
             }
-            
+
             const users = await apiRequest<UserProfile[]>('/users/all');
-            
+
             // Cache the result
             cacheService.set(cacheKey, users, CACHE_CONFIGS.USER_DATA);
-            
+
             return users;
         } catch (error) {
             console.error("Error fetching all users:", error);

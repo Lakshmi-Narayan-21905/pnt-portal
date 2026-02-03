@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
 
 export const firebaseConfig = {
     apiKey: "AIzaSyAoPVoJmFKxkbgb1LxblJJ_Egb-vOv2uT8",
@@ -13,11 +14,10 @@ export const firebaseConfig = {
 };
 
 // Initialize Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const analytics = getAnalytics(app);
-
-// Note: Firestore (db) is NO LONGER exported for client-side use.
-// All data access must go through the functions API.
+export const db = getFirestore(app);
 
 export default app;

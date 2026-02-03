@@ -43,6 +43,15 @@ const PlacementHeadDashboard: React.FC = () => {
     const [students, setStudents] = useState<UserProfile[]>([]);
     const [placementRecords, setPlacementRecords] = useState<PlacementRecord[]>([]);
     const [deptCoordinators, setDeptCoordinators] = useState<UserProfile[]>([]);
+    const [classCoordinators, setClassCoordinators] = useState<UserProfile[]>([]);
+    const [classPerformance, setClassPerformance] = useState<{
+        coordinatorName: string;
+        department: string | undefined;
+        section: string | undefined;
+        totalStudents: number;
+        placedCount: number;
+        placementRate: number;
+    }[]>([]);
 
     // Computed Stats
     const [stats, setStats] = useState({
@@ -87,17 +96,56 @@ const PlacementHeadDashboard: React.FC = () => {
     const fetchAllData = async () => {
         try {
             setLoading(true);
-            const [allCompanies, allStudents, allRecords, allDeptCoords] = await Promise.all([
+            const [allCompanies, allStudents, allRecords, allDeptCoords, allClassCoords] = await Promise.all([
                 CompanyService.getAllCompanies(),
                 UserService.getAllStudents(),
                 PlacementRecordService.getAllRecords(),
-                UserService.getUsersByRole('DEPT_COORDINATOR')
+                UserService.getUsersByRole('DEPT_COORDINATOR'),
+                UserService.getUsersByRole('CLASS_COORDINATOR')
             ]);
 
             setCompanies(allCompanies);
             setStudents(allStudents);
             setPlacementRecords(allRecords);
             setDeptCoordinators(allDeptCoords);
+            setClassCoordinators(allClassCoords); // Set class coordinators state
+
+            // Process Data for KPIs
+            const now = Date.now();
+            const active = allCompanies.filter(c => c.deadline > now).length;
+            const placed = allStudents.filter(s => s.placementStatus === 'PLACED' || s.placementStatus === 'OFFERED').length;
+            const upcoming = allCompanies.filter(c => c.driveDate > now && c.driveDate < now + 7 * 24 * 60 * 60 * 1000).length;
+
+            setStats({
+                activeDrives: active,
+                totalCompanies: allCompanies.length,
+                totalCoordinators: allDeptCoords.length + allClassCoords.length, // Combined coordinators
+                totalStudents: allStudents.length,
+                placedCount: placed,
+                upcomingInterviews: upcoming
+            });
+
+            // Calculate Class-wise Performance
+            const classStats = allClassCoords.map(coord => {
+                // Find students belonging to this coordinator's class (Department + Section)
+                const classStudents = allStudents.filter(s =>
+                    s.department === coord.department &&
+                    s.section === coord.section
+                );
+
+                const totalInClass = classStudents.length;
+                const placedInClass = classStudents.filter(s => s.placementStatus === 'PLACED').length;
+
+                return {
+                    coordinatorName: coord.displayName,
+                    department: coord.department,
+                    section: coord.section,
+                    totalStudents: totalInClass,
+                    placedCount: placedInClass,
+                    placementRate: totalInClass > 0 ? Math.round((placedInClass / totalInClass) * 100) : 0
+                };
+            });
+            setClassPerformance(classStats); // Store class performance
 
             processAnalytics(allCompanies, allStudents, allRecords, allDeptCoords);
 
@@ -120,7 +168,7 @@ const PlacementHeadDashboard: React.FC = () => {
         const activeDrives = comps.filter(c => c.deadline > now);
         const upcomingInterviews = comps.filter(c => c.driveDate > now && c.driveDate <= now + 7 * 24 * 60 * 60 * 1000); // Next 7 days
 
-        // Count placed students based on records OR student status. 
+        // Count placed students based on records OR student status.
         // Using Records is more accurate for "Offers", Student Status for "Individuals Placed"
         // const placedStudentIds = new Set(recs.map(r => r.rollNo.toLowerCase()));
         const placedCount = studs.filter(s => s.placementStatus === 'PLACED').length;

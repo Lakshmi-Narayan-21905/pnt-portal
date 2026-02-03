@@ -28,17 +28,17 @@ class RealtimeListenerService {
         }
 
         const collectionRef = collection(db, collectionName);
-        
+
         const unsubscribe = onSnapshot(
             collectionRef,
             (snapshot) => {
                 // Skip initial snapshot to avoid unnecessary cache clear
                 if (!snapshot.metadata.hasPendingWrites) {
                     console.log(`[RealtimeListener] Changes detected in ${collectionName}`);
-                    
+
                     // Invalidate cache for this collection
                     cacheService.invalidatePattern(cachePattern);
-                    
+
                     // Call registered callbacks
                     const callbacks = this.changeCallbacks.get(collectionName);
                     if (callbacks) {
@@ -50,7 +50,7 @@ class RealtimeListenerService {
                             }
                         });
                     }
-                    
+
                     // Call the provided callback
                     if (onChangeCallback) {
                         onChangeCallback();
@@ -95,9 +95,9 @@ class RealtimeListenerService {
         if (!this.changeCallbacks.has(collectionName)) {
             this.changeCallbacks.set(collectionName, new Set());
         }
-        
+
         this.changeCallbacks.get(collectionName)!.add(callback);
-        
+
         // Return unsubscribe function
         return () => {
             const callbacks = this.changeCallbacks.get(collectionName);
@@ -114,13 +114,13 @@ class RealtimeListenerService {
         console.log('[RealtimeListener] Initializing all collection listeners');
 
         // Listen to companies collection
-        this.listenToCollection('companies', CACHE_KEYS.COMPANIES.PATTERN);
+        this.listenToCollection('companies', CACHE_KEYS.PATTERN_COMPANIES);
 
         // Listen to trainings collection
-        this.listenToCollection('trainings', CACHE_KEYS.TRAININGS.PATTERN);
+        this.listenToCollection('trainings', CACHE_KEYS.PATTERN_TRAININGS);
 
         // Listen to announcements collection
-        this.listenToCollection('announcements', CACHE_KEYS.ANNOUNCEMENTS.PATTERN);
+        this.listenToCollection('announcements', CACHE_KEYS.PATTERN_ANNOUNCEMENTS);
 
         // Listen to placement records collection
         this.listenToCollection('placement_records', CACHE_KEYS.PLACEMENT_RECORDS.PATTERN);
