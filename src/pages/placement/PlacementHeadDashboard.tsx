@@ -104,8 +104,10 @@ const PlacementHeadDashboard: React.FC = () => {
                 UserService.getUsersByRole('CLASS_COORDINATOR')
             ]);
 
+            const allCandidates = [...allStudents, ...allClassCoords];
+
             setCompanies(allCompanies);
-            setStudents(allStudents);
+            setStudents(allCandidates);
             setPlacementRecords(allRecords);
             setDeptCoordinators(allDeptCoords);
             setClassCoordinators(allClassCoords); // Set class coordinators state
@@ -113,14 +115,14 @@ const PlacementHeadDashboard: React.FC = () => {
             // Process Data for KPIs
             const now = Date.now();
             const active = allCompanies.filter(c => c.deadline > now).length;
-            const placed = allStudents.filter(s => s.placementStatus === 'PLACED' || s.placementStatus === 'OFFERED').length;
+            const placed = allCandidates.filter(s => s.placementStatus === 'PLACED' || s.placementStatus === 'OFFERED').length;
             const upcoming = allCompanies.filter(c => c.driveDate > now && c.driveDate < now + 7 * 24 * 60 * 60 * 1000).length;
 
             setStats({
                 activeDrives: active,
                 totalCompanies: allCompanies.length,
                 totalCoordinators: allDeptCoords.length + allClassCoords.length, // Combined coordinators
-                totalStudents: allStudents.length,
+                totalStudents: allCandidates.length,
                 placedCount: placed,
                 upcomingInterviews: upcoming
             });
@@ -128,9 +130,16 @@ const PlacementHeadDashboard: React.FC = () => {
             // Calculate Class-wise Performance
             const classStats = allClassCoords.map(coord => {
                 // Find students belonging to this coordinator's class (Department + Section)
-                const classStudents = allStudents.filter(s =>
+                const classStudents = allCandidates.filter(s =>
                     s.department === coord.department &&
-                    s.section === coord.section
+                    s.section === coord.section &&
+                    s.role === 'STUDENT' // Only count actual students for class performance, or maybe both? 
+                    // Usually class coordinator manages others. keeping purely students for class stats seems safer, 
+                    // but user asked to fetch *both*. 
+                    // "Total Students" in the dashboard generally implies the pool of people available for placement.
+                    // Class Performance is "how did this class do". If the coordinator is also placed, they count.
+                    // I will use allCandidates here too, but checking role might be redundant if we want everyone.
+                    // Let's stick to using allCandidates but filtering by dept/section.
                 );
 
                 const totalInClass = classStudents.length;
@@ -147,7 +156,7 @@ const PlacementHeadDashboard: React.FC = () => {
             });
             setClassPerformance(classStats); // Store class performance
 
-            processAnalytics(allCompanies, allStudents, allRecords, allDeptCoords);
+            processAnalytics(allCompanies, allCandidates, allRecords, allDeptCoords);
 
         } catch (error) {
             console.error("Dashboard Data Fetch Error:", error);

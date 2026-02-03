@@ -137,12 +137,18 @@ export const UserService = {
         }
     },
 
+    // Change user role
+    changeUserRole: async (uid: string, role: string) => {
+        // Cast role to UserRole if needed, assuming role is valid
+        return UserService.updateUserProfile(uid, { role: role as UserRole });
+    },
+
     // Clear all user caches (useful for manual refresh)
     clearCache: () => {
         cacheService.delete(CACHE_KEYS.ALL_USERS);
         // Clear role-based caches
         ['STUDENT', 'ADMIN', 'HEAD_OF_DEPARTMENT', 'PLACEMENT_COORDINATOR', 'TRAINING_COORDINATOR', 'DEPT_COORDINATOR', 'CLASS_COORDINATOR'].forEach(role => {
-            cacheService.delete(CACHE_KEYS.USERS_BY_ROLE(role));
+            cacheService.delete(CACHE_KEYS.USERS_BY_ROLE(role as UserRole));
         });
     }
 };

@@ -34,9 +34,16 @@ export const apiRequest = async <T>(endpoint: string, method: string = 'GET', bo
             throw new Error(`API Error (${response.status}): ${errorText}`);
         }
 
-        // Handle empty responses (e.g. 204 No Content)
+        // Handle empty, text, or JSON responses
         const text = await response.text();
-        return text ? JSON.parse(text) : {} as T;
+        if (!text) return {} as T;
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            // If response is not valid JSON, return text (e.g. "Profile Updated")
+            return text as unknown as T;
+        }
     } catch (error) {
         console.error(`API Request failed for ${endpoint}:`, error);
         throw error;

@@ -37,8 +37,11 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 ]);
 
                 // Filter for this department
-                const deptStudents = allStudents.filter(u => u.department === userProfile.department);
+                const deptStudentsOnly = allStudents.filter(u => u.department === userProfile.department);
                 const deptCoordinators = allCoordinators.filter(u => u.department === userProfile.department);
+
+                // Merge for metrics
+                const deptStudents = [...deptStudentsOnly, ...deptCoordinators];
 
                 // --- 1. KPI Cards ---
                 const totalStudents = deptStudents.length;
