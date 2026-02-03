@@ -97,52 +97,50 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     else globalNotReady++;
                 });
 
-                // Calculate stats per section
-                const sectionStats = Object.entries(sectionMap).map(([section, students]) => {
-                    // Weak Section Logic
-                    const p = students.filter(s => s.placementStatus === 'PLACED').length;
-                    const pct = students.length > 0 ? Math.round((p / students.length) * 100) : 0;
+                // --- 3. At Risk Students ---
+                // Criteria: Unplaced AND (CGPA < 6.0 OR Arrears > 0)
+                const atRiskStudents = deptStudents
+                    .filter(s => s.placementStatus !== 'PLACED' && ((s.cgpa || 0) < 6.0 || (s.standingArreas || 0) > 0 || (s.historyOfArreas || 0) > 0))
+                    .map(s => {
+                        let issue = '';
+                        if ((s.standingArreas || 0) > 0) issue = `${s.standingArreas} Standing Arrears`;
+                        else if ((s.historyOfArreas || 0) > 0) issue = 'History of Arrears';
+                        else issue = 'Low CGPA';
+                        return { ...s, issue };
+                    })
+                    .slice(0, 5); // Top 5
 
-                    let issue = '';
-                    const avgCGPA = students.reduce((acc, s) => acc + (s.cgpa || 0), 0) / students.length;
-                    const trainingRate = students.filter(s => trainingsParticipants.has(s.uid)).length / students.length;
+                // --- 4. Next Drive Readiness ---
+                // Find next upcoming drive
+                const nextCompany = allCompanies
+                    .filter(c => c.driveDate > now)
+                    .sort((a, b) => a.driveDate - b.driveDate)[0];
 
-                    if (avgCGPA < 7.0) issue = 'Low Avg CGPA';
-                    else if (trainingRate < 0.5) issue = 'Low Training';
-                    else issue = 'Need Visits';
+                let nextDriveStats = null;
 
-                    // Section Readiness Logic
-                    let secReady = 0, secPartial = 0, secNotReady = 0;
-                    students.forEach(s => {
-                        const status = checkReadiness(s);
-                        if (status === 'READY') secReady++;
-                        else if (status === 'PARTIAL') secPartial++;
-                        else secNotReady++;
+                if (nextCompany) {
+                    const eligibleStudents = deptStudents.filter(s => {
+                        // Basic Eligibility Check
+                        const isDeptEligible = nextCompany.eligibilityCriteria?.branches?.includes(s.department || '');
+                        const isCgpaEligible = (s.cgpa || 0) >= (nextCompany.eligibilityCriteria?.minCGPA || 0);
+                        const hArrears = s.historyOfArreas || 0;
+                        const sArrears = s.standingArreas || 0;
+                        const maxH = nextCompany.eligibilityCriteria?.historyOfArrears ?? 100;
+                        const maxS = nextCompany.eligibilityCriteria?.standingArrears ?? 100;
+
+                        return isDeptEligible && isCgpaEligible && hArrears <= maxH && sArrears <= maxS;
                     });
 
-                    return {
-                        section,
-                        pct,
-                        issue,
-                        count: students.length,
-                        readiness: { ready: secReady, partial: secPartial, notReady: secNotReady }
+                    const readyCount = eligibleStudents.filter(s => trainingsParticipants.has(s.uid)).length;
+
+                    nextDriveStats = {
+                        name: nextCompany.name,
+                        date: nextCompany.driveDate,
+                        totalEligible: eligibleStudents.length,
+                        ready: readyCount,
+                        notReady: eligibleStudents.length - readyCount
                     };
-                });
-
-                // Weak Sections: Sort by placement % ascending (weakest first)
-                const weakSections = sectionStats.sort((a, b) => a.pct - b.pct).slice(0, 3).map(s => ({
-                    section: s.section,
-                    pct: s.pct,
-                    issue: s.issue
-                }));
-
-                // Section Readiness Data (Sorted by Section Name usually, or Readiness... let's do Name)
-                const sectionReadiness = sectionStats.sort((a, b) => a.section.localeCompare(b.section)).map(s => ({
-                    section: s.section,
-                    ready: s.readiness.ready,
-                    partial: s.readiness.partial,
-                    notReady: s.readiness.notReady
-                }));
+                }
 
                 setStats({
                     totalStudents,
@@ -152,8 +150,8 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     readiness: { ready: globalReady, partial: globalPartial, notReady: globalNotReady },
                     trainingCoverage,
                     enrolledCount,
-                    weakSections,
-                    sectionReadiness
+                    atRiskStudents,
+                    nextDriveStats
                 });
 
             } catch (error) {
@@ -313,15 +311,15 @@ const DeptCoordinatorDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Row 3: Action Panels */}
+            {/* Row 3: At Risk & Next Drive */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
 
-                {/* Weak Sections */}
+                {/* At Risk Students */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col">
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-red-500" />
-                            Weak Sections (Attention Needed)
+                            At Risk Students <span className="text-xs font-normal text-gray-500">(Unplaced & Low Stats)</span>
                         </h3>
                     </div>
 
@@ -329,28 +327,33 @@ const DeptCoordinatorDashboard: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-gray-400 uppercase bg-gray-50">
                                 <tr>
-                                    <th className="px-3 py-2 rounded-l-lg">Section</th>
-                                    <th className="px-3 py-2">Placement %</th>
-                                    <th className="px-3 py-2 rounded-r-lg">Primary Issue</th>
+                                    <th className="px-3 py-2 rounded-l-lg">Name</th>
+                                    <th className="px-3 py-2">CGPA</th>
+                                    <th className="px-3 py-2 rounded-r-lg">Issue</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
-                                {stats.weakSections.length > 0 ? (
-                                    stats.weakSections.map((sec, i) => (
-                                        <tr key={sec.section} className="hover:bg-gray-50">
-                                            <td className="px-3 py-3 font-semibold text-gray-800">{sec.section}</td>
+                                {/* @ts-ignore */}
+                                {stats.atRiskStudents && stats.atRiskStudents.length > 0 ? (
+                                    // @ts-ignore
+                                    stats.atRiskStudents.map((student, i) => (
+                                        <tr key={i} className="hover:bg-gray-50">
+                                            <td className="px-3 py-3 font-semibold text-gray-800">
+                                                {student.displayName}
+                                                <span className="block text-xs text-gray-400">{student.section}</span>
+                                            </td>
                                             <td className="px-3 py-3">
-                                                <span className="px-2 py-1 bg-red-50 text-red-600 rounded text-xs font-bold">
-                                                    {sec.pct}%
+                                                <span className={`font-mono font-bold ${student.cgpa < 6 ? 'text-red-600' : 'text-gray-600'}`}>
+                                                    {student.cgpa || '-'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 py-3 text-gray-500 text-xs">{sec.issue}</td>
+                                            <td className="px-3 py-3 text-red-500 text-xs font-medium">{student.issue}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
                                         <td colSpan={3} className="px-3 py-4 text-center text-gray-400 text-xs">
-                                            All sections performing well!
+                                            No high-risk students found!
                                         </td>
                                     </tr>
                                 )}
@@ -359,45 +362,90 @@ const DeptCoordinatorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Section Readiness Status */}
+                {/* Next Drive Readiness */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col">
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                            <UserCheck className="w-4 h-4 text-blue-500" />
-                            Section Readiness Status
+                            <Briefcase className="w-4 h-4 text-blue-500" />
+                            Next Drive Readiness
                         </h3>
+                        {/* @ts-ignore */}
+                        {stats.nextDriveStats && (
+                            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium">
+                                {/* @ts-ignore */}
+                                {stats.nextDriveStats.name}
+                            </span>
+                        )}
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-gray-400 uppercase bg-gray-50">
-                                <tr>
-                                    <th className="px-3 py-2 rounded-l-lg">Section</th>
-                                    <th className="px-3 py-2 font-bold text-green-600">Ready</th>
-                                    <th className="px-3 py-2 font-bold text-yellow-600">Partial</th>
-                                    <th className="px-3 py-2 rounded-r-lg font-bold text-red-600">Not Ready</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {stats.sectionReadiness.length > 0 ? (
-                                    stats.sectionReadiness.map((item, i) => (
-                                        <tr key={item.section} className="hover:bg-gray-50">
-                                            <td className="px-3 py-3 font-medium text-gray-800">{item.section}</td>
-                                            <td className="px-3 py-3 font-bold text-green-600 bg-green-50/50">{item.ready}</td>
-                                            <td className="px-3 py-3 font-bold text-yellow-600 bg-yellow-50/50">{item.partial}</td>
-                                            <td className="px-3 py-3 font-bold text-red-600 bg-red-50/50">{item.notReady}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={4} className="px-3 py-4 text-center text-gray-400 text-xs">
-                                            No section data found.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                    {/* @ts-ignore */}
+                    {stats.nextDriveStats ? (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center text-sm mb-2">
+                                <span className="text-gray-500">Eligible Students</span>
+                                {/* @ts-ignore */}
+                                <span className="font-bold text-gray-900">{stats.nextDriveStats.totalEligible}</span>
+                            </div>
+
+                            {/* @ts-ignore */}
+                            {stats.nextDriveStats.totalEligible > 0 ? (
+                                <>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className="text-gray-600">Ready (Trained)</span>
+                                                {/* @ts-ignore */}
+                                                <span className="font-bold text-green-600">{stats.nextDriveStats.ready}</span>
+                                            </div>
+                                            <div className="w-full bg-gray-100 rounded-full h-2">
+                                                <div
+                                                    className="bg-green-500 h-2 rounded-full"
+                                                    // @ts-ignore
+                                                    style={{ width: `${(stats.nextDriveStats.ready / stats.nextDriveStats.totalEligible) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className="text-gray-600">Not Ready (Untrained)</span>
+                                                {/* @ts-ignore */}
+                                                <span className="font-bold text-red-600">{stats.nextDriveStats.notReady}</span>
+                                            </div>
+                                            <div className="w-full bg-gray-100 rounded-full h-2">
+                                                <div
+                                                    className="bg-red-500 h-2 rounded-full"
+                                                    // @ts-ignore
+                                                    style={{ width: `${(stats.nextDriveStats.notReady / stats.nextDriveStats.totalEligible) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 mt-4">
+                                        <p className="text-xs text-yellow-800">
+                                            <strong>Action:</strong> Ensure the {
+                                                // @ts-ignore
+                                                stats.nextDriveStats.notReady
+                                            } untrained students complete their training before {
+                                                // @ts-ignore
+                                                new Date(stats.nextDriveStats.date).toLocaleDateString()
+                                            }.
+                                        </p>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center py-6 text-gray-400 text-xs">
+                                    No students meet eligibility criteria for this drive.
+                                </div>
+                            )}
+
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 py-8">
+                            <Briefcase className="w-8 h-8 opacity-20" />
+                            <p className="text-xs">No upcoming drives scheduled.</p>
+                        </div>
+                    )}
                 </div>
 
             </div>
