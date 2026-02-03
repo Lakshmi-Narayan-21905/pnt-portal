@@ -25,8 +25,8 @@ const StudentAnnouncements: React.FC = () => {
         if (!userProfile?.department) return;
         try {
             setLoading(true);
-            // Pass the student's department to get 'all' + 'dept' targeted announcements
-            const data = await AnnouncementService.getAnnouncementsForStudent(userProfile.department);
+            // Pass the student's department AND uid to get targeted announcements
+            const data = await AnnouncementService.getAnnouncementsForStudent(userProfile.department, userProfile.uid);
             setAnnouncements(data);
         } catch (err) {
             console.error("Failed to fetch announcements", err);

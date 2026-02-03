@@ -96,4 +96,5 @@ export interface Announcement {
     authorRole: UserRole;
     authorName: string;
     targetDepts: string[]; // Changed from targetDept string to array
+    targetUsers?: string[]; // List of specific user IDs to target
 }

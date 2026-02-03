@@ -69,12 +69,13 @@ export const AnnouncementService = {
     },
 
     // Get announcements relevant to a student
-    getAnnouncementsForStudent: async (studentDept?: string): Promise<Announcement[]> => {
+    getAnnouncementsForStudent: async (studentDept?: string, uid?: string): Promise<Announcement[]> => {
         try {
             return await cacheService.wrapWithCache(
-                CACHE_KEYS.ANNOUNCEMENTS.FOR_STUDENT(studentDept),
+                CACHE_KEYS.ANNOUNCEMENTS.FOR_STUDENT(studentDept, uid),
                 async () => {
                     const announcements: Announcement[] = [];
+                    // ... existing logic ...
 
                     // Query: targetDepts contains 'all' OR 'studentDept'
                     // Firestore 'array-contains' only allows one value per query if we want to be simple (no OR).
@@ -123,6 +124,24 @@ export const AnnouncementService = {
                                 }
                             });
                         } catch (ignore) { }
+                    }
+
+                    // 3. Fetch specific TARGET USER announcements
+                    // This was missing!
+                    if (uid) {
+                        try {
+                            const qUser = query(collectionRef, where('targetUsers', 'array-contains', uid));
+                            const snapUser = await getDocs(qUser);
+
+                            snapUser.forEach(doc => {
+                                const id = doc.id;
+                                if (!announcements.find(a => a.id === id)) {
+                                    announcements.push({ id: doc.id, ...doc.data() } as Announcement);
+                                }
+                            });
+                        } catch (error) {
+                            console.error("Error fetching user targeted announcements:", error);
+                        }
                     }
 
                     // Client-side sort by date (newest first)

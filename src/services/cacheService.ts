@@ -26,7 +26,7 @@ interface CacheStats {
  */
 class CacheEncryption {
     private static readonly ENCRYPTION_KEY = 'PNT_PORTAL_CACHE_2026'; // Change this for your app
-    
+
     /**
      * Encrypt data for localStorage storage
      */
@@ -34,10 +34,10 @@ class CacheEncryption {
         try {
             // Convert to base64
             const base64 = btoa(encodeURIComponent(data));
-            
+
             // Apply XOR cipher with key
             const encrypted = this.xorCipher(base64, this.ENCRYPTION_KEY);
-            
+
             // Add random salt prefix to make it harder to recognize patterns
             const salt = Math.random().toString(36).substring(2, 10);
             return salt + ':' + encrypted;
@@ -46,31 +46,31 @@ class CacheEncryption {
             return data; // Fallback to unencrypted if encryption fails
         }
     }
-    
+
     /**
      * Decrypt data from localStorage
      */
-    static decrypt(encryptedData: string): string {
+    static decrypt(encryptedData: string): string | null {
         try {
             // Remove salt prefix
             const parts = encryptedData.split(':');
             if (parts.length !== 2) {
-                throw new Error('Invalid encrypted format');
+                return null;
             }
-            
+
             const encrypted = parts[1];
-            
+
             // Reverse XOR cipher
             const base64 = this.xorCipher(encrypted, this.ENCRYPTION_KEY);
-            
+
             // Decode from base64
             return decodeURIComponent(atob(base64));
         } catch (error) {
-            console.error('Decryption failed:', error);
-            return encryptedData; // Return as-is if decryption fails
+            // Silent fail for decryption issues
+            return null;
         }
     }
-    
+
     /**
      * Simple XOR cipher for obfuscation
      */
@@ -93,7 +93,7 @@ class CacheService {
     constructor(options?: { useLocalStorage?: boolean; storagePrefix?: string }) {
         this.useLocalStorage = options?.useLocalStorage || false;
         this.storagePrefix = options?.storagePrefix || 'pnt_cache_';
-        
+
         // Load from localStorage if enabled
         if (this.useLocalStorage) {
             this.loadFromLocalStorage();
@@ -108,7 +108,7 @@ class CacheService {
      */
     get<T>(key: string): T | null {
         const entry = this.cache.get(key);
-        
+
         if (!entry) {
             this.stats.misses++;
             return null;
@@ -165,7 +165,7 @@ class CacheService {
      */
     invalidatePattern(pattern: string): void {
         const keysToDelete: string[] = [];
-        
+
         this.cache.forEach((_, key) => {
             if (key.startsWith(pattern) || key.includes(pattern)) {
                 keysToDelete.push(key);
@@ -181,7 +181,7 @@ class CacheService {
     clear(): void {
         this.cache.clear();
         this.stats.size = 0;
-        
+
         if (this.useLocalStorage) {
             // Clear all items with our prefix
             Object.keys(localStorage).forEach(key => {
@@ -197,10 +197,10 @@ class CacheService {
      */
     getStats(): CacheStats & { hitRate: string } {
         const total = this.stats.hits + this.stats.misses;
-        const hitRate = total > 0 
+        const hitRate = total > 0
             ? ((this.stats.hits / total) * 100).toFixed(2) + '%'
             : '0%';
-        
+
         return {
             ...this.stats,
             hitRate
@@ -220,12 +220,12 @@ class CacheService {
     has(key: string): boolean {
         const entry = this.cache.get(key);
         if (!entry) return false;
-        
+
         if (Date.now() - entry.timestamp > entry.ttl) {
             this.delete(key);
             return false;
         }
-        
+
         return true;
     }
 
@@ -235,7 +235,7 @@ class CacheService {
     getRemainingTTL(key: string): number {
         const entry = this.cache.get(key);
         if (!entry) return 0;
-        
+
         const remaining = entry.ttl - (Date.now() - entry.timestamp);
         return remaining > 0 ? remaining : 0;
     }
@@ -247,7 +247,7 @@ class CacheService {
         try {
             const jsonString = JSON.stringify(entry);
             const encrypted = CacheEncryption.encrypt(jsonString);
-            
+
             localStorage.setItem(
                 this.storagePrefix + key,
                 encrypted
@@ -267,13 +267,19 @@ class CacheService {
                 if (storageKey.startsWith(this.storagePrefix)) {
                     const key = storageKey.replace(this.storagePrefix, '');
                     const encryptedData = localStorage.getItem(storageKey);
-                    
+
                     if (encryptedData) {
                         try {
                             // Decrypt the data
                             const decrypted = CacheEncryption.decrypt(encryptedData);
+
+                            if (!decrypted) {
+                                localStorage.removeItem(storageKey);
+                                return;
+                            }
+
                             const entry = JSON.parse(decrypted) as CacheEntry<any>;
-                            
+
                             // Only load if not expired
                             if (Date.now() - entry.timestamp <= entry.ttl) {
                                 this.cache.set(key, entry);
@@ -281,14 +287,13 @@ class CacheService {
                                 localStorage.removeItem(storageKey);
                             }
                         } catch (parseError) {
-                            console.warn(`Failed to decrypt/parse cache entry: ${key}`, parseError);
                             // Remove corrupted entry
                             localStorage.removeItem(storageKey);
                         }
                     }
                 }
             });
-            
+
             this.stats.size = this.cache.size;
         } catch (error) {
             console.warn('Failed to load from localStorage:', error);
@@ -328,10 +333,10 @@ class CacheService {
 
         // If not in cache, fetch the data
         const data = await fetchFunction();
-        
+
         // Store in cache
         this.set(key, data, ttl);
-        
+
         return data;
     }
 }
@@ -360,7 +365,7 @@ export const CACHE_KEYS = {
         PATTERN: 'training'
     },
     ANNOUNCEMENTS: {
-        FOR_STUDENT: (dept?: string) => `announcements_student_${dept || 'all'}`,
+        FOR_STUDENT: (dept?: string, uid?: string) => `announcements_student_${dept || 'all'}_${uid || ''}`,
         LATEST_DATE: (dept?: string) => `announcements_latest_${dept || 'all'}`,
         PATTERN: 'announcement'
     },

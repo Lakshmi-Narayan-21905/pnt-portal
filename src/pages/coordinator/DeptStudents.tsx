@@ -41,6 +41,8 @@ const DeptStudents: React.FC = () => {
         section: '',
     });
 
+    const [placementFilter, setPlacementFilter] = useState<'ALL' | 'PLACED' | 'UNPLACED'>('ALL');
+
     const [previewData, setPreviewData] = useState<PreviewData[]>([]);
     const [uploadStats, setUploadStats] = useState({ total: 0, success: 0, skipped: 0, failed: 0 });
 
@@ -308,6 +310,17 @@ const DeptStudents: React.FC = () => {
                         <Download className="w-4 h-4 mr-2" />
                         Export
                     </button>
+
+                    <select
+                        value={placementFilter}
+                        onChange={(e) => setPlacementFilter(e.target.value as any)}
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                    >
+                        <option value="ALL">All Status</option>
+                        <option value="PLACED">Placed</option>
+                        <option value="UNPLACED">Unplaced</option>
+                    </select>
+
                     <button
                         onClick={() => setIsUploadModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-brand-lavender-light text-brand-lavender-dark font-medium rounded-lg hover:bg-brand-lavender-lilac/50 transition border border-brand-lavender-lilac/30"
@@ -348,78 +361,85 @@ const DeptStudents: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-50">
                         {loading ? (
-                            <tr><td colSpan={4} className="p-8 text-center text-gray-500">Loading...</td></tr>
+                            <tr><td colSpan={5} className="p-8 text-center text-gray-500">Loading...</td></tr>
                         ) : students.length === 0 ? (
-                            <tr><td colSpan={4} className="p-8 text-center text-gray-500">No students found.</td></tr>
+                            <tr><td colSpan={5} className="p-8 text-center text-gray-500">No students found.</td></tr>
                         ) : (
-                            students.map((student) => (
-                                <tr key={student.uid} className="hover:bg-purple-50/30 transition-colors group">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div
-                                            className="flex items-center cursor-pointer group"
-                                            onClick={() => setSelectedStudent(student)}
-                                        >
-                                            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${student.role === 'CLASS_COORDINATOR'
-                                                ? 'bg-indigo-100 text-indigo-600 ring-2 ring-indigo-200'
-                                                : 'bg-purple-100 text-purple-600'
-                                                }`}>
-                                                {student.displayName?.charAt(0)}
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
-                                                    {student.displayName}
+                            students
+                                .filter(student => {
+                                    if (placementFilter === 'ALL') return true;
+                                    if (placementFilter === 'PLACED') return student.placementStatus === 'PLACED';
+                                    if (placementFilter === 'UNPLACED') return student.placementStatus !== 'PLACED';
+                                    return true;
+                                })
+                                .map((student) => (
+                                    <tr key={student.uid} className="hover:bg-purple-50/30 transition-colors group">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div
+                                                className="flex items-center cursor-pointer group"
+                                                onClick={() => setSelectedStudent(student)}
+                                            >
+                                                <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${student.role === 'CLASS_COORDINATOR'
+                                                    ? 'bg-indigo-100 text-indigo-600 ring-2 ring-indigo-200'
+                                                    : 'bg-purple-100 text-purple-600'
+                                                    }`}>
+                                                    {student.displayName?.charAt(0)}
                                                 </div>
-                                                {student.role === 'CLASS_COORDINATOR' && (
-                                                    <span className="text-[10px] uppercase font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
-                                                        Coordinator
-                                                    </span>
-                                                )}
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
+                                                        {student.displayName}
+                                                    </div>
+                                                    {student.role === 'CLASS_COORDINATOR' && (
+                                                        <span className="text-[10px] uppercase font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                                                            Coordinator
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                                        <span className="px-2 py-0.5 rounded bg-gray-100 border border-gray-200 text-xs">
-                                            {student.section || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileCompleted
-                                            ? 'bg-brand-green-ice text-brand-green-dark border-brand-green-mint/30'
-                                            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                            }`}>
-                                            {student.profileCompleted ? 'Verified' : 'Pending'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex justify-end space-x-2">
-                                            {student.role === 'CLASS_COORDINATOR' && (
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                                            <span className="px-2 py-0.5 rounded bg-gray-100 border border-gray-200 text-xs">
+                                                {student.section || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${student.profileCompleted
+                                                ? 'bg-brand-green-ice text-brand-green-dark border-brand-green-mint/30'
+                                                : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                }`}>
+                                                {student.profileCompleted ? 'Verified' : 'Pending'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex justify-end space-x-2">
+                                                {student.role === 'CLASS_COORDINATOR' && (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDemote(student); }}
+                                                        className="p-1 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded transition"
+                                                        title="Remove Coordinator Role"
+                                                    >
+                                                        <UserMinus className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleDemote(student); }}
-                                                    className="p-1 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded transition"
-                                                    title="Remove Coordinator Role"
+                                                    onClick={(e) => { e.stopPropagation(); handleEdit(student); }}
+                                                    className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition"
+                                                    title="Edit"
                                                 >
-                                                    <UserMinus className="w-4 h-4" />
+                                                    <Pencil className="w-4 h-4" />
                                                 </button>
-                                            )}
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleEdit(student); }}
-                                                className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition"
-                                                title="Edit"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(student); }}
-                                                className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition"
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(student); }}
+                                                    className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
                         )}
                     </tbody>
                 </table>
