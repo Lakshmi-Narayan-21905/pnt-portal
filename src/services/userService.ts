@@ -89,7 +89,7 @@ export const UserService = {
             
             return users;
         } catch (error) {
-            console.error("Error fetching users by role:", error);
+            console.error("Error fetching all students:", error);
             throw error;
         }
     },

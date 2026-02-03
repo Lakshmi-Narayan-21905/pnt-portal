@@ -5,8 +5,10 @@ import { UserService } from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
+import { useTheme } from '../../hooks/useTheme';
 
 const DeptCoordinators: React.FC = () => {
+    const theme = useTheme();
     const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [coordinators, setCoordinators] = useState<UserProfile[]>([]);
@@ -55,10 +57,20 @@ const DeptCoordinators: React.FC = () => {
 
         setAssigning(true);
         try {
-            // 1. Remove from Students collection
+            // 1. Demote previous coordinator if exists
+            const currentCoord = coordinators.find(c => c.section === targetSection);
+            if (currentCoord) {
+                // Prevent demoting if we are somehow re-assigning the same person (though UI prevents this)
+                if (currentCoord.uid !== student.uid) {
+                    await UserService.changeUserRole(currentCoord.uid, 'STUDENT');
+                    // We could alert here, but a single success message at the end is cleaner
+                }
+            }
+
+            // 2. Remove new coordinator from Students collection (Promote)
             await UserService.deleteUserProfile(student.uid);
 
-            // 2. Add to Class Coordinators collection
+            // 3. Add to Class Coordinators collection
             // Preserve all student data, just update Role and Section
             const newProfile: UserProfile = {
                 ...student,
@@ -69,14 +81,11 @@ const DeptCoordinators: React.FC = () => {
 
             await UserService.createUserProfile(newProfile);
 
-            // 3. Optional: Demote previous coordinator of this section? 
-            // For now, we just rely on the new one being set. 
-            // If we wanted to clean up, we'd find the old one and set their section to null or move them back to students.
-            // Leaving as is to minimize destructive actions unless requested.
-
-            await showAlert(`Successfully assigned ${student.displayName} as Class Coordinator.`, 'success', 'Success');
+            await showAlert(`Successfully assigned ${student.displayName} as Class Coordinator.${currentCoord ? ' Previous coordinator demoted.' : ''}`, 'success', 'Success');
             setIsSelectModalOpen(false);
-            fetchData();
+            setIsSelectModalOpen(false);
+            // Small delay to ensure Firestore indexes update (if any) or just consistency
+            setTimeout(fetchData, 500);
         } catch (error: any) {
             console.error(error);
             await showAlert('Failed to assign coordinator: ' + error.message, 'error', 'Error');
@@ -102,7 +111,7 @@ const DeptCoordinators: React.FC = () => {
                 {/* Removed Export/Add buttons to match simplified "Section View" request */}
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/60 rounded-xl overflow-hidden">
+            <div className={`bg-white/70 backdrop-blur-md shadow-sm border ${theme.border} rounded-xl overflow-hidden`}>
                 <table className="min-w-full divide-y divide-brand-lavender-light/30">
                     <thead className="bg-brand-lavender-ice/50">
                         <tr>
@@ -166,10 +175,11 @@ const DeptCoordinators: React.FC = () => {
                         )}
 
                         {/* List All Students of Dept */}
-                        {students.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">No students found in this department.</p>
+                        {/* List Students of THIS Section */}
+                        {students.filter(s => s.section === targetSection).length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">No unassigned students found in Section {targetSection}.</p>
                         ) : (
-                            students.sort((a, b) => (a.section || '').localeCompare(b.section || '')).map(student => (
+                            students.filter(s => s.section === targetSection).sort((a, b) => a.displayName.localeCompare(b.displayName)).map(student => (
                                 <button
                                     key={student.uid}
                                     disabled={assigning}
@@ -199,3 +209,4 @@ const DeptCoordinators: React.FC = () => {
 };
 
 export default DeptCoordinators;
+// Force refresh

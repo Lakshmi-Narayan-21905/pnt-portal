@@ -19,11 +19,12 @@ interface StatCardProps {
     subtitle: string;
     icon: React.ElementType;
     delay: number;
+    border?: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon, delay }) => (
+const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon, delay, border }) => (
     <div
-        className="bg-white p-6 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_8px_24px_rgba(99,102,241,0.15)] hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group min-w-[280px]"
+        className={`bg-white p-6 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${border || 'border-gray-100'} border-l-4 hover:shadow-[0_8px_24px_rgba(99,102,241,0.15)] hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group min-w-[280px]`}
         style={{ animation: `fadeInUp 0.5s ease-out ${delay}s backwards` }}
     >
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none opacity-50"></div>
@@ -47,7 +48,10 @@ const StatCard: React.FC<StatCardProps> = ({ title, count, subtitle, icon: Icon,
     </div>
 );
 
+import { useTheme } from '../../hooks/useTheme';
+
 const StudentDashboard: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const navigate = useNavigate();
 
@@ -162,6 +166,7 @@ const StudentDashboard: React.FC = () => {
                     subtitle="Companies hiring now"
                     icon={Building2}
                     delay={0.1}
+                    border={theme.borderLeft}
                 />
                 <StatCard
                     title="My Applications"
@@ -169,6 +174,7 @@ const StudentDashboard: React.FC = () => {
                     subtitle="Applications submitted"
                     icon={Briefcase}
                     delay={0.2}
+                    border={theme.borderLeft}
                 />
                 <StatCard
                     title="Upcoming Trainings"
@@ -176,6 +182,7 @@ const StudentDashboard: React.FC = () => {
                     subtitle="Programs available"
                     icon={GraduationCap}
                     delay={0.3}
+                    border={theme.borderLeft}
                 />
             </div>
 
@@ -183,7 +190,7 @@ const StudentDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Drives Calendar */}
                 <div
-                    className="h-[600px] flex flex-col bg-white rounded-3xl p-4 md:p-6 shadow-md shadow-gray-200 border border-gray-100 transition-all hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden"
+                    className={`h-[600px] flex flex-col bg-white rounded-3xl p-4 md:p-6 shadow-md shadow-gray-200 border ${theme.border} transition-all hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden`}
                     style={{ animation: 'fadeInUp 0.6s ease-out 0.4s backwards' }}
                 >
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -219,7 +226,7 @@ const StudentDashboard: React.FC = () => {
 
                 {/* Trainings Calendar */}
                 <div
-                    className="h-[600px] flex flex-col bg-white rounded-3xl p-4 md:p-6 shadow-md shadow-gray-200 border border-gray-100 transition-all hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden"
+                    className={`h-[600px] flex flex-col bg-white rounded-3xl p-4 md:p-6 shadow-md shadow-gray-200 border ${theme.border} transition-all hover:shadow-xl hover:shadow-gray-200/50 overflow-hidden`}
                     style={{ animation: 'fadeInUp 0.6s ease-out 0.5s backwards' }}
                 >
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">

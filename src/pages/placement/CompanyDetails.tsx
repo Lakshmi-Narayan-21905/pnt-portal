@@ -54,7 +54,7 @@ const CompanyDetails: React.FC = () => {
     const fetchCompanyStudents = async (targetCompany: Company) => {
         setLoadingStudents(true);
         try {
-            const students = await UserService.getUsersByRole('STUDENT');
+            const students = await UserService.getAllStudents(); // Changed from getUsersByRole('STUDENT') to getAllStudents()
 
             // Filter strictly for Dept Coordinator
             let relevantStudents = students;

@@ -3,7 +3,6 @@ import {
     Users,
     Activity,
     Database,
-    Server,
     Download,
     RefreshCw
 } from 'lucide-react';
@@ -22,8 +21,11 @@ import * as XLSX from 'xlsx';
 
 const COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
+import { useTheme } from '../../hooks/useTheme'; // Added import
+
 const AdminDashboard: React.FC = () => {
-    const { userProfile } = useAuth();
+    const theme = useTheme(); // Init hook
+    const { } = useAuth();
     const [loading, setLoading] = useState(true);
     const [lastRefresh, setLastRefresh] = useState(new Date());
 
@@ -65,11 +67,11 @@ const AdminDashboard: React.FC = () => {
         setLoading(true);
         try {
             const [allUsers, allCompanies, allTrainings, allPlacements] = await Promise.all([
-                UserService.getUsersByRole('STUDENT').then(s =>
+                UserService.getAllStudents().then(students =>
                     UserService.getUsersByRole('PLACEMENT_HEAD').then(ph =>
                         UserService.getUsersByRole('TRAINING_HEAD').then(th =>
                             UserService.getUsersByRole('DEPT_COORDINATOR').then(dc =>
-                                [...s, ...ph, ...th, ...dc]
+                                [...students, ...ph, ...th, ...dc]
                             )
                         )
                     )
@@ -222,14 +224,14 @@ const AdminDashboard: React.FC = () => {
 
             {/* 2. Global KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <KPICard title="Total Users" value={stats.totalUsers} subtext={`${stats.activeUsers} Verified`} icon={Users} color="text-indigo-600" bg="bg-indigo-50" />
-                <KPICard title="Total Docs" value={stats.totalStorage} subtext="Across 4 Collections" icon={Database} color="text-blue-600" bg="bg-blue-50" />
-                <KPICard title="Writes (24h)" value={stats.dbWritesToday} subtext="New Records Created" icon={Activity} color="text-emerald-600" bg="bg-emerald-50" />
+                <KPICard title="Total Users" value={stats.totalUsers} subtext={`${stats.activeUsers} Verified`} icon={Users} color="text-indigo-600" bg="bg-indigo-50" border={theme.borderLeft} />
+                <KPICard title="Total Docs" value={stats.totalStorage} subtext="Across 4 Collections" icon={Database} color="text-blue-600" bg="bg-blue-50" border={theme.borderLeft} />
+                <KPICard title="Writes (24h)" value={stats.dbWritesToday} subtext="New Records Created" icon={Activity} color="text-emerald-600" bg="bg-emerald-50" border={theme.borderLeft} />
             </div>
 
             {/* 3. User Analytics & DB Growth */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6">
+                <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">User Distribution</h3>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
@@ -263,7 +265,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 p-6">
+                <div className={`lg:col-span-2 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} p-6`}>
                     <h3 className="font-bold text-gray-800 mb-6">Database Growth (Writes)</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -289,7 +291,7 @@ const AdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
 
                 {/* Collection Overview */}
-                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+                <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} overflow-hidden`}>
                     <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                         <h3 className="font-bold text-gray-800">Collection Overview</h3>
                         <Database className="w-4 h-4 text-gray-400" />
@@ -330,7 +332,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Logs (Now full width since Insights are gone) */}
-                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+                <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${theme.border} overflow-hidden`}>
                     <div className="p-4 border-b border-gray-100 bg-gray-50">
                         <h3 className="font-bold text-gray-800">Recent System Events</h3>
                     </div>
@@ -388,10 +390,11 @@ interface KPICardProps {
     icon: React.ElementType;
     color: string;
     bg: string;
+    border?: string;
 }
 
-const KPICard: React.FC<KPICardProps> = ({ title, value, subtext, icon: Icon, color, bg }) => (
-    <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-gray-100 flex items-start justify-between hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group">
+const KPICard: React.FC<KPICardProps> = ({ title, value, subtext, icon: Icon, color, bg, border }) => (
+    <div className={`bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] border ${border || 'border-gray-100'} border-l-4 flex items-start justify-between hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group`}>
         <div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wide group-hover:text-indigo-600 transition-colors">{title}</p>
             <h3 className="text-3xl font-bold text-gray-900 mt-2">{value}</h3>

@@ -23,11 +23,13 @@ export interface UserProfile {
     twelfthMark?: number;
     standingArreas?: number;
     historyOfArreas?: number;
+    passoutYear?: number;
+    currentYear?: string;
     profileCompleted: boolean;
     profileStatus?: 'PENDING' | 'APPROVAL_PENDING' | 'VERIFIED';
 
     placementStatus?: 'PLACED' | 'UNPLACED' | 'OFFERED';
-    photoURL?: string;
+
 
     createdAt: number;
 }
@@ -94,4 +96,5 @@ export interface Announcement {
     authorRole: UserRole;
     authorName: string;
     targetDepts: string[]; // Changed from targetDept string to array
+    targetUsers?: string[]; // List of specific user IDs to target
 }

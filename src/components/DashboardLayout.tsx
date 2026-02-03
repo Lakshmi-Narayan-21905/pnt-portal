@@ -300,7 +300,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, navItems, user
 
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 bg-transparent h-screen overflow-hidden">
-                <header className="h-16 bg-transparent border-none flex items-center justify-between px-6 sticky top-0 z-30 shadow-none">
+                <header className="h-16 md:hidden bg-transparent border-none flex items-center justify-between px-6 sticky top-0 z-30 shadow-none">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}

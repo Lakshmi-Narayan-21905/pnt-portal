@@ -41,6 +41,27 @@ export const TrainingService = {
         }
     },
 
+    // Get a specific training by ID
+    getTrainingById: async (id: string): Promise<Training> => {
+        try {
+            return await cacheService.wrapWithCache(
+                CACHE_KEYS.TRAININGS.SINGLE(id),
+                async () => {
+                    const docRef = await import('firebase/firestore').then(mod => mod.getDoc(doc(db, COLLECTION_NAME, id)));
+                    if (docRef.exists()) {
+                        return { id: docRef.id, ...docRef.data() } as Training;
+                    } else {
+                        throw new Error("Training program not found");
+                    }
+                },
+                CACHE_TTL.SHORT
+            );
+        } catch (error) {
+            console.error("Error fetching training by ID:", error);
+            throw error;
+        }
+    },
+
     // Update a training program
     updateTraining: async (id: string, trainingData: Partial<Training>) => {
         try {

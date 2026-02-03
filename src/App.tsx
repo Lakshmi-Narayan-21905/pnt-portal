@@ -46,6 +46,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <AlertProvider>
+
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 

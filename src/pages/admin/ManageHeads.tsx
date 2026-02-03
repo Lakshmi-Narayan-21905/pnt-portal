@@ -6,7 +6,10 @@ import { ExcelParser } from '../../utils/excelParser';
 import Modal from '../../components/ui/Modal';
 import { Plus, Upload, Eye, EyeOff } from 'lucide-react';
 
+import { useTheme } from '../../hooks/useTheme';
+
 const ManageHeads: React.FC = () => {
+    const theme = useTheme();
     const [activeTab, setActiveTab] = useState<'PLACEMENT' | 'TRAINING'>('PLACEMENT');
     const [heads, setHeads] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(false);
@@ -154,7 +157,7 @@ const ManageHeads: React.FC = () => {
             {loading ? (
                 <div className="text-center py-10">Loading...</div>
             ) : (
-                <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+                <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                     <table className="min-w-full divide-y divide-gray-100">
                         <thead className="bg-indigo-50/50 backdrop-blur-sm border-b border-indigo-100">
                             <tr>
@@ -223,7 +226,7 @@ const ManageHeads: React.FC = () => {
                     {addMethod === 'MANUAL' ? (
                         <form onSubmit={handleManualAdd} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -233,7 +236,7 @@ const ManageHeads: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     required
@@ -243,7 +246,7 @@ const ManageHeads: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}

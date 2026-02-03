@@ -7,8 +7,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import type { UserProfile } from '../../types';
 import Modal from '../../components/ui/Modal';
 import * as XLSX from 'xlsx';
+import { useTheme } from '../../hooks/useTheme';
 
 const ClassStudents: React.FC = () => {
+    const theme = useTheme();
     const { showAlert, showConfirm } = useAlert();
     const { userProfile } = useAuth();
     const [students, setStudents] = useState<UserProfile[]>([]);
@@ -29,8 +31,18 @@ const ClassStudents: React.FC = () => {
         if (!userProfile?.department) return;
         setLoading(true);
         try {
-            // Fetch all students and filter by department (and classId if available)
-            const allStudents = await UserService.getUsersByRole('STUDENT');
+            const allStudents = await UserService.getAllStudents();
+            // Filter by department of the current class coordinator
+            // We need to know current user's department. Assuming it's available in context or passed as prop.
+            // Wait, ClassStudents fetches ALL students then filters?
+            // Let's check how it filters.
+
+            // Looking at previous code, it fetches 'STUDENT' then filters.
+            // We should use getAllStudents() here too.
+
+            // However, we need to make sure we are not showing the current class coordinator in the list if that's not desired.
+            // But the requirement is to "fetch from both", so let's stick to that.
+
             let filtered = allStudents.filter(u => u.department === userProfile.department);
 
             // If class coordinator has a specific classId, filter by it (Deprecated logic?)
@@ -43,7 +55,30 @@ const ClassStudents: React.FC = () => {
                 filtered = filtered.filter(u => u.section === userProfile.section);
             }
 
-            setStudents(filtered);
+            // Deduplicate filtered list in case user is in both collections or coordinator is added twice
+            const uniqueStudentsMap = new Map();
+            filtered.forEach(u => uniqueStudentsMap.set(u.uid, u));
+
+            // Ensure current coordinator is in the list (if not already)
+            // Note: If coordinator fetches themselves via getAllStudents, they might already be in 'filtered'.
+            // If we want to pin them to top or ensure they are present:
+
+            // Mark coordinator for display or just rely on role
+            // Let's just merge and dedupe.
+            if (!uniqueStudentsMap.has(userProfile.uid)) {
+                uniqueStudentsMap.set(userProfile.uid, { ...userProfile });
+            }
+
+            // Convert back to array
+            const uniqueStudents = Array.from(uniqueStudentsMap.values());
+
+            // Optional: Sort so coordinator is at top or just alphabetical?
+            // User requested duplicates removal.
+            // Let's sort alphabetically or keep coordinator first if needed.
+            // Sorting by name is usually best.
+            uniqueStudents.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+
+            setStudents(uniqueStudents);
         } catch (error) {
             console.error(error);
         } finally {
@@ -145,7 +180,7 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
-                await showAlert('Student approved successfully', 'success', 'Approved');
+                await showAlert('Student approved successfully', 'success', 'Approved', { hideButton: true });
             } catch (e) {
                 await showAlert('Failed to approve', 'error', 'Error');
             }
@@ -163,7 +198,7 @@ const ClassStudents: React.FC = () => {
                 });
                 setSelectedStudent(null);
                 fetchStudents();
-                await showAlert('Student declined and profile reset', 'info', 'Declined');
+                await showAlert('Student declined and profile reset', 'info', 'Declined', { hideButton: true });
             } catch (e) {
                 await showAlert('Failed to decline', 'error', 'Error');
             }
@@ -195,7 +230,7 @@ const ClassStudents: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border border-gray-100 overflow-hidden">
+            <div className={`bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-xl border ${theme.border} overflow-hidden`}>
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-orange-50/50 backdrop-blur-sm border-b border-orange-100">
                         <tr>
@@ -244,9 +279,18 @@ const ClassStudents: React.FC = () => {
 
             <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Student">
                 <form onSubmit={handleCreateStudent} className="space-y-4">
-                    <input required placeholder="Display Name" className="input-field" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
-                    <input required type="email" placeholder="Email" className="input-field" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                    <input required type="password" placeholder="Password" className="input-field" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Display Name <span className="text-red-500">*</span></label>
+                        <input required placeholder="Display Name" className="input-field w-full" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                        <input required type="email" placeholder="Email" className="input-field w-full" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                        <input required type="password" placeholder="Password" className="input-field w-full" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    </div>
 
                     <button disabled={creating} type="submit" className="w-full py-2.5 bg-brand-orange-primary text-white font-bold rounded-lg hover:bg-brand-orange-deep transition shadow-lg shadow-brand-orange-primary/30 mt-4 disabled:opacity-70">
                         {creating ? 'Creating...' : 'Create Student'}

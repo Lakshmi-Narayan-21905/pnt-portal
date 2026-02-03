@@ -1,15 +1,19 @@
 import { apiRequest } from './api';
 import type { Company } from '../types';
+
 import { cacheService, CACHE_KEYS, CACHE_CONFIGS } from './cacheService';
+
 
 export const CompanyService = {
     // Add a new company drive
     addCompany: async (companyData: Omit<Company, 'id' | 'applicants'>) => {
         try {
+
             const result = await apiRequest<string>('/companies', 'POST', companyData);
             // Invalidate cache after addition
             cacheService.delete(CACHE_KEYS.COMPANIES);
             return result;
+
         } catch (error) {
             console.error("Error adding company:", error);
             throw error;

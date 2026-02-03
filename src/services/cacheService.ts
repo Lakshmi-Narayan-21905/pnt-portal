@@ -1,4 +1,5 @@
 /**
+
  * Secure Cache Service
  * - Stores data in localStorage with encryption
  * - Implements cache invalidation based on data version/timestamp

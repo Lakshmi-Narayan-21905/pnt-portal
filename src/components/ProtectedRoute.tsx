@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { UserRole } from '../types';
 
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
     const { currentUser, userProfile, loading } = useAuth();
+    const location = useLocation();
 
     if (loading) {
         return (
@@ -26,6 +27,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
         // Redirect to appropriate dashboard if role is not allowed
         // or generic unauthorized page
         return <Navigate to="/unauthorized" replace />;
+    }
+
+    // Force Student Profile Completion
+    if (userProfile?.role === 'STUDENT') {
+        const isCompleteProfilePage = location.pathname === '/student/complete-profile';
+
+        // If profile is NOT complete, and we are NOT on the complete profile page, force redirect
+        if (!userProfile.profileCompleted && !isCompleteProfilePage) {
+            return <Navigate to="/student/complete-profile" replace />;
+        }
     }
 
     return <Outlet />;

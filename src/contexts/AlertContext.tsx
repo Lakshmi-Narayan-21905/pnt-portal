@@ -15,10 +15,11 @@ interface AlertOptions {
     cancelText?: string;
     onConfirm?: () => void;
     onCancel?: () => void;
+    hideButton?: boolean;
 }
 
 interface AlertContextType {
-    showAlert: (message: string, type?: AlertType, title?: string) => Promise<boolean>; // Returns true if confirmed (for confirm type)
+    showAlert: (message: string, type?: AlertType, title?: string, options?: { hideButton?: boolean }) => Promise<boolean>; // Returns true if confirmed (for confirm type)
     showConfirm: (message: string, title?: string, confirmText?: string, type?: 'confirm' | 'delete' | 'approve') => Promise<boolean>;
 }
 
@@ -39,7 +40,8 @@ const AlertModal: React.FC<{
     onClose: () => void;
     options: AlertOptions;
     themeColor: string;
-}> = ({ isOpen, options, themeColor }) => {
+    themeBg: string;
+}> = ({ isOpen, options, themeColor, themeBg }) => {
     if (!isOpen) return null;
 
     const { title, message, type = 'info', confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel } = options;
@@ -71,7 +73,7 @@ const AlertModal: React.FC<{
     };
 
     // We can override the icon color based on the Theme if it's a "confirm" or "info" type to match the portal
-    const iconBgClass = (type === 'confirm' || type === 'info') ? themeColor.replace('text-', 'bg-').replace('600', '500') : getIconBg();
+    const iconBgClass = (type === 'confirm' || type === 'info') ? themeBg : getIconBg();
 
 
     return (
@@ -115,15 +117,17 @@ const AlertModal: React.FC<{
                                 {cancelText}
                             </button>
                         )}
-                        <button
-                            onClick={onConfirm}
-                            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium text-white shadow-md hover:opacity-90 transition-all transform active:scale-95 focus:ring-2 focus:ring-offset-1 focus:ring-opacity-50 ${type === 'delete' ? 'bg-red-600 shadow-red-500/30' :
+                        {!options.hideButton && (
+                            <button
+                                onClick={onConfirm}
+                                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium text-white shadow-md hover:opacity-90 transition-all transform active:scale-95 focus:ring-2 focus:ring-offset-1 focus:ring-opacity-50 ${type === 'delete' ? 'bg-red-600 shadow-red-500/30' :
                                     type === 'approve' ? 'bg-green-600 shadow-green-500/30' :
                                         themeColor.replace('text-', 'bg-')
-                                }`}
-                        >
-                            {confirmText || 'OK'}
-                        </button>
+                                    }`}
+                            >
+                                {confirmText || 'OK'}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -146,17 +150,19 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const location = useLocation();
 
     // Determine Theme Color based on Route
-    const getThemeColor = () => {
+    const getThemeColors = () => {
         const path = location.pathname;
-        if (path.startsWith('/admin')) return 'text-indigo-600';
-        if (path.startsWith('/placement-head')) return 'text-green-600'; // Green
-        if (path.startsWith('/training-head')) return 'text-green-600';
-        if (path.startsWith('/dept-coordinator')) return 'text-purple-600'; // Lavender/Purple
-        if (path.startsWith('/class-coordinator')) return 'text-orange-500';
-        return 'text-blue-600'; // Default/Student
+        if (path.startsWith('/admin')) return { text: 'text-indigo-600', bg: 'bg-indigo-600' };
+        if (path.startsWith('/placement-head')) return { text: 'text-green-600', bg: 'bg-green-600' };
+        if (path.startsWith('/training-head')) return { text: 'text-green-600', bg: 'bg-green-600' };
+        if (path.startsWith('/dept-coordinator')) return { text: 'text-purple-600', bg: 'bg-purple-600' };
+        if (path.startsWith('/class-coordinator')) return { text: 'text-orange-500', bg: 'bg-brand-orange-primary' }; // Use brand color for better match
+        return { text: 'text-blue-600', bg: 'bg-blue-600' };
     };
 
-    const showAlert = useCallback((message: string, type: AlertType = 'info', title?: string) => {
+    const themeColors = getThemeColors();
+
+    const showAlert = useCallback((message: string, type: AlertType = 'info', title?: string, options?: { hideButton?: boolean }) => {
         return new Promise<boolean>((resolve) => {
             setAlertState({
                 isOpen: true,
@@ -165,6 +171,7 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                     type,
                     title,
                     confirmText: 'OK',
+                    hideButton: options?.hideButton,
                     onConfirm: () => {
                         setAlertState(prev => ({ ...prev, isOpen: false }));
                         resolve(true);
@@ -209,7 +216,8 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 isOpen={alertState.isOpen}
                 onClose={() => alertState.resolve?.(false)}
                 options={alertState.options}
-                themeColor={getThemeColor()}
+                themeColor={themeColors.text}
+                themeBg={themeColors.bg}
             />
         </AlertContext.Provider>
     );

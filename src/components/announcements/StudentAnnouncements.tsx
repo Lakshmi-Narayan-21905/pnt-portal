@@ -4,8 +4,10 @@ import { AnnouncementService } from '../../services/announcementService';
 import type { Announcement } from '../../types';
 import { Bell, Calendar, User } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateUtils';
+import { useTheme } from '../../hooks/useTheme';
 
 const StudentAnnouncements: React.FC = () => {
+    const theme = useTheme();
     const { userProfile } = useAuth();
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,8 +25,8 @@ const StudentAnnouncements: React.FC = () => {
         if (!userProfile?.department) return;
         try {
             setLoading(true);
-            // Pass the student's department to get 'all' + 'dept' targeted announcements
-            const data = await AnnouncementService.getAnnouncementsForStudent(userProfile.department);
+            // Pass the student's department AND uid to get targeted announcements
+            const data = await AnnouncementService.getAnnouncementsForStudent(userProfile.department, userProfile.uid);
             setAnnouncements(data);
         } catch (err) {
             console.error("Failed to fetch announcements", err);
@@ -58,7 +60,7 @@ const StudentAnnouncements: React.FC = () => {
             ) : (
                 <div className="space-y-4">
                     {announcements.map((ann) => (
-                        <div key={ann.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={ann.id} className={`bg-white rounded-xl shadow-sm border ${theme.border} p-6 hover:shadow-md transition-shadow`}>
                             <div className="flex justify-between items-start mb-3">
                                 <h3 className="text-lg font-bold text-gray-900">{ann.title}</h3>
                                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${ann.authorRole.includes('HEAD')

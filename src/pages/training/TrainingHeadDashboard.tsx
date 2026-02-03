@@ -35,7 +35,10 @@ const STATUS_COLORS = {
     completed: '#6B7280' // Gray 500
 };
 
+import { useTheme } from '../../hooks/useTheme';
+
 const TrainingHeadDashboard: React.FC = () => {
+    const theme = useTheme();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
@@ -216,7 +219,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={CheckCircle2}
                     color="text-emerald-600"
                     bg="bg-emerald-50"
-                    border="border-emerald-100"
+                    border={`${theme.borderLeft} border-emerald-100`}
                 />
                 <KPICard
                     title="Upcoming Programs"
@@ -224,7 +227,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={Clock}
                     color="text-blue-600"
                     bg="bg-blue-50"
-                    border="border-blue-100"
+                    border={`${theme.borderLeft} border-blue-100`}
                 />
                 <KPICard
                     title="Total Trainings"
@@ -232,7 +235,7 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={GraduationCap}
                     color="text-purple-600"
                     bg="bg-purple-50"
-                    border="border-purple-100"
+                    border={`${theme.borderLeft} border-purple-100`}
                 />
                 <KPICard
                     title="Unique Participants"
@@ -240,12 +243,12 @@ const TrainingHeadDashboard: React.FC = () => {
                     icon={Users}
                     color="text-orange-600"
                     bg="bg-orange-50"
-                    border="border-orange-100"
+                    border={`${theme.borderLeft} border-orange-100`}
                 />
             </div>
 
             {/* KPI Cards Row 2: Coordinators (Smaller / Concise) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/50 p-4 rounded-xl border border-white/60">
+            <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/50 p-4 rounded-xl border ${theme.border}`}>
                 <div className="flex items-center gap-4">
                     <div className="p-3 rounded-full bg-indigo-50 text-indigo-600">
                         <Users className="w-6 h-6" />
@@ -269,7 +272,7 @@ const TrainingHeadDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* 1. Status Distribution (Donut) */}
-                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Program Status</h3>
                         <PieIcon className="w-5 h-5 text-gray-400" />
@@ -298,7 +301,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 2. Timeline (Area/Line) - Spans 2 Cols */}
-                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Training Frequency (Monthly)</h3>
                         <TrendingUp className="w-5 h-5 text-gray-400" />
@@ -323,7 +326,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 3. Top Programs by Participation */}
-                <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Highest Participation Programs</h3>
                         <Users className="w-5 h-5 text-gray-400" />
@@ -346,7 +349,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 4. Dept Coordinators */}
-                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Coordinators by Dept</h3>
                         <BarChart3 className="w-5 h-5 text-gray-400" />
@@ -366,7 +369,7 @@ const TrainingHeadDashboard: React.FC = () => {
             </div>
 
             {/* Active Programs Report Table */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className={`bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border ${theme.border} overflow-hidden`}>
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-green-100 text-green-700 rounded-lg">
@@ -455,7 +458,7 @@ interface KPICardProps {
 }
 
 const KPICard: React.FC<KPICardProps> = ({ title, value, icon: Icon, color, bg, border }) => (
-    <div className={`p-6 rounded-xl shadow-md border ${border} bg-white/70 backdrop-blur-md hover:shadow-lg transition-all duration-300 group`}>
+    <div className={`p-6 rounded-xl shadow-md border ${border} border-l-4 bg-white/70 backdrop-blur-md hover:shadow-lg transition-all duration-300 group`}>
         <div className="flex items-start justify-between mb-4">
             <div className={`p-3 rounded-xl bg-white shadow-sm transition-transform group-hover:scale-110`}>
                 <Icon className={`w-6 h-6 ${color}`} />
