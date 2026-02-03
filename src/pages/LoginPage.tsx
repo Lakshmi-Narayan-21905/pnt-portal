@@ -80,23 +80,20 @@ const LoginPage: React.FC = () => {
             await setPersistence(auth, browserSessionPersistence);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-            // Single Session Enforcement: Generate and store Session ID
+            // Single Session Enforcement: Generate Session ID
             const sessionId = Date.now().toString() + "-" + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem('sessionId', sessionId);
 
-            // We need to update the profile immediately
-            // Note: We're using the direct service call here to ensure it happens before navigation
-            // and to avoid race conditions with AuthContext
+            // 1. Update Profile FIRST
             try {
-                // Import dynamically or ensure UserService is imported at top
-                // But we can't do dynamic import easily inside try/catch for this.
-                // Assuming UserService is imported.
+                // Assuming UserService is working
                 await UserService.updateUserProfile(userCredential.user.uid, { sessionId });
             } catch (profileErr) {
                 console.error("Failed to update session ID", profileErr);
-                // Non-fatal? If we fail to update DB, the other tab won't know we logged in.
-                // But we proceed.
             }
+
+            // 2. Set Session Storage AFTER profile update succeeds (or attempts to)
+            // This prevents AuthContext from seeing a mismatch before the server data is updated.
+            sessionStorage.setItem('sessionId', sessionId);
         } finally {
             setLoading(false);
         }
