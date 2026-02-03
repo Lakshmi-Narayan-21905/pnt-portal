@@ -302,8 +302,6 @@ const AdminDashboard: React.FC = () => {
                                 <tr>
                                     <th className="px-6 py-3 font-medium">Collection Name</th>
                                     <th className="px-6 py-3 font-medium">Doc Count</th>
-                                    <th className="px-6 py-3 font-medium">Status</th>
-                                    <th className="px-6 py-3 font-medium text-right">Health</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -311,19 +309,6 @@ const AdminDashboard: React.FC = () => {
                                     <tr key={idx} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 font-medium text-gray-900">{c.name}</td>
                                         <td className="px-6 py-4 text-gray-600">{c.count}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${c.count > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                {c.count > 0 ? 'Active' : 'Empty'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="w-full bg-gray-200 rounded-full h-1.5 max-w-[100px] ml-auto">
-                                                <div
-                                                    className={`h-1.5 rounded-full ${c.count > 0 ? 'bg-green-500' : 'bg-gray-400'}`}
-                                                    style={{ width: c.count > 0 ? '100%' : '0%' }}
-                                                ></div>
-                                            </div>
-                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
