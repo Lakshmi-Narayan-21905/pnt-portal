@@ -212,7 +212,7 @@ const TrainingHeadDashboard: React.FC = () => {
             </div>
 
             {/* KPI Cards Row 1: Programs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <KPICard
                     title="Active Programs"
                     value={stats.activeCount}
@@ -236,14 +236,6 @@ const TrainingHeadDashboard: React.FC = () => {
                     color="text-purple-600"
                     bg="bg-purple-50"
                     border={`${theme.borderLeft} border-purple-100`}
-                />
-                <KPICard
-                    title="Unique Participants"
-                    value={stats.uniqueStudentsCovered}
-                    icon={Users}
-                    color="text-orange-600"
-                    bg="bg-orange-50"
-                    border={`${theme.borderLeft} border-orange-100`}
                 />
             </div>
 
@@ -326,7 +318,7 @@ const TrainingHeadDashboard: React.FC = () => {
                 </div>
 
                 {/* 3. Top Programs by Participation */}
-                <div className={`lg:col-span-2 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
+                <div className={`lg:col-span-3 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-700">Highest Participation Programs</h3>
                         <Users className="w-5 h-5 text-gray-400" />
@@ -343,25 +335,6 @@ const TrainingHeadDashboard: React.FC = () => {
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* 4. Dept Coordinators */}
-                <div className={`bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border ${theme.border}`}>
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-bold text-gray-700">Coordinators by Dept</h3>
-                        <BarChart3 className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={chartData.deptCoordData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} interval={0} angle={-45} textAnchor="end" height={60} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                                <RechartsTooltip />
-                                <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

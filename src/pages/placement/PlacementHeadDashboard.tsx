@@ -340,13 +340,12 @@ const PlacementHeadDashboard: React.FC = () => {
             </div>
 
             {/* 2. KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 <KPISmall title="Active Drives" value={stats.activeDrives} icon={CheckCircle2} color="text-emerald-500" bg="bg-emerald-50" border={theme.borderLeft} />
                 <KPISmall title="Total Companies" value={stats.totalCompanies} icon={Building2} color="text-blue-500" bg="bg-blue-50" border={theme.borderLeft} />
                 <KPISmall title="Placed Students" value={stats.placedCount} icon={Briefcase} color="text-purple-500" bg="bg-purple-50" border={theme.borderLeft} />
                 <KPISmall title="Total Students" value={stats.totalStudents} icon={Users} color="text-gray-500" bg="bg-gray-50" border={theme.borderLeft} />
                 <KPISmall title="Coordinators" value={stats.totalCoordinators} icon={Users} color="text-indigo-500" bg="bg-indigo-50" border={theme.borderLeft} />
-                <KPISmall title="Interviews (7d)" value={stats.upcomingInterviews} icon={Clock} color="text-orange-500" bg="bg-orange-50" border={theme.borderLeft} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
