@@ -140,7 +140,7 @@ const LoginPage: React.FC = () => {
                         {/* Header */}
                         <div className="text-center mb-5">
                             <h1 className="text-xl font-bold text-slate-900 mb-1">
-                                {isResetting ? 'Reset Password' : 'Get Started with your Placements'}
+                                {isResetting ? 'Reset Password' : 'Get Started with your Placement'}
                             </h1>
                             <p className="text-slate-500 text-xs">
                                 {isResetting ? 'Enter your email to receive a reset link' : 'Sign in to your account to continue'}
