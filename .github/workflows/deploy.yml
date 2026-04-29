@@ -7,18 +7,39 @@ on:
       - branch9
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 🐳 Login to Docker Hub
     - name: Login to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+    # 🐳 Build Image
     - name: Build Docker image
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/react-app:latest .
 
+    # 🐳 Push Image
     - name: Push Docker image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+
+    # ☁️ Configure AWS Credentials
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # ☸️ Connect to EKS Cluster
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name react-cluster
+
+    # 🚀 Deploy to EKS (CORRECTED)
+    - name: Deploy to EKS
+      run: |
+        kubectl set image deployment/react-deployment react-container=${{ secrets.DOCKER_USERNAME }}/react-app:latest
